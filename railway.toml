@@ -1,9 +1,9 @@
 [build]
 builder = "nixpacks"
-buildCommand = "pnpm run build"
+buildCommand = "pnpm run build --filter=web"
 
 [deploy]
-startCommand = "pnpm start"
+startCommand = "pnpm --filter=web start"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
 
