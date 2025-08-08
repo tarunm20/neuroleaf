@@ -32,7 +32,7 @@ export const generateRootMetadata = async (): Promise<Metadata> => {
       description: appConfig.description,
     },
     icons: {
-      icon: '/images/favicon/favicon.ico',
+      icon: '/images/favicon/neuroleaf-favicon.ico',
       apple: '/images/favicon/apple-touch-icon.png',
     },
   };
