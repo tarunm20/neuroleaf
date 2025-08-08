@@ -25,10 +25,10 @@ SUPABASE_SERVICE_ROLE_KEY=your-production-service-role-key
 
 #### Stripe Configuration (Production)
 ```bash
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_51RkXwIGKuCdCJW8jQaLzcS5CXExNKll9g76Yf8pq0OSw8cPUVBsoSn9jMzTxT4azadXk2pjEAQOIeqDH25du3o8W00oIvPWFKR
-STRIPE_SECRET_KEY=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
-STRIPE_WEBHOOK_SECRET=whsec_uOMvzhHECoxqtWtRem1nW0nQSsy3i8TJ
-STRIPE_PRICE_ID=price_1RtbGGGKuCdCJW8j6GDMbAxV
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_your_publishable_key
+STRIPE_SECRET_KEY=sk_live_your_secret_key
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
+STRIPE_PRICE_ID=price_your_price_id
 ```
 
 #### AI Configuration
@@ -160,3 +160,10 @@ For deployment issues:
 4. Check network connectivity and DNS resolution
 
 The deployment should be production-ready with this configuration, optimized for performance and reliability.
+
+## Security Notes
+
+- **Never commit real API keys or secrets** to version control
+- **Generate new API keys** if any were accidentally exposed
+- **Use Railway's environment variables** for all sensitive configuration
+- **Rotate secrets regularly** and use strong, unique values
