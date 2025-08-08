@@ -1,11 +1,14 @@
 [build]
 builder = "nixpacks"
-buildCommand = "pnpm run build --filter=web"
+buildCommand = "pnpm install && cd apps/web && NODE_ENV=production next build"
+watchPatterns = ["apps/web/**/*"]
 
 [deploy]
-startCommand = "pnpm --filter=web start"
+startCommand = "cd apps/web && NODE_ENV=production next start"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
+healthcheckPath = "/"
+healthcheckTimeout = 300
 
 [env]
 NODE_ENV = "production"
