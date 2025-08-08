@@ -11,13 +11,20 @@ interface TestPerformanceAnalyticsProps {
 }
 
 // Mock data for MVP demonstration
-const mockPerformance = {
+const mockPerformance: {
+  total_sessions: number;
+  total_questions_answered: number;
+  average_score: number;
+  total_time_spent_minutes: number;
+  sessions_last_7_days: number;
+  improvement_trend: 'needs_improvement' | 'improving' | 'stable';
+} = {
   total_sessions: 0,
   total_questions_answered: 0,
   average_score: 0,
   total_time_spent_minutes: 0,
   sessions_last_7_days: 0,
-  improvement_trend: 'needs_improvement' as const,
+  improvement_trend: 'needs_improvement',
 };
 
 export function TestPerformanceAnalytics({ userId, deckId }: TestPerformanceAnalyticsProps) {
@@ -65,8 +72,8 @@ export function TestPerformanceAnalytics({ userId, deckId }: TestPerformanceAnal
     );
   }
 
-  const improvementColor = performance.improvement_trend === 'improving' || performance.improvement_trend === 'needs_improvement' ? 'text-green-600' : 'text-orange-600';
-  const improvementIcon = performance.improvement_trend === 'improving' || performance.improvement_trend === 'needs_improvement' ? TrendingUp : Target;
+  const improvementColor = performance.improvement_trend === 'improving' ? 'text-green-600' : 'text-orange-600';
+  const improvementIcon = performance.improvement_trend === 'improving' ? TrendingUp : Target;
   const ImprovementIcon = improvementIcon;
 
   return (
@@ -155,7 +162,7 @@ export function TestPerformanceAnalytics({ userId, deckId }: TestPerformanceAnal
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${improvementColor}`}>
-              {performance.improvement_trend === 'improving' ? 'Improving' : performance.improvement_trend === 'needs_improvement' ? 'Needs Focus' : 'Stable'}
+              {performance.improvement_trend === 'improving' ? 'Improving' : 'Needs Focus'}
             </div>
             <p className="text-xs text-muted-foreground">
               Based on recent performance

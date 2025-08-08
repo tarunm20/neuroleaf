@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const SubscriptionTierSchema = z.enum(['free', 'pro', 'premium']);
+export const SubscriptionTierSchema = z.enum(['free', 'pro']);
 
 export const UpdateSubscriptionTierSchema = z.object({
   accountId: z.string().uuid(),

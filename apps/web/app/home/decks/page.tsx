@@ -30,10 +30,6 @@ export default function DecksPage() {
     <PageWithBreadcrumbs
       title="My Decks"
       description="Manage your flashcard decks and track your learning progress."
-      breadcrumbs={[
-        { label: 'Home', href: '/home' },
-        { label: 'My Decks' },
-      ]}
     >
       <Suspense fallback={
         <div className="container mx-auto px-4 py-8">

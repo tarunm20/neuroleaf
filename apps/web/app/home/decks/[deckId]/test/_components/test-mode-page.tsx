@@ -217,8 +217,8 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
         const generatedQuestions: Question[] = result.data.map((aiQuestion, index) => ({
           id: `q-${index}`,
           question: aiQuestion.question,
-          flashcardId: flashcards[index % flashcards.length].id,
-          expectedAnswer: aiQuestion.suggested_answer || flashcards[index % flashcards.length].back_content
+          flashcardId: flashcards[index % flashcards.length]?.id || '',
+          expectedAnswer: aiQuestion.suggested_answer || flashcards[index % flashcards.length]?.back_content || ''
         }));
 
         setQuestions(generatedQuestions);
@@ -249,13 +249,15 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
     setIsSubmittingAnswer(true);
 
     try {
+      if (!currentQuestion) return;
+      
       const answer: Answer = {
         questionId: currentQuestion.id,
         userAnswer: currentAnswer
       };
 
       setAnswers(prev => {
-        const existingIndex = prev.findIndex(a => a.questionId === currentQuestion.id);
+        const existingIndex = prev.findIndex(a => a.questionId === currentQuestion?.id);
         if (existingIndex >= 0) {
           // Update existing answer
           const updated = [...prev];
@@ -308,7 +310,7 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
 
       if (result.success && result.data) {
         // Set comprehensive results for detailed display
-        setComprehensiveResults(result.data);
+        setComprehensiveResults(result.data as any);
 
         // Also set legacy test results for backward compatibility
         const overallScore = result.data.overall_analysis.overall_percentage;

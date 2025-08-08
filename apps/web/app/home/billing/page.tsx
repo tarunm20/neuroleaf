@@ -24,7 +24,7 @@ export default async function BillingPage() {
   }
 
   const subscriptionInfo = await getSubscriptionInfoAction();
-  const currentPlan = pricingPlans.find(plan => plan.id === subscriptionInfo.tier) || pricingPlans[0];
+  const currentPlan = pricingPlans.find(plan => plan.id === subscriptionInfo?.tier) || pricingPlans[0];
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -48,19 +48,19 @@ export default async function BillingPage() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <h3 className="text-xl font-semibold">{currentPlan.name}</h3>
-                  {subscriptionInfo.tier === 'pro' && (
+                  <h3 className="text-xl font-semibold">{currentPlan?.name || 'Unknown Plan'}</h3>
+                  {subscriptionInfo?.tier === 'pro' && (
                     <Badge className="bg-primary/10 text-primary">Pro</Badge>
                   )}
                 </div>
-                <p className="text-muted-foreground mb-3">{currentPlan.description}</p>
+                <p className="text-muted-foreground mb-3">{currentPlan?.description || ''}</p>
                 <div className="text-2xl font-bold">
-                  {formatPrice(currentPlan.price.monthly)}
-                  {currentPlan.price.monthly > 0 && <span className="text-sm font-normal">/month</span>}
+                  {formatPrice(currentPlan?.price.monthly || 0)}
+                  {(currentPlan?.price.monthly || 0) > 0 && <span className="text-sm font-normal">/month</span>}
                 </div>
               </div>
               
-              {subscriptionInfo.tier === 'pro' && (
+              {subscriptionInfo?.tier === 'pro' && (
                 <form action={manageBillingAction}>
                   <Button type="submit" variant="outline" className="flex items-center gap-2">
                     <Settings className="h-4 w-4" />
@@ -70,12 +70,12 @@ export default async function BillingPage() {
               )}
             </div>
 
-            {subscriptionInfo.expiresAt && (
+            {subscriptionInfo?.expiresAt && (
               <div className="mt-4 pt-4 border-t">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4" />
                   <span>
-                    {subscriptionInfo.status === 'active' ? 'Renews' : 'Expires'} on{' '}
+                    {subscriptionInfo?.status === 'active' ? 'Renews' : 'Expires'} on{' '}
                     {new Date(subscriptionInfo.expiresAt).toLocaleDateString()}
                   </span>
                 </div>
@@ -91,7 +91,7 @@ export default async function BillingPage() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-3">
-              {currentPlan.features.map((feature, index) => (
+              {currentPlan?.features.map((feature, index) => (
                 <div key={index} className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full" />
                   <span>{feature}</span>
@@ -102,7 +102,7 @@ export default async function BillingPage() {
         </Card>
 
         {/* Upgrade/Downgrade Options */}
-        {subscriptionInfo.tier === 'free' && (
+        {subscriptionInfo?.tier === 'free' && (
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -117,7 +117,7 @@ export default async function BillingPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-primary">
-                    {formatPrice(pricingPlans[1].price.monthly)}/month
+                    {formatPrice(pricingPlans[1]?.price.monthly || 0)}/month
                   </div>
                   <div className="text-sm text-muted-foreground">
                     7-day free trial included

@@ -17,13 +17,6 @@ const TIER_LIMITS = {
     hasUnlimitedTests: false,
   },
   pro: {
-    maxDecks: 25,
-    maxFlashcardsPerDeck: -1, // unlimited
-    maxAIGenerationsPerMonth: 100,
-    maxTestSessionsPerMonth: -1, // unlimited
-    hasUnlimitedTests: true,
-  },
-  premium: {
     maxDecks: -1, // unlimited
     maxFlashcardsPerDeck: -1, // unlimited
     maxAIGenerationsPerMonth: -1, // unlimited
