@@ -37,19 +37,21 @@ const links: Record<
     path: string;
   }
 > = {
-  /*
-    FAQ: {
-      label: 'marketing:faq',
-      path: '/faq',
-    },
-     */
+  Pricing: {
+    label: 'Pricing',
+    path: '/pricing',
+  },
+  FAQ: {
+    label: 'FAQ',
+    path: '/faq',
+  },
 };
 
 export function SiteNavigation() {
   const NavItems = Object.values(links).map((item) => {
     return (
       <SiteNavigationItem key={item.path} path={item.path}>
-        <Trans i18nKey={item.label} />
+        {item.label.includes(':') ? <Trans i18nKey={item.label} /> : item.label}
       </SiteNavigationItem>
     );
   });
@@ -85,7 +87,7 @@ function MobileDropdown() {
           return (
             <DropdownMenuItem key={item.path} asChild>
               <Link className={className} href={item.path}>
-                <Trans i18nKey={item.label} />
+                {item.label.includes(':') ? <Trans i18nKey={item.label} /> : item.label}
               </Link>
             </DropdownMenuItem>
           );

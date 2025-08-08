@@ -1,0 +1,44 @@
+{
+  "name": "@kit/subscription",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "clean": "git clean -xdf .turbo node_modules",
+    "format": "prettier --check \"**/*.{ts,tsx}\"",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    "./components": "./src/components/index.ts",
+    "./hooks": "./src/hooks/index.ts",
+    "./schemas": "./src/schemas/index.ts",
+    "./server": "./src/server/index.ts",
+    "./types": "./src/types.ts"
+  },
+  "devDependencies": {
+    "@kit/eslint-config": "workspace:*",
+    "@kit/prettier-config": "workspace:*",
+    "@kit/shared": "workspace:*",
+    "@kit/supabase": "workspace:*",
+    "@kit/tsconfig": "workspace:*",
+    "@kit/ui": "workspace:*",
+    "@supabase/supabase-js": "2.48.1",
+    "@tanstack/react-query": "5.77.2",
+    "@types/react": "19.1.6",
+    "@types/react-dom": "19.1.5",
+    "lucide-react": "^0.511.0",
+    "next": "15.3.2",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "sonner": "^1.7.4",
+    "zod": "^3.25.32"
+  },
+  "prettier": "@kit/prettier-config",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "src/*"
+      ]
+    }
+  }
+}

@@ -22,20 +22,20 @@ function Home() {
       <div className={'container mx-auto'}>
         <Hero
           pill={
-            <Pill label={'New'}>
-              <span>The leading SaaS Starter Kit for ambitious developers</span>
+            <Pill label={'AI-Powered'}>
+              <span>Smart flashcards that adapt to your learning style</span>
             </Pill>
           }
           title={
             <>
-              <span>The ultimate SaaS Starter</span>
-              <span>for your next project</span>
+              <span>Master any subject with</span>
+              <span>AI-powered flashcards</span>
             </>
           }
           subtitle={
             <span>
-              Build and Ship a SaaS faster than ever before with the next-gen
-              SaaS Starter Kit. Ship your SaaS in days, not months.
+              Transform any lecture or document into intelligent flashcards with AI-powered 
+              test mode that provides personalized feedback on your learning progress.
             </span>
           }
           cta={<MainCallToActionButton />}
@@ -62,47 +62,47 @@ function Home() {
             heading={
               <>
                 <b className="font-semibold dark:text-white">
-                  The ultimate SaaS Starter Kit
+                  The smartest way to learn
                 </b>
                 .{' '}
                 <span className="text-muted-foreground font-normal">
-                  Unleash your creativity and build your SaaS faster than ever
-                  with Makerkit.
+                  Harness the power of AI to create personalized study
+                  experiences that adapt to your learning pace.
                 </span>
               </>
             }
             icon={
               <FeatureShowcaseIconContainer>
                 <LayoutDashboard className="h-5" />
-                <span>All-in-one solution</span>
+                <span>Smart Learning Platform</span>
               </FeatureShowcaseIconContainer>
             }
           >
             <FeatureGrid>
               <FeatureCard
                 className={'relative col-span-2 overflow-hidden'}
-                label={'Beautiful Dashboard'}
-                description={`Makerkit provides a beautiful dashboard to manage your SaaS business.`}
+                label={'Convert Lectures to Flashcards'}
+                description={`Upload any lecture notes, PDFs, or documents and automatically convert them into comprehensive flashcards using AI.`}
               />
 
               <FeatureCard
                 className={
                   'relative col-span-2 w-full overflow-hidden lg:col-span-1'
                 }
-                label={'Authentication'}
-                description={`Makerkit provides a variety of providers to allow your users to sign in.`}
+                label={'Create Detailed Flashcards'}
+                description={`Build rich, detailed flashcards with advanced formatting and multimedia support for comprehensive learning.`}
               />
 
               <FeatureCard
                 className={'relative col-span-2 overflow-hidden lg:col-span-1'}
-                label={'Multi Tenancy'}
-                description={`Multi tenant memberships for your SaaS business.`}
+                label={'AI Test Mode'}
+                description={`Generate curated questions and get AI-powered grading with detailed feedback on your responses.`}
               />
 
               <FeatureCard
                 className={'relative col-span-2 overflow-hidden'}
-                label={'Billing'}
-                description={`Makerkit supports multiple payment gateways to charge your customers.`}
+                label={'More Features Coming'}
+                description={`We're constantly adding new features to enhance your learning experience. Stay tuned for exciting updates!`}
               />
             </FeatureGrid>
           </FeatureShowcase>
@@ -135,8 +135,8 @@ function MainCallToActionButton() {
       </CtaButton>
 
       <CtaButton variant={'link'}>
-        <Link href={'/contact'}>
-          <Trans i18nKey={'common:contactUs'} />
+        <Link href={'/pricing'}>
+          View Pricing
         </Link>
       </CtaButton>
     </div>
