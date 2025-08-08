@@ -171,16 +171,19 @@ export function AIBulkCreationDialog({
       for (let i = 0; i < selectedCards.length; i++) {
         const card = selectedCards[i];
         
-        await createFlashcard.mutateAsync({
-          deckId,
-          data: {
-            front_content: card.front,
-            back_content: card.back,
-            difficulty: card.difficulty,
-            tags: card.tags,
+        if (card) {
+          await createFlashcard.mutateAsync({
+            deck_id: deckId,
+            front_content: card.front || '',
+            back_content: card.back || '',
+            difficulty: card.difficulty || 'medium',
+            tags: card.tags || [],
             ai_generated: true,
-          }
-        });
+            front_media_urls: [],
+            back_media_urls: [],
+            public_data: {},
+          });
+        }
 
         setCreationProgress(Math.round(((i + 1) / total) * 100));
       }

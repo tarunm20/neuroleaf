@@ -12,10 +12,6 @@ export default function AnalyticsPage() {
     <PageWithBreadcrumbs
       title="Analytics"
       description="Track your learning progress and performance insights."
-      breadcrumbs={[
-        { label: 'Home', href: '/home' },
-        { label: 'Analytics' },
-      ]}
     >
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">

@@ -21,6 +21,7 @@ export interface PricingPlan {
     aiGenerations?: number | 'unlimited';
     aiTestsPerMonth?: number | 'unlimited';
     collaborators?: number | 'unlimited';
+    fileUploads?: number | 'unlimited';
   };
   popular?: boolean;
 }
@@ -89,6 +90,9 @@ export const billingConfig = {
       hasFileUpload: false,
       hasRichTextEditor: false,
       hasAdvancedStudy: false,
+      hasTestMode: false,
+      hasAdvancedAnalytics: false,
+      aiTestsPerMonth: 0,
     },
     pro: {
       decks: -1, // unlimited
@@ -96,6 +100,9 @@ export const billingConfig = {
       hasFileUpload: true,
       hasRichTextEditor: true,
       hasAdvancedStudy: true,
+      hasTestMode: true,
+      hasAdvancedAnalytics: true,
+      aiTestsPerMonth: -1, // unlimited
     },
   },
 

@@ -160,8 +160,9 @@ export function DecksPageContainer({ userId }: DecksPageContainerProps) {
           <DeckLimitIndicator subscriptionInfo={subscriptionInfo} />
           {!subscriptionInfo.canCreateDeck && (
             <UpgradePrompt 
-              currentTier={subscriptionInfo.tier} 
-              onUpgradeClick={handleUpgradeClick}
+              type="deck"
+              current={subscriptionInfo.currentDeckCount}
+              limit={subscriptionInfo.deckLimit}
             />
           )}
         </div>
