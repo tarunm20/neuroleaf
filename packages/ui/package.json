@@ -100,6 +100,7 @@
     "./skeleton": "./src/shadcn/skeleton.tsx",
     "./shadcn-sidebar": "./src/shadcn/sidebar.tsx",
     "./collapsible": "./src/shadcn/collapsible.tsx",
+    "./progress": "./src/shadcn/progress.tsx",
     "./utils": "./src/lib/utils/index.ts",
     "./if": "./src/makerkit/if.tsx",
     "./trans": "./src/makerkit/trans.tsx",
@@ -122,6 +123,10 @@
     "./version-updater": "./src/makerkit/version-updater.tsx",
     "./multi-step-form": "./src/makerkit/multi-step-form.tsx",
     "./app-breadcrumbs": "./src/makerkit/app-breadcrumbs.tsx",
+    "./page-with-breadcrumbs": "./src/makerkit/page-with-breadcrumbs.tsx",
+    "./loading-page": "./src/makerkit/loading-page.tsx",
+    "./deck-breadcrumb-fetcher": "./src/makerkit/deck-breadcrumb-fetcher.tsx",
+    "./use-deck-breadcrumbs": "./src/makerkit/use-deck-breadcrumbs.tsx",
     "./empty-state": "./src/makerkit/empty-state.tsx",
     "./marketing": "./src/makerkit/marketing/index.tsx"
   },

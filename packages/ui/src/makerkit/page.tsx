@@ -115,7 +115,13 @@ export function PageBody(
 ) {
   const className = cn('flex w-full flex-1 flex-col lg:px-4', props.className);
 
-  return <div className={className}>{props.children}</div>;
+  return (
+    <div className={className}>
+      <div className="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8">
+        {props.children}
+      </div>
+    </div>
+  );
 }
 
 export function PageNavigation(props: React.PropsWithChildren) {

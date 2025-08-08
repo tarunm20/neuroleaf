@@ -1,0 +1,27 @@
+Cell Structure and Function
+
+The cell is the basic unit of life. All living organisms are composed of one or more cells. There are two main types of cells: prokaryotic and eukaryotic.
+
+Prokaryotic cells lack a membrane-bound nucleus. Their genetic material is freely floating in the cytoplasm. Examples include bacteria and archaea. These cells are typically smaller and simpler in structure.
+
+Eukaryotic cells have a membrane-bound nucleus that contains their DNA. They also have various membrane-bound organelles. Examples include plant cells, animal cells, and fungal cells.
+
+Key organelles in eukaryotic cells include:
+
+The nucleus controls cell activities and contains the cell's DNA. It is surrounded by a double membrane called the nuclear envelope.
+
+Mitochondria are the powerhouses of the cell. They produce ATP through cellular respiration. They have their own DNA and can reproduce independently.
+
+The endoplasmic reticulum (ER) comes in two forms: rough ER, which has ribosomes attached and synthesizes proteins, and smooth ER, which synthesizes lipids and detoxifies substances.
+
+The Golgi apparatus modifies, packages, and ships proteins and lipids from the ER. It consists of flattened membrane sacs called cisternae.
+
+Ribosomes are responsible for protein synthesis. They can be found free in the cytoplasm or attached to the rough ER.
+
+Lysosomes contain digestive enzymes that break down waste materials, cellular debris, and foreign substances that enter the cell.
+
+In plant cells, chloroplasts conduct photosynthesis, converting light energy into chemical energy. They contain chlorophyll, which gives plants their green color.
+
+The cell membrane controls what enters and exits the cell. It is selectively permeable, allowing some substances to pass through while blocking others.
+
+Cell division occurs through mitosis in somatic cells and meiosis in reproductive cells. During mitosis, one cell divides to produce two identical diploid cells. During meiosis, one diploid cell divides to produce four genetically diverse haploid gametes.

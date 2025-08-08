@@ -1,4 +1,4 @@
-import { Home, User } from 'lucide-react';
+import { Home, User, BookOpen, BarChart3, CreditCard, TestTube } from 'lucide-react';
 import { z } from 'zod';
 
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
@@ -9,21 +9,36 @@ const iconClasses = 'w-4';
 
 const routes = [
   {
-    label: 'common:routes.application',
+    label: 'Learning',
     children: [
       {
-        label: 'common:routes.home',
+        label: 'Dashboard',
         path: pathsConfig.app.home,
         Icon: <Home className={iconClasses} />,
         end: true,
       },
+      {
+        label: 'My Decks',
+        path: '/home/decks',
+        Icon: <BookOpen className={iconClasses} />,
+      },
+      {
+        label: 'Analytics',
+        path: '/home/analytics',
+        Icon: <BarChart3 className={iconClasses} />,
+      },
     ],
   },
   {
-    label: 'common:routes.settings',
+    label: 'Account',
     children: [
       {
-        label: 'common:routes.profile',
+        label: 'Billing',
+        path: '/home/billing',
+        Icon: <CreditCard className={iconClasses} />,
+      },
+      {
+        label: 'Profile',
         path: pathsConfig.app.profileSettings,
         Icon: <User className={iconClasses} />,
       },
