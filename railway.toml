@@ -1,14 +1,23 @@
 [build]
 builder = "nixpacks"
-buildCommand = "pnpm install && cd apps/web && NODE_ENV=production next build"
-watchPatterns = ["apps/web/**/*"]
+# Use Turborepo for optimized builds with better caching
+buildCommand = "pnpm turbo build --filter=web"
+# Watch patterns optimized for monorepo structure
+watchPatterns = ["apps/web/**", "packages/**", "turbo.json", "package.json", "pnpm-lock.yaml"]
 
 [deploy]
-startCommand = "cd apps/web && NODE_ENV=production next start"
+# Use Turborepo for start command as well
+startCommand = "cd apps/web && pnpm start"
+# Railway deployment configuration
 restartPolicyType = "on_failure"
-restartPolicyMaxRetries = 10
+restartPolicyMaxRetries = 3
 healthcheckPath = "/"
-healthcheckTimeout = 300
+healthcheckTimeout = 60
 
 [env]
+# Essential environment variables for production
 NODE_ENV = "production"
+# Disable Next.js telemetry for production
+NEXT_TELEMETRY_DISABLED = "1"
+# Enable pnpm in production
+ENABLE_PNPM = "1"
