@@ -1,0 +1,25 @@
+Introduction to Calculus: Limits, Derivatives, and Integrals
+
+Calculus is a branch of mathematics that studies continuous change. It has two main branches: differential calculus (concerned with rates of change) and integral calculus (concerned with accumulation of quantities).
+
+A limit describes the behavior of a function as its input approaches a particular value. Formally, the limit of f(x) as x approaches a is L if f(x) can be made arbitrarily close to L by choosing x sufficiently close to a. Limits form the foundation for both derivatives and integrals.
+
+The derivative of a function measures its instantaneous rate of change at any point. Geometrically, the derivative represents the slope of the tangent line to the function's graph. The derivative of f(x) is denoted as f'(x) or df/dx.
+
+Basic differentiation rules include the power rule: d/dx(x^n) = nx^(n-1), the product rule: d/dx(uv) = u'v + uv', the quotient rule: d/dx(u/v) = (u'v - uv')/v², and the chain rule: d/dx(f(g(x))) = f'(g(x)) × g'(x).
+
+Applications of derivatives include finding maximum and minimum values of functions, analyzing motion (velocity and acceleration), and solving optimization problems. Critical points occur where the derivative equals zero or is undefined.
+
+The second derivative test helps classify critical points. If f''(x) > 0 at a critical point, it's a local minimum. If f''(x) < 0, it's a local maximum. If f''(x) = 0, the test is inconclusive.
+
+Integration is the reverse process of differentiation. The definite integral ∫[a to b] f(x)dx represents the signed area under the curve f(x) from x = a to x = b. The indefinite integral ∫f(x)dx represents the family of all antiderivatives of f(x).
+
+The Fundamental Theorem of Calculus connects derivatives and integrals. It states that if F(x) is an antiderivative of f(x), then ∫[a to b] f(x)dx = F(b) - F(a).
+
+Basic integration techniques include substitution, integration by parts, and partial fractions. The substitution method involves changing variables to simplify the integral. Integration by parts uses the formula ∫u dv = uv - ∫v du.
+
+Applications of integration include calculating areas between curves, volumes of solids of revolution, arc lengths, and work done by variable forces. Integration is also used in probability, physics, and engineering.
+
+L'Hôpital's rule helps evaluate limits of indeterminate forms. If lim[x→a] f(x)/g(x) results in 0/0 or ∞/∞, then this limit equals lim[x→a] f'(x)/g'(x), provided the latter limit exists.
+
+Calculus extends to multivariable functions, leading to partial derivatives, multiple integrals, and vector calculus. These concepts are essential for understanding phenomena in three-dimensional space and higher dimensions.

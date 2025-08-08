@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server';
-import { NextResponse, URLPattern } from 'next/server';
+import { NextResponse } from 'next/server';
 
 import { CsrfError, createCsrfProtect } from '@edge-csrf/nextjs';
 
@@ -100,7 +100,7 @@ function isServerAction(request: NextRequest) {
 function getPatterns() {
   return [
     {
-      pattern: new URLPattern({ pathname: '/auth/*?' }),
+      pattern: { pathname: '/auth' },
       handler: async (req: NextRequest, res: NextResponse) => {
         const {
           data: { user },
@@ -124,7 +124,7 @@ function getPatterns() {
       },
     },
     {
-      pattern: new URLPattern({ pathname: '/home/*?' }),
+      pattern: { pathname: '/home' },
       handler: async (req: NextRequest, res: NextResponse) => {
         const {
           data: { user },
@@ -163,12 +163,10 @@ function getPatterns() {
  */
 function matchUrlPattern(url: string) {
   const patterns = getPatterns();
-  const input = url.split('?')[0];
+  const pathname = new URL(url).pathname;
 
   for (const pattern of patterns) {
-    const patternResult = pattern.pattern.exec(input);
-
-    if (patternResult !== null && 'pathname' in patternResult) {
+    if (pathname.startsWith(pattern.pattern.pathname)) {
       return pattern.handler;
     }
   }

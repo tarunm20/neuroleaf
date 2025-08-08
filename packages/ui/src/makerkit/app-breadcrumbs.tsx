@@ -17,9 +17,15 @@ import { Trans } from './trans';
 
 const unslugify = (slug: string) => slug.replace(/-/g, ' ');
 
+// Dynamic label fetcher hook type
+export interface BreadcrumbLabelFetcher {
+  (path: string, fullPath: string[]): string | Promise<string> | null;
+}
+
 export function AppBreadcrumbs(props: {
   values?: Record<string, string>;
   maxDepth?: number;
+  labelFetcher?: BreadcrumbLabelFetcher;
 }) {
   const pathName = usePathname();
   const splitPath = pathName.split('/').filter(Boolean);
@@ -42,15 +48,27 @@ export function AppBreadcrumbs(props: {
     <Breadcrumb>
       <BreadcrumbList>
         {visiblePaths.map((path, index) => {
-          const label =
-            path in values ? (
-              values[path]
-            ) : (
+          // Check for custom values first, then labelFetcher, then fallback to i18n
+          let label: React.ReactNode;
+          
+          if (path in values) {
+            label = values[path];
+          } else if (props.labelFetcher) {
+            const customLabel = props.labelFetcher(path, splitPath);
+            label = customLabel || (
               <Trans
                 i18nKey={`common:routes.${unslugify(path)}`}
                 defaults={unslugify(path)}
               />
             );
+          } else {
+            label = (
+              <Trans
+                i18nKey={`common:routes.${unslugify(path)}`}
+                defaults={unslugify(path)}
+              />
+            );
+          }
 
           return (
             <Fragment key={index}>

@@ -11,94 +11,176 @@
         --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
         --font-heading: var(--font-sans);
 
-        --background: var(--color-white);
-        --foreground: var(--color-neutral-950);
+        /* Neuroleaf Green Theme - Light Mode */
+        --background: #fefefe;
+        --foreground: #0f172a;
 
-        --card: var(--color-white);
-        --card-foreground: var(--color-neutral-950);
+        --card: #ffffff;
+        --card-foreground: #0f172a;
 
-        --popover: var(--color-white);
-        --popover-foreground: var(--color-neutral-950);
+        --popover: #ffffff;
+        --popover-foreground: #0f172a;
 
-        --primary: var(--color-neutral-950);
-        --primary-foreground: var(--color-white);
+        /* Primary Green (Neuroleaf Brand) */
+        --primary: #059669; /* Emerald-600 */
+        --primary-foreground: #ffffff;
 
-        --secondary: oklch(96.76% 0.0013 286.38);
-        --secondary-foreground: oklch(21.03% 0.0318 264.65);
+        /* Secondary Green Tints */
+        --secondary: #ecfdf5; /* Emerald-50 */
+        --secondary-foreground: #065f46; /* Emerald-800 */
 
-        --muted: oklch(96.71% 0.0029 264.54);
-        --muted-foreground: oklch(55.13% 0.0233 264.36);
+        /* Muted Green */
+        --muted: #f0fdf4; /* Green-50 */
+        --muted-foreground: #16a34a; /* Green-600 */
 
-        --accent: oklch(96.76% 0.0013 286.38);
-        --accent-foreground: oklch(21.03% 0.0318 264.65);
+        /* Accent Green */
+        --accent: #d1fae5; /* Emerald-100 */
+        --accent-foreground: #047857; /* Emerald-700 */
 
         --destructive: var(--color-red-500);
         --destructive-foreground: var(--color-white);
 
-        --border: var(--color-gray-100);
-        --input: var(--color-gray-200);
-        --ring: var(--color-neutral-800);
+        /* Interactive Elements with Green Tints */
+        --border: #d1fae5; /* Emerald-100 */
+        --input: #ecfdf5; /* Emerald-50 */
+        --ring: #10b981; /* Emerald-500 */
 
         --radius: 0.5rem;
 
-        --chart-1: var(--color-orange-400);
-        --chart-2: var(--color-teal-600);
-        --chart-3: var(--color-green-800);
-        --chart-4: var(--color-yellow-200);
-        --chart-5: var(--color-orange-200);
+        /* Green-themed Charts */
+        --chart-1: #10b981; /* Emerald-500 */
+        --chart-2: #059669; /* Emerald-600 */
+        --chart-3: #047857; /* Emerald-700 */
+        --chart-4: #6ee7b7; /* Emerald-300 */
+        --chart-5: #34d399; /* Emerald-400 */
 
-        --sidebar-background: var(--color-neutral-50);
-        --sidebar-foreground: oklch(37.05% 0.012 285.8);
-        --sidebar-primary: var(--color-neutral-950);
-        --sidebar-primary-foreground: var(--color-white);
-        --sidebar-accent: var(--color-neutral-100);
-        --sidebar-accent-foreground: var(--color-neutral-950);
-        --sidebar-border: var(--border);
-        --sidebar-ring: var(--color-blue-500);
+        /* Sidebar Green Theming */
+        --sidebar-background: #f0fdf4; /* Green-50 */
+        --sidebar-foreground: #166534; /* Green-800 */
+        --sidebar-primary: #059669; /* Emerald-600 */
+        --sidebar-primary-foreground: #ffffff;
+        --sidebar-accent: #dcfce7; /* Green-100 */
+        --sidebar-accent-foreground: #15803d; /* Green-700 */
+        --sidebar-border: #bbf7d0; /* Green-200 */
+        --sidebar-ring: #10b981; /* Emerald-500 */
     }
 
     .dark {
-        --background: var(--color-neutral-900);
-        --foreground: var(--color-white);
+        /* Neuroleaf Green Theme - Dark Mode */
+        --background: #121212; /* Soft black for better readability */
+        --foreground: #e2e8f0; /* Slate-200 for better contrast */
 
-        --card: var(--color-neutral-900);
-        --card-foreground: var(--color-white);
+        --card: #1e1e1e; /* Slightly lighter soft black */
+        --card-foreground: #e2e8f0;
 
-        --popover: var(--color-neutral-900);
-        --popover-foreground: var(--color-white);
+        --popover: #1e1e1e; /* Match card background */
+        --popover-foreground: #e2e8f0;
 
-        --primary: var(--color-white);
-        --primary-foreground: var(--color-neutral-900);
+        /* Primary Green (Better contrast for dark mode) */
+        --primary: #10b981; /* Emerald-500 - more vibrant */
+        --primary-foreground: #ffffff; /* Pure white for better contrast */
 
-        --secondary: var(--color-neutral-800);
-        --secondary-foreground: oklch(98.43% 0.0017 247.84);
+        /* Secondary with better readability */
+        --secondary: #2a2a2a; /* Darker gray for better layering */
+        --secondary-foreground: #cbd5e1; /* Slate-300 for better readability */
 
-        --muted: var(--color-neutral-800);
-        --muted-foreground: oklch(71.19% 0.0129 286.07);
+        /* Muted with improved contrast */
+        --muted: #2a2a2a; /* Match secondary for consistency */
+        --muted-foreground: #94a3b8; /* Slate-400 - more readable than green */
 
-        --accent: var(--color-neutral-800);
-        --accent-foreground: oklch(98.48% 0 0);
+        /* Accent with better visibility */
+        --accent: #2a2a2a; /* Consistent with other backgrounds */
+        --accent-foreground: #f1f5f9; /* Slate-100 for high contrast */
 
         --destructive: var(--color-red-700);
         --destructive-foreground: var(--color-white);
 
-        --border: var(--color-neutral-800);
-        --input: var(--color-neutral-700);
-        --ring: oklch(87.09% 0.0055 286.29);
+        /* Interactive Elements for Dark Mode */
+        --border: #404040; /* Lighter border for better definition */
+        --input: #2a2a2a; /* Match other backgrounds */
+        --ring: #10b981; /* Match primary color */
 
-        --chart-1: var(--color-blue-600);
-        --chart-2: var(--color-emerald-400);
-        --chart-3: var(--color-orange-400);
-        --chart-4: var(--color-purple-500);
-        --chart-5: var(--color-pink-500);
+        /* Dark Mode Green Charts */
+        --chart-1: #10b981; /* Emerald-500 */
+        --chart-2: #34d399; /* Emerald-400 */
+        --chart-3: #6ee7b7; /* Emerald-300 */
+        --chart-4: #14b8a6; /* Teal-500 */
+        --chart-5: #06b6d4; /* Sky-500 */
 
-        --sidebar-background: var(--color-neutral-900);
-        --sidebar-foreground: var(--color-white);
-        --sidebar-primary: var(--color-blue-500);
-        --sidebar-primary-foreground: var(--color-white);
-        --sidebar-accent: var(--color-neutral-800);
-        --sidebar-accent-foreground: var(--color-white);
-        --sidebar-border: var(--border);
-        --sidebar-ring: var(--color-blue-500);
+        /* Dark Sidebar with improved contrast */
+        --sidebar-background: #1a1a1a; /* Slightly lighter than main background */
+        --sidebar-foreground: #e2e8f0; /* Match main foreground */
+        --sidebar-primary: #10b981; /* Match primary color */
+        --sidebar-primary-foreground: #ffffff; /* Pure white */
+        --sidebar-accent: #2a2a2a; /* Consistent accent background */
+        --sidebar-accent-foreground: #cbd5e1; /* Readable text */
+        --sidebar-border: #404040; /* Match main border */
+        --sidebar-ring: #10b981; /* Match primary color */
     }
+}
+
+/* Custom Neuroleaf Navigation Styles */
+@layer components {
+  .neuroleaf-nav-item {
+    @apply relative transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground;
+  }
+  
+  .neuroleaf-nav-item[aria-current="page"] {
+    @apply bg-gradient-to-r from-emerald-100 to-emerald-50 text-emerald-800 font-medium;
+    border-right: 3px solid theme(colors.emerald.600);
+  }
+  
+  .dark .neuroleaf-nav-item[aria-current="page"] {
+    @apply bg-gradient-to-r from-emerald-500/20 to-emerald-600/10 text-emerald-400;
+    border-right: 3px solid theme(colors.emerald.500);
+  }
+  
+  .neuroleaf-nav-item:hover {
+    @apply bg-gradient-to-r from-emerald-50 to-emerald-100;
+  }
+  
+  .dark .neuroleaf-nav-item:hover {
+    @apply bg-gradient-to-r from-emerald-500/15 to-emerald-600/5;
+  }
+  
+  /* Enhanced cards with green accents */
+  .neuroleaf-card {
+    @apply bg-card shadow-sm border border-border hover:shadow-md transition-all duration-200;
+    box-shadow: 0 1px 3px 0 rgba(16, 185, 129, 0.1), 0 1px 2px 0 rgba(16, 185, 129, 0.06);
+  }
+  
+  .neuroleaf-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.15), 0 2px 4px -1px rgba(16, 185, 129, 0.1);
+  }
+  
+  .dark .neuroleaf-card {
+    box-shadow: 0 1px 3px 0 rgba(16, 185, 129, 0.2), 0 1px 2px 0 rgba(16, 185, 129, 0.1);
+  }
+  
+  .dark .neuroleaf-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.25), 0 2px 4px -1px rgba(16, 185, 129, 0.15);
+  }
+  
+  /* Green gradient buttons */
+  .neuroleaf-button-primary {
+    @apply bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-medium;
+    @apply transition-all duration-200 shadow-sm hover:shadow-md;
+  }
+  
+  /* Green progress bars */
+  .neuroleaf-progress {
+    @apply bg-gradient-to-r from-emerald-500 to-emerald-600;
+  }
+  
+  /* Study session enhancements */
+  .neuroleaf-flashcard {
+    @apply bg-card border border-border rounded-lg shadow-lg;
+    box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.1), 0 4px 6px -2px rgba(16, 185, 129, 0.05);
+    transition: all 0.3s ease;
+  }
+  
+  .neuroleaf-flashcard:hover {
+    box-shadow: 0 20px 40px -10px rgba(16, 185, 129, 0.15), 0 8px 12px -4px rgba(16, 185, 129, 0.1);
+    transform: translateY(-2px);
+  }
 }

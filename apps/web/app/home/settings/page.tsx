@@ -8,6 +8,7 @@ import pathsConfig from '~/config/paths.config';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import { requireUserInServerComponent } from '~/lib/server/require-user-in-server-component';
+import { SubscriptionManagement } from './_components/subscription-management';
 
 const callbackPath = pathsConfig.auth.callback;
 
@@ -34,7 +35,11 @@ function PersonalAccountSettingsPage() {
 
   return (
     <PageBody>
-      <div className={'flex w-full flex-1 flex-col lg:max-w-2xl'}>
+      <div className="space-y-8 max-w-2xl">
+        {/* Subscription Management */}
+        <SubscriptionManagement userId={userId} />
+        
+        {/* Account Settings */}
         <PersonalAccountSettingsContainer
           userId={userId}
           paths={paths}
