@@ -56,7 +56,7 @@ export const pricingPlans: PricingPlan[] = [
       monthly: 9.99,
     },
     stripePriceId: {
-      monthly: process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID || '',
+      monthly: process.env.STRIPE_PRICE_ID || process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID || '',
     },
     features: [
       'Unlimited decks & cards',
