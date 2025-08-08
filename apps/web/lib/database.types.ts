@@ -18,9 +18,9 @@ export type Database = {
       graphql: {
         Args: {
           operationName?: string
-          query?: string
-          variables?: Json
           extensions?: Json
+          variables?: Json
+          query?: string
         }
         Returns: Json
       }
@@ -590,21 +590,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_deck_flashcard_stats: {
-        Args: { deck_uuid: string }
-        Returns: {
-          total_cards: number
-          easy_count: number
-          medium_count: number
-          hard_count: number
-          ai_generated_count: number
-          with_media_count: number
-          avg_front_length: number
-          avg_back_length: number
-        }[]
-      }
       get_deck_performance_analytics: {
-        Args: { p_user_id: string; p_deck_id: string }
+        Args: { p_deck_id: string; p_user_id: string }
         Returns: {
           flashcard_id: string
           front_content: string
@@ -616,54 +603,15 @@ export type Database = {
           last_attempt_at: string
         }[]
       }
-      get_due_decks_summary: {
-        Args: { user_id: string }
-        Returns: {
-          deck_id: string
-          deck_name: string
-          cards_due: number
-          total_cards: number
-          next_review: string
-          average_difficulty: string
-        }[]
-      }
       get_user_performance_summary: {
         Args: { p_user_id: string }
         Returns: {
+          average_mastery_level: number
+          average_test_score: number
           total_flashcards: number
           mastered_flashcards: number
           needs_review_flashcards: number
-          average_mastery_level: number
           total_test_sessions: number
-          average_test_score: number
-        }[]
-      }
-      get_user_recent_activities: {
-        Args: { user_id: string; activity_limit?: number }
-        Returns: {
-          activity_id: string
-          activity_type: string
-          title: string
-          description: string
-          activity_timestamp: string
-          deck_name: string
-          cards_studied: number
-          accuracy: number
-          session_duration: number
-        }[]
-      }
-      get_user_study_streak: {
-        Args: { user_id: string }
-        Returns: number
-      }
-      get_user_weekly_stats: {
-        Args: { user_id: string }
-        Returns: {
-          total_study_time: number
-          cards_studied: number
-          cards_correct: number
-          accuracy_rate: number
-          sessions_count: number
         }[]
       }
     }
@@ -936,11 +884,11 @@ export type Database = {
         Returns: undefined
       }
       can_insert_object: {
-        Args: { bucketid: string; name: string; owner: string; metadata: Json }
+        Args: { owner: string; name: string; metadata: Json; bucketid: string }
         Returns: undefined
       }
       delete_prefix: {
-        Args: { _bucket_id: string; _name: string }
+        Args: { _name: string; _bucket_id: string }
         Returns: boolean
       }
       extension: {
@@ -976,25 +924,25 @@ export type Database = {
       }
       list_multipart_uploads_with_delimiter: {
         Args: {
+          delimiter_param: string
+          next_key_token?: string
+          max_keys?: number
           bucket_id: string
           prefix_param: string
-          delimiter_param: string
-          max_keys?: number
-          next_key_token?: string
           next_upload_token?: string
         }
         Returns: {
-          key: string
-          id: string
           created_at: string
+          id: string
+          key: string
         }[]
       }
       list_objects_with_delimiter: {
         Args: {
+          max_keys?: number
           bucket_id: string
           prefix_param: string
           delimiter_param: string
-          max_keys?: number
           start_after?: string
           next_token?: string
         }
@@ -1011,12 +959,12 @@ export type Database = {
       }
       search: {
         Args: {
-          prefix: string
-          bucketname: string
-          limits?: number
-          levels?: number
           offsets?: number
+          limits?: number
+          bucketname: string
           search?: string
+          prefix: string
+          levels?: number
           sortcolumn?: string
           sortorder?: string
         }
@@ -1031,31 +979,31 @@ export type Database = {
       }
       search_legacy_v1: {
         Args: {
-          prefix: string
           bucketname: string
-          limits?: number
-          levels?: number
-          offsets?: number
           search?: string
+          offsets?: number
           sortcolumn?: string
+          prefix: string
+          levels?: number
           sortorder?: string
+          limits?: number
         }
         Returns: {
-          name: string
-          id: string
           updated_at: string
+          id: string
           created_at: string
           last_accessed_at: string
           metadata: Json
+          name: string
         }[]
       }
       search_v1_optimised: {
         Args: {
+          offsets?: number
           prefix: string
           bucketname: string
           limits?: number
           levels?: number
-          offsets?: number
           search?: string
           sortcolumn?: string
           sortorder?: string
@@ -1072,18 +1020,18 @@ export type Database = {
       search_v2: {
         Args: {
           prefix: string
-          bucket_name: string
-          limits?: number
-          levels?: number
           start_after?: string
+          levels?: number
+          limits?: number
+          bucket_name: string
         }
         Returns: {
-          key: string
+          created_at: string
+          updated_at: string
           name: string
           id: string
-          updated_at: string
-          created_at: string
           metadata: Json
+          key: string
         }[]
       }
     }

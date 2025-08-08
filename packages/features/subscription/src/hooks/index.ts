@@ -1,1 +1,1 @@
-export { useSubscription, useCanCreateDeck } from './use-subscription';
+export { useSubscription, useCanCreateDeck, useCanAccessDeck } from './use-subscription';
