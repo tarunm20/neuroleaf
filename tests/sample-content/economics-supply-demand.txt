@@ -1,0 +1,23 @@
+Supply and Demand: Economic Fundamentals
+
+Supply and demand are the fundamental forces that drive market economies. These concepts explain how prices are determined and how resources are allocated in free markets.
+
+Demand represents the quantity of a good or service that consumers are willing and able to purchase at various prices during a specific time period. The law of demand states that, all else being equal, as the price of a good increases, the quantity demanded decreases, and vice versa. This creates a downward-sloping demand curve.
+
+Factors that shift the demand curve include changes in consumer income, population, tastes and preferences, prices of substitute or complementary goods, and future expectations. An increase in demand shifts the curve to the right, while a decrease shifts it to the left.
+
+Supply represents the quantity of a good or service that producers are willing and able to offer at various prices during a specific time period. The law of supply states that, all else being equal, as the price of a good increases, the quantity supplied increases, and vice versa. This creates an upward-sloping supply curve.
+
+Factors that shift the supply curve include changes in production costs, technology, number of sellers, government policies, and future expectations. An increase in supply shifts the curve to the right, while a decrease shifts it to the left.
+
+Market equilibrium occurs where supply and demand curves intersect. At this point, the quantity demanded equals the quantity supplied, determining the market price and quantity. This equilibrium price is also called the market-clearing price.
+
+Price elasticity of demand measures how responsive quantity demanded is to price changes. Elastic demand means consumers are highly responsive to price changes, while inelastic demand means consumers are not very responsive. Factors affecting elasticity include availability of substitutes, necessity versus luxury, proportion of income spent, and time period for adjustment.
+
+Consumer surplus is the difference between what consumers are willing to pay and what they actually pay. Producer surplus is the difference between the market price and the minimum price producers are willing to accept. Total economic surplus is the sum of consumer and producer surplus.
+
+Market failures occur when free markets fail to allocate resources efficiently. Examples include externalities (costs or benefits affecting third parties), public goods (non-excludable and non-rivalrous), monopolies (single sellers with market power), and information asymmetries (unequal access to information).
+
+Government interventions in markets include price floors (minimum prices like minimum wage), price ceilings (maximum prices like rent control), taxes, subsidies, and regulations. These interventions can help address market failures but may also create inefficiencies.
+
+Perfect competition is a theoretical market structure with many buyers and sellers, identical products, perfect information, and no barriers to entry. Real markets rarely meet these conditions, but this model provides a benchmark for analyzing market efficiency.

@@ -1,0 +1,21 @@
+Learning Theories in Psychology
+
+Learning theories explain how people acquire, process, and retain knowledge. These theories provide frameworks for understanding educational processes and developing effective teaching methods.
+
+Behaviorism focuses on observable behaviors and the environmental factors that influence them. Classical conditioning, discovered by Ivan Pavlov, involves learning through association. A neutral stimulus becomes associated with an unconditioned stimulus to produce a conditioned response. For example, Pavlov's dogs learned to salivate at the sound of a bell.
+
+Operant conditioning, developed by B.F. Skinner, involves learning through consequences. Behaviors followed by positive consequences (reinforcement) are more likely to be repeated, while behaviors followed by negative consequences (punishment) are less likely to occur. Reinforcement can be positive (adding something pleasant) or negative (removing something unpleasant).
+
+Cognitive learning theory emphasizes mental processes such as thinking, memory, and problem-solving. Jean Piaget's theory of cognitive development describes how children's thinking evolves through four stages: sensorimotor (0-2 years), preoperational (2-7 years), concrete operational (7-11 years), and formal operational (11+ years).
+
+Social learning theory, proposed by Albert Bandura, suggests that people learn through observation, imitation, and modeling. The famous Bobo doll experiment demonstrated that children learn aggressive behaviors by watching adults. This theory highlights the importance of role models and social context in learning.
+
+Constructivism proposes that learners actively build their own understanding rather than passively receiving information. Lev Vygotsky's social constructivism emphasizes the role of social interaction and culture in learning. His concept of the Zone of Proximal Development describes the difference between what a learner can do independently and what they can do with guidance.
+
+Information processing theory compares human learning to computer processing. It describes how information moves through sensory memory, short-term memory, and long-term memory. Attention, encoding, storage, and retrieval are key processes in this model.
+
+Multiple intelligence theory, developed by Howard Gardner, suggests that intelligence consists of eight distinct types: linguistic, logical-mathematical, spatial, musical, bodily-kinesthetic, interpersonal, intrapersonal, and naturalistic intelligence. This theory challenges traditional views of intelligence as a single, measurable entity.
+
+Experiential learning theory, proposed by David Kolb, describes learning as a four-stage cycle: concrete experience, reflective observation, abstract conceptualization, and active experimentation. This theory emphasizes the importance of hands-on experience in the learning process.
+
+Adult learning theory, or andragogy, developed by Malcolm Knowles, focuses on how adults learn differently from children. Adults are self-directed, bring prior experience, are goal-oriented, and prefer practical, problem-solving approaches to learning.

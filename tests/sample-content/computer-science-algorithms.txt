@@ -1,0 +1,17 @@
+Introduction to Algorithms and Data Structures
+
+An algorithm is a step-by-step procedure for solving a problem or completing a task. Algorithms must be precise, unambiguous, and finite. They form the foundation of computer science and programming.
+
+Algorithm complexity is measured using Big O notation, which describes the worst-case time or space requirements as input size grows. Common complexities include O(1) for constant time, O(log n) for logarithmic time, O(n) for linear time, O(n log n) for linearithmic time, and O(n²) for quadratic time.
+
+Sorting algorithms arrange data in a specific order. Bubble sort compares adjacent elements and swaps them if they're in the wrong order, with O(n²) complexity. Selection sort finds the minimum element and places it at the beginning, also O(n²). Insertion sort builds the sorted array one element at a time, O(n²) worst case but O(n) best case. Merge sort uses divide-and-conquer to achieve O(n log n) complexity. Quick sort partitions the array around a pivot, with O(n log n) average case but O(n²) worst case.
+
+Search algorithms find specific elements in data structures. Linear search checks each element sequentially, with O(n) complexity. Binary search works on sorted arrays by repeatedly dividing the search interval in half, achieving O(log n) complexity.
+
+Data structures organize and store data efficiently. Arrays store elements in contiguous memory locations, providing O(1) access by index. Linked lists use nodes with pointers to the next element, allowing dynamic size but O(n) access time. Stacks follow Last-In-First-Out (LIFO) principle, supporting push and pop operations in O(1) time. Queues follow First-In-First-Out (FIFO) principle, supporting enqueue and dequeue operations in O(1) time.
+
+Trees are hierarchical data structures. Binary trees have at most two children per node. Binary search trees maintain the property that left children are smaller and right children are larger than their parent. Balanced trees like AVL trees ensure O(log n) operations by maintaining height balance.
+
+Hash tables use hash functions to map keys to array indices, providing O(1) average-case insertion, deletion, and lookup. Collision resolution techniques include chaining and open addressing.
+
+Graphs consist of vertices connected by edges. They can be directed or undirected, weighted or unweighted. Graph traversal algorithms include Depth-First Search (DFS) and Breadth-First Search (BFS), both with O(V + E) complexity where V is vertices and E is edges.

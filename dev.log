@@ -1,0 +1,245 @@
+
+> next-supabase-saas-kit-turbo-lite@0.2.0 dev /Users/tarunmurugan/Documents/Code/personal/neuroleaf
+> cross-env FORCE_COLOR=1 turbo dev --parallel
+
+turbo 2.5.0
+
+[2m• Packages in scope: @kit/accounts, @kit/ai, @kit/auth, @kit/decks, @kit/eslint-config, @kit/flashcards, @kit/i18n, @kit/next, @kit/prettier-config, @kit/shared, @kit/subscription, @kit/supabase, @kit/test-mode, @kit/tsconfig, @kit/ui, scripts, web, web-e2e[0m
+[2m• Running [0m[1m[2mdev[0m[2m in 18 packages
+[0m[2m• Remote caching disabled[0m
+[32mweb:dev: [0mcache bypass, force executing [2m24b2a27c0a4121a2[0m
+[35mscripts:dev: [0mcache bypass, force executing [2mb7e29e92a745608c[0m
+[32mweb:dev: [0m
+[32mweb:dev: [0m> web@0.1.0 dev /Users/tarunmurugan/Documents/Code/personal/neuroleaf/apps/web
+[32mweb:dev: [0m> pnpm with-env next dev --turbo | pino-pretty -c
+[32mweb:dev: [0m
+[35mscripts:dev: [0m
+[35mscripts:dev: [0m> scripts@0.1.0 dev /Users/tarunmurugan/Documents/Code/personal/neuroleaf/tooling/scripts
+[35mscripts:dev: [0m> node ./src/dev.mjs
+[35mscripts:dev: [0m
+[35mscripts:dev: [0m[32mYou are running Node 20.19.3.[0m
+[32mweb:dev: [0m
+[32mweb:dev: [0m> web@0.1.0 with-env /Users/tarunmurugan/Documents/Code/personal/neuroleaf/apps/web
+[32mweb:dev: [0m> dotenv -e ./.env.local -- "next" "dev" "--turbo"
+[32mweb:dev: [0m
+[35mscripts:dev: [0m[32mYou are running pnpm 9.12.0.[0m
+[32mweb:dev: [0m   ▲ Next.js 15.3.2 (Turbopack)
+[32mweb:dev: [0m   - Local:        http://localhost:3000
+[32mweb:dev: [0m   - Network:      http://192.168.1.184:3000
+[32mweb:dev: [0m   - Environments: .env.local, .env.development, .env
+[32mweb:dev: [0m   - Experiments (use with caution):
+[32mweb:dev: [0m     ⨯ reactCompiler
+[32mweb:dev: [0m
+[32mweb:dev: [0m ✓ Starting...
+[32mweb:dev: [0m ✓ Compiled instrumentation Node.js in 8ms
+[32mweb:dev: [0m ✓ Compiled instrumentation Edge in 13ms
+[32mweb:dev: [0m ✓ Compiled middleware in 161ms
+[32mweb:dev: [0m ✓ Ready in 1044ms
+[32mweb:dev: [0m ○ Compiling /pricing ...
+[32mweb:dev: [0m ✓ Compiled /pricing in 2.2s
+[32mweb:dev: [0m GET /pricing 200 in 2701ms
+[32mweb:dev: [0m GET /pricing 200 in 217ms
+[32mweb:dev: [0m │ GET http://127.0.0.1:54321/auth/v1/user 200 in 32ms (cache skip)
+[32mweb:dev: [0m │ │ Cache skipped reason: (auto no cache)
+[32mweb:dev: [0m │ GET http://127.0.0.1:54321/auth/v1/user 200 in 24ms (cache skip)
+[32mweb:dev: [0m │ │ Cache skipped reason: (auto no cache)
+[32mweb:dev: [0m[Dev Only] This is a simple warning to let you know you are using the Supabase Service Role. Make sure it's the right call.
+[32mweb:dev: [0mCheckout error: Error: NEXT_REDIRECT
+[32mweb:dev: [0m    at createCheckoutAction (lib/server-actions/billing-actions.ts:34:13)
+[32mweb:dev: [0m  32 |     });
+[32mweb:dev: [0m  33 |
+[32mweb:dev: [0m> 34 |     redirect(session.url!);
+[32mweb:dev: [0m     |             ^
+[32mweb:dev: [0m  35 |   } catch (error) {
+[32mweb:dev: [0m  36 |     console.error('Checkout error:', error);
+[32mweb:dev: [0m  37 |     throw new Error('Failed to create checkout session'); {
+[32mweb:dev: [0m  digest: 'NEXT_REDIRECT;push;https://checkout.stripe.com/c/pay/cs_test_a19XlWiI0Btwtxbd1P9bC0IqDOpL5XqcniXBaGkHmWZwuKfXub8JLKQ7Nn#fidkdWxOYHwnPyd1blpxYHZxWjA0V25dclUxZ1U3ZklTNGkyQnI2bmxXPUNKUlZfSUg1U058cWo9ZjJ3aGpoYV9rZ2F2ZFxIcmJsZlI3M2gwPHFXa2JicFByYWp%2Fb2wzSWhUcjR2ZkFhR09ENTVkQDNWNlJrPCcpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl;307;'
+[32mweb:dev: [0m}
+[32mweb:dev: [0mServer Side Error: Error: Failed to create checkout session
+[32mweb:dev: [0m    at createCheckoutAction (lib/server-actions/billing-actions.ts:37:10)
+[32mweb:dev: [0m  35 |   } catch (error) {
+[32mweb:dev: [0m  36 |     console.error('Checkout error:', error);
+[32mweb:dev: [0m> 37 |     throw new Error('Failed to create checkout session');
+[32mweb:dev: [0m     |          ^
+[32mweb:dev: [0m  38 |   }
+[32mweb:dev: [0m  39 | }
+[32mweb:dev: [0m  40 | {
+[32mweb:dev: [0m  digest: '1036134235'
+[32mweb:dev: [0m}
+[32mweb:dev: [0m ⨯ Error: Failed to create checkout session
+[32mweb:dev: [0m    at createCheckoutAction (lib/server-actions/billing-actions.ts:37:10)
+[32mweb:dev: [0m  35 |   } catch (error) {
+[32mweb:dev: [0m  36 |     console.error('Checkout error:', error);
+[32mweb:dev: [0m> 37 |     throw new Error('Failed to create checkout session');
+[32mweb:dev: [0m     |          ^
+[32mweb:dev: [0m  38 |   }
+[32mweb:dev: [0m  39 | }
+[32mweb:dev: [0m  40 | {
+[32mweb:dev: [0m  digest: '1036134235'
+[32mweb:dev: [0m}
+[32mweb:dev: [0m POST /pricing 500 in 1381ms
+[32mweb:dev: [0m ○ Compiling /api/stripe/webhook ...
+[32mweb:dev: [0m ✓ Compiled /api/stripe/webhook in 557ms
+[32mweb:dev: [0m GET /api/stripe/webhook 405 in 660ms
+[32mweb:dev: [0m ○ Compiling / ...
+[32mweb:dev: [0m ✓ Compiled / in 1145ms
+[32mweb:dev: [0m GET / 200 in 1210ms
+[32mweb:dev: [0m ○ Compiling /home/decks/[deckId]/flashcards ...
+[32mweb:dev: [0m ✓ Compiled /home/decks/[deckId]/flashcards in 1946ms
+[32mweb:dev: [0m GET /home/decks/2773c238-3b07-4028-afb4-42f67e319be5/flashcards 200 in 2580ms
+[32mweb:dev: [0m │ GET http://127.0.0.1:54321/auth/v1/user 200 in 12ms (cache skip)
+[32mweb:dev: [0m │ │ Cache skipped reason: (auto no cache)
+[32mweb:dev: [0m GET /pricing 200 in 80ms
+[32mweb:dev: [0m │ GET http://127.0.0.1:54321/auth/v1/user 200 in 8ms (cache skip)
+[32mweb:dev: [0m │ │ Cache skipped reason: (auto no cache)
+[32mweb:dev: [0m[Dev Only] This is a simple warning to let you know you are using the Supabase Service Role. Make sure it's the right call.
+[32mweb:dev: [0mCheckout error: Error: NEXT_REDIRECT
+[32mweb:dev: [0m    at createCheckoutAction (lib/server-actions/billing-actions.ts:34:13)
+[32mweb:dev: [0m  32 |     });
+[32mweb:dev: [0m  33 |
+[32mweb:dev: [0m> 34 |     redirect(session.url!);
+[32mweb:dev: [0m     |             ^
+[32mweb:dev: [0m  35 |   } catch (error) {
+[32mweb:dev: [0m  36 |     console.error('Checkout error:', error);
+[32mweb:dev: [0m  37 |     throw new Error('Failed to create checkout session'); {
+[32mweb:dev: [0m  digest: 'NEXT_REDIRECT;push;https://checkout.stripe.com/c/pay/cs_test_a1B5imoLspNsu3EF9GMRVwHv821l9Ft18Bei9B8Xn8zeFWn2buijmIPsZu#fidkdWxOYHwnPyd1blpxYHZxWjA0V25dclUxZ1U3ZklTNGkyQnI2bmxXPUNKUlZfSUg1U058cWo9ZjJ3aGpoYV9rZ2F2ZFxIcmJsZlI3M2gwPHFXa2JicFByYWp%2Fb2wzSWhUcjR2ZkFhR09ENTVkQDNWNlJrPCcpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl;307;'
+[32mweb:dev: [0m}
+[32mweb:dev: [0mServer Side Error: Error: Failed to create checkout session
+[32mweb:dev: [0m    at createCheckoutAction (lib/server-actions/billing-actions.ts:37:10)
+[32mweb:dev: [0m  35 |   } catch (error) {
+[32mweb:dev: [0m  36 |     console.error('Checkout error:', error);
+[32mweb:dev: [0m> 37 |     throw new Error('Failed to create checkout session');
+[32mweb:dev: [0m     |          ^
+[32mweb:dev: [0m  38 |   }
+[32mweb:dev: [0m  39 | }
+[32mweb:dev: [0m  40 | {
+[32mweb:dev: [0m  digest: '1036134235'
+[32mweb:dev: [0m}
+[32mweb:dev: [0m ⨯ Error: Failed to create checkout session
+[32mweb:dev: [0m    at createCheckoutAction (lib/server-actions/billing-actions.ts:37:10)
+[32mweb:dev: [0m  35 |   } catch (error) {
+[32mweb:dev: [0m  36 |     console.error('Checkout error:', error);
+[32mweb:dev: [0m> 37 |     throw new Error('Failed to create checkout session');
+[32mweb:dev: [0m     |          ^
+[32mweb:dev: [0m  38 |   }
+[32mweb:dev: [0m  39 | }
+[32mweb:dev: [0m  40 | {
+[32mweb:dev: [0m  digest: '1036134235'
+[32mweb:dev: [0m}
+[32mweb:dev: [0m POST /pricing 500 in 1065ms
+[32mweb:dev: [0m ✓ Compiled in 209ms
+[32mweb:dev: [0m ✓ Compiled in 204ms
+[32mweb:dev: [0m ⨯ ./apps/web/lib/server-actions/billing-actions.ts:12:1
+[32mweb:dev: [0mModule not found: Can't resolve '@kit/supabase/clients'
+[32mweb:dev: [0m[0m [90m 10 |[39m } [36mfrom[39m [32m'../billing/stripe-server'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m [90m 11 |[39m [36mimport[39m { [33mSubscriptionService[39m } [36mfrom[39m [32m'@kit/subscription/server'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m[31m[1m>[22m[39m[90m 12 |[39m [36mimport[39m { getSupabaseServiceRoleClient } [36mfrom[39m [32m'@kit/supabase/clients'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[32mweb:dev: [0m[0m [90m 13 |[39m[0m
+[32mweb:dev: [0m[0m [90m 14 |[39m [36mexport[39m [36masync[39m [36mfunction[39m createCheckoutAction(formData[33m:[39m [33mFormData[39m) {[0m
+[32mweb:dev: [0m[0m [90m 15 |[39m   [36mconst[39m priceId [33m=[39m formData[33m.[39m[36mget[39m([32m'priceId'[39m) [36mas[39m string[33m;[39m[0m
+[32mweb:dev: [0m
+[32mweb:dev: [0m
+[32mweb:dev: [0m
+[32mweb:dev: [0mhttps://nextjs.org/docs/messages/module-not-found
+[32mweb:dev: [0m
+[32mweb:dev: [0m
+[32mweb:dev: [0m ⨯ ./apps/web/lib/server-actions/billing-actions.ts:12:1
+[32mweb:dev: [0mModule not found: Can't resolve '@kit/supabase/clients'
+[32mweb:dev: [0m[0m [90m 10 |[39m } [36mfrom[39m [32m'../billing/stripe-server'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m [90m 11 |[39m [36mimport[39m { [33mSubscriptionService[39m } [36mfrom[39m [32m'@kit/subscription/server'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m[31m[1m>[22m[39m[90m 12 |[39m [36mimport[39m { getSupabaseServiceRoleClient } [36mfrom[39m [32m'@kit/supabase/clients'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[32mweb:dev: [0m[0m [90m 13 |[39m[0m
+[32mweb:dev: [0m[0m [90m 14 |[39m [36mexport[39m [36masync[39m [36mfunction[39m createCheckoutAction(formData[33m:[39m [33mFormData[39m) {[0m
+[32mweb:dev: [0m[0m [90m 15 |[39m   [36mconst[39m priceId [33m=[39m formData[33m.[39m[36mget[39m([32m'priceId'[39m) [36mas[39m string[33m;[39m[0m
+[32mweb:dev: [0m
+[32mweb:dev: [0m
+[32mweb:dev: [0m
+[32mweb:dev: [0mhttps://nextjs.org/docs/messages/module-not-found
+[32mweb:dev: [0m
+[32mweb:dev: [0m
+[32mweb:dev: [0m ⨯ ./apps/web/lib/server-actions/billing-actions.ts:12:1
+[32mweb:dev: [0mModule not found: Can't resolve '@kit/supabase/clients'
+[32mweb:dev: [0m[0m [90m 10 |[39m } [36mfrom[39m [32m'../billing/stripe-server'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m [90m 11 |[39m [36mimport[39m { [33mSubscriptionService[39m } [36mfrom[39m [32m'@kit/subscription/server'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m[31m[1m>[22m[39m[90m 12 |[39m [36mimport[39m { getSupabaseServiceRoleClient } [36mfrom[39m [32m'@kit/supabase/clients'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[32mweb:dev: [0m[0m [90m 13 |[39m[0m
+[32mweb:dev: [0m[0m [90m 14 |[39m [36mexport[39m [36masync[39m [36mfunction[39m createCheckoutAction(formData[33m:[39m [33mFormData[39m) {[0m
+[32mweb:dev: [0m[0m [90m 15 |[39m   [36mconst[39m priceId [33m=[39m formData[33m.[39m[36mget[39m([32m'priceId'[39m) [36mas[39m string[33m;[39m[0m
+[32mweb:dev: [0m
+[32mweb:dev: [0m
+[32mweb:dev: [0m
+[32mweb:dev: [0mhttps://nextjs.org/docs/messages/module-not-found
+[32mweb:dev: [0m
+[32mweb:dev: [0m
+[32mweb:dev: [0m ⨯ ./apps/web/lib/server-actions/billing-actions.ts:12:1
+[32mweb:dev: [0mModule not found: Can't resolve '@kit/supabase/clients'
+[32mweb:dev: [0m[0m [90m 10 |[39m } [36mfrom[39m [32m'../billing/stripe-server'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m [90m 11 |[39m [36mimport[39m { [33mSubscriptionService[39m } [36mfrom[39m [32m'@kit/subscription/server'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m[31m[1m>[22m[39m[90m 12 |[39m [36mimport[39m { getSupabaseServiceRoleClient } [36mfrom[39m [32m'@kit/supabase/clients'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[32mweb:dev: [0m[0m [90m 13 |[39m[0m
+[32mweb:dev: [0m[0m [90m 14 |[39m [36mexport[39m [36masync[39m [36mfunction[39m createCheckoutAction(formData[33m:[39m [33mFormData[39m) {[0m
+[32mweb:dev: [0m[0m [90m 15 |[39m   [36mconst[39m priceId [33m=[39m formData[33m.[39m[36mget[39m([32m'priceId'[39m) [36mas[39m string[33m;[39m[0m
+[32mweb:dev: [0m
+[32mweb:dev: [0m
+[32mweb:dev: [0m
+[32mweb:dev: [0mhttps://nextjs.org/docs/messages/module-not-found
+[32mweb:dev: [0m
+[32mweb:dev: [0m
+[32mweb:dev: [0m ✓ Compiled in 188ms
+[32mweb:dev: [0m ✓ Compiled in 183ms
+[32mweb:dev: [0m ✓ Compiled in 665ms
+[32mweb:dev: [0m GET / 200 in 160ms
+[32mweb:dev: [0m ✓ Compiled /pricing in 302ms
+[32mweb:dev: [0m ⨯ ./apps/web/lib/server-actions/billing-actions.ts:12:10
+[32mweb:dev: [0mEcmascript file had an error
+[32mweb:dev: [0m[0m [90m 10 |[39m } [36mfrom[39m [32m'../billing/stripe-server'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m [90m 11 |[39m [36mimport[39m { [33mSubscriptionService[39m } [36mfrom[39m [32m'@kit/subscription/server'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m[31m[1m>[22m[39m[90m 12 |[39m [36mimport[39m { getSupabaseServerClient } [36mfrom[39m [32m'@kit/supabase/server-client'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m [90m    |[39m          [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[32mweb:dev: [0m[0m [90m 13 |[39m[0m
+[32mweb:dev: [0m[0m [90m 14 |[39m [36mexport[39m [36masync[39m [36mfunction[39m createCheckoutAction(formData[33m:[39m [33mFormData[39m) {[0m
+[32mweb:dev: [0m[0m [90m 15 |[39m   [36mconst[39m priceId [33m=[39m formData[33m.[39m[36mget[39m([32m'priceId'[39m) [36mas[39m string[33m;[39m[0m
+[32mweb:dev: [0m
+[32mweb:dev: [0mthe name `getSupabaseServerClient` is defined multiple times
+[32mweb:dev: [0m
+[32mweb:dev: [0m
+[32mweb:dev: [0m ○ Compiling /_error ...
+[32mweb:dev: [0m ✓ Compiled /_error in 927ms
+[32mweb:dev: [0m GET /pricing 500 in 1411ms
+[32mweb:dev: [0m ⨯ ./apps/web/lib/server-actions/billing-actions.ts:12:10
+[32mweb:dev: [0mEcmascript file had an error
+[32mweb:dev: [0m[0m [90m 10 |[39m } [36mfrom[39m [32m'../billing/stripe-server'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m [90m 11 |[39m [36mimport[39m { [33mSubscriptionService[39m } [36mfrom[39m [32m'@kit/subscription/server'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m[31m[1m>[22m[39m[90m 12 |[39m [36mimport[39m { getSupabaseServerClient } [36mfrom[39m [32m'@kit/supabase/server-client'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m [90m    |[39m          [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[32mweb:dev: [0m[0m [90m 13 |[39m[0m
+[32mweb:dev: [0m[0m [90m 14 |[39m [36mexport[39m [36masync[39m [36mfunction[39m createCheckoutAction(formData[33m:[39m [33mFormData[39m) {[0m
+[32mweb:dev: [0m[0m [90m 15 |[39m   [36mconst[39m priceId [33m=[39m formData[33m.[39m[36mget[39m([32m'priceId'[39m) [36mas[39m string[33m;[39m[0m
+[32mweb:dev: [0m
+[32mweb:dev: [0mthe name `getSupabaseServerClient` is defined multiple times
+[32mweb:dev: [0m
+[32mweb:dev: [0m
+[32mweb:dev: [0m GET /pricing 500 in 43ms
+[32mweb:dev: [0m ⨯ ./apps/web/lib/server-actions/billing-actions.ts:12:10
+[32mweb:dev: [0mEcmascript file had an error
+[32mweb:dev: [0m[0m [90m 10 |[39m } [36mfrom[39m [32m'../billing/stripe-server'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m [90m 11 |[39m [36mimport[39m { [33mSubscriptionService[39m } [36mfrom[39m [32m'@kit/subscription/server'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m[31m[1m>[22m[39m[90m 12 |[39m [36mimport[39m { getSupabaseServerClient } [36mfrom[39m [32m'@kit/supabase/server-client'[39m[33m;[39m[0m
+[32mweb:dev: [0m[0m [90m    |[39m          [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[32mweb:dev: [0m[0m [90m 13 |[39m[0m
+[32mweb:dev: [0m[0m [90m 14 |[39m [36mexport[39m [36masync[39m [36mfunction[39m createCheckoutAction(formData[33m:[39m [33mFormData[39m) {[0m
+[32mweb:dev: [0m[0m [90m 15 |[39m   [36mconst[39m priceId [33m=[39m formData[33m.[39m[36mget[39m([32m'priceId'[39m) [36mas[39m string[33m;[39m[0m
+[32mweb:dev: [0m
+[32mweb:dev: [0mthe name `getSupabaseServerClient` is defined multiple times
+[32mweb:dev: [0m
+[32mweb:dev: [0m
+[32mweb:dev: [0m GET /pricing 500 in 70ms
+
+[1m Tasks:    [32m[1m2 successful[0m, 2 total[0m
+[1mCached:    [1m0 cached[0m, 2 total[0m
+[1m  Time:    [1m5h58m49.592s[0m [0m
+

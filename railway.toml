@@ -1,0 +1,11 @@
+[build]
+builder = "nixpacks"
+buildCommand = "pnpm run build"
+
+[deploy]
+startCommand = "pnpm start"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10
+
+[env]
+NODE_ENV = "production"

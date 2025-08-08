@@ -25,17 +25,17 @@ const config = {
       fullUrl: true,
     },
   },
-  serverExternalPackages: [],
+  serverExternalPackages: ['pdf2json'],
   // needed for supporting dynamic imports for local content
   outputFileTracingIncludes: {
     '/*': ['./content/**/*'],
   },
+  turbopack: {
+    resolveExtensions: ['.ts', '.tsx', '.js', '.jsx'],
+  },
   experimental: {
     mdxRs: true,
     reactCompiler: ENABLE_REACT_COMPILER,
-    turbo: {
-      resolveExtensions: ['.ts', '.tsx', '.js', '.jsx'],
-    },
     optimizePackageImports: [
       'recharts',
       'lucide-react',
@@ -45,6 +45,9 @@ const config = {
       'date-fns',
       ...INTERNAL_PACKAGES,
     ],
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
   },
   modularizeImports: {
     lodash: {
