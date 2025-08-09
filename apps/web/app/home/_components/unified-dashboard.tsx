@@ -12,7 +12,7 @@ import { generateFlashcardsWithAIAction } from '@kit/flashcards/server';
 import { CreateDeckData, DeckWithStats } from '@kit/decks/schemas';
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@kit/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@kit/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@kit/ui/alert-dialog';
 import { Button } from '@kit/ui/button';
 
 import { PrimaryActionHero } from './primary-action-hero';
@@ -39,13 +39,13 @@ export function UnifiedDashboard() {
   const learningStatsService = new LearningStatsService(supabase);
   
   // Get subscription info
-  const { data: subscriptionInfo } = useSubscription(user?.data?.id!);
+  const { data: subscriptionInfo } = useSubscription(user?.data?.id || '');
   
 
   // Fetch learning statistics
   const { data: learningStats, isLoading: statsLoading } = useQuery({
     queryKey: ['learning-stats', user?.data?.id],
-    queryFn: () => learningStatsService.getLearningStats(user?.data?.id!),
+    queryFn: () => learningStatsService.getLearningStats(user?.data?.id || ''),
     enabled: !!user?.data?.id,
     staleTime: 1000 * 60 * 2, // 2 minutes
     refetchOnWindowFocus: true,
@@ -53,9 +53,9 @@ export function UnifiedDashboard() {
   });
 
   // Fetch enhanced progress statistics
-  const { data: enhancedStats, isLoading: enhancedStatsLoading } = useQuery({
+  const { data: _enhancedStats, isLoading: enhancedStatsLoading } = useQuery({
     queryKey: ['enhanced-progress-stats', user?.data?.id],
-    queryFn: () => learningStatsService.getEnhancedProgressStats(user?.data?.id!),
+    queryFn: () => learningStatsService.getEnhancedProgressStats(user?.data?.id || ''),
     enabled: !!user?.data?.id,
     staleTime: 1000 * 60 * 5, // 5 minutes (these stats are less time-sensitive)
     refetchOnWindowFocus: false,
@@ -65,7 +65,7 @@ export function UnifiedDashboard() {
 
   // Deck management hooks  
   const createDeckMutation = useCreateDeck();
-  const updateDeckMutation = useUpdateDeck();
+  const _updateDeckMutation = useUpdateDeck();
   const deleteDeckMutation = useDeleteDeck();
   const duplicateDeckMutation = useDuplicateDeck();
 
@@ -101,8 +101,8 @@ export function UnifiedDashboard() {
           visibility: data.visibility,
           tags: data.tags,
         },
-        accountId: user?.data?.id!,
-        userId: user?.data?.id!,
+        accountId: user?.data?.id || '',
+        userId: user?.data?.id || '',
       });
       
       // Then generate flashcards if content is provided
@@ -171,7 +171,7 @@ export function UnifiedDashboard() {
     }, 1500);
   };
 
-  const handleEditDeck = useCallback((deck: DeckWithStats) => {
+  const handleEditDeck = useCallback((_deck: DeckWithStats) => {
     toast.info('Edit functionality coming soon!');
   }, []);
 
@@ -187,8 +187,8 @@ export function UnifiedDashboard() {
 
       await duplicateDeckMutation.mutateAsync({
         deckId: deck.id,
-        accountId: user?.data?.id!,
-        userId: user?.data?.id!,
+        accountId: user?.data?.id || '',
+        userId: user?.data?.id || '',
         newName: `${deck.name} (Copy)`,
       });
     } catch (error) {

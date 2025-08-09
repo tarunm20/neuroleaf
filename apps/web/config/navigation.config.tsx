@@ -33,12 +33,7 @@ const routes = [
     label: 'Account',
     children: [
       {
-        label: 'Billing',
-        path: '/home/billing',
-        Icon: <CreditCard className={iconClasses} />,
-      },
-      {
-        label: 'Profile',
+        label: 'Settings',
         path: pathsConfig.app.profileSettings,
         Icon: <User className={iconClasses} />,
       },

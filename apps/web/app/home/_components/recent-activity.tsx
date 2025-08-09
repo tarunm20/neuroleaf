@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@kit/ui/card';
-import { Clock, BookOpen, Plus, Brain } from 'lucide-react';
+import { Clock, Plus, Brain } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 interface Activity {

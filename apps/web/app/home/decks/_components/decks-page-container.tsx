@@ -29,10 +29,10 @@ export function DecksPageContainer({ userId }: DecksPageContainerProps) {
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [upgradeDialogInfo, setUpgradeDialogInfo] = useState<{ tierName: string; deckLimit: number } | null>(null);
 
-  const { data: decksData, isLoading } = useDecks(userId, filters);
+  const { data: _decksData, isLoading: _isLoading } = useDecks(userId, filters);
   const { data: subscriptionInfo } = useSubscription(userId);
   const createDeckMutation = useCreateDeck();
-  const updateDeckMutation = useUpdateDeck();
+  const _updateDeckMutation = useUpdateDeck();
   const deleteDeckMutation = useDeleteDeck();
   const duplicateDeckMutation = useDuplicateDeck();
 
@@ -96,7 +96,7 @@ export function DecksPageContainer({ userId }: DecksPageContainerProps) {
     router.push(`/home/decks/${deckId}/flashcards`);
   };
 
-  const handleEditDeck = (deck: DeckWithStats) => {
+  const handleEditDeck = (_deck: DeckWithStats) => {
     // For now, just show a toast. In the future, this could open an edit dialog
     toast.info('Edit functionality coming soon!');
   };

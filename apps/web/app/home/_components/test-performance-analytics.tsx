@@ -202,21 +202,21 @@ export function TestPerformanceAnalytics({ userId, deckId }: TestPerformanceAnal
               {performance.average_score >= 80 && (
                 <div className="flex items-center gap-2 text-green-600">
                   <div className="w-2 h-2 bg-green-600 rounded-full" />
-                  <span className="text-sm">Excellent performance! You're mastering the material.</span>
+                  <span className="text-sm">Excellent performance! You&apos;re mastering the material.</span>
                 </div>
               )}
               
               {performance.sessions_last_7_days >= 3 && (
                 <div className="flex items-center gap-2 text-blue-600">
                   <div className="w-2 h-2 bg-blue-600 rounded-full" />
-                  <span className="text-sm">Great consistency! You've taken {performance.sessions_last_7_days} tests this week.</span>
+                  <span className="text-sm">Great consistency! You&apos;ve taken {performance.sessions_last_7_days} tests this week.</span>
                 </div>
               )}
               
               {performance.total_questions_answered >= 50 && (
                 <div className="flex items-center gap-2 text-purple-600">
                   <div className="w-2 h-2 bg-purple-600 rounded-full" />
-                  <span className="text-sm">Impressive dedication! You've answered {performance.total_questions_answered} questions.</span>
+                  <span className="text-sm">Impressive dedication! You&apos;ve answered {performance.total_questions_answered} questions.</span>
                 </div>
               )}
               

@@ -163,7 +163,7 @@ function PricingPage() {
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">Compare Plans</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            See exactly what's included to make the best choice for your learning goals.
+            See exactly what&apos;s included to make the best choice for your learning goals.
           </p>
         </div>
 

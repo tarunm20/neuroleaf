@@ -17,7 +17,7 @@ interface PageWithBreadcrumbsProps {
 export function PageWithBreadcrumbs({
   children,
   title,
-  description,
+  description: _description,
   breadcrumbValues,
   headerActions,
   className,

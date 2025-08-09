@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@kit/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@kit/ui/card';
+import { Card, CardContent, CardHeader } from '@kit/ui/card';
 import { Badge } from '@kit/ui/badge';
 import {
   Select,
@@ -78,7 +78,7 @@ interface Flashcard {
 }
 
 export function DeckDetailPage({ deckId }: DeckDetailPageProps) {
-  const router = useRouter();
+  const _router = useRouter();
   const user = useUser();
   const [difficultyFilter, setDifficultyFilter] = useState<string>('all');
   const [tagFilter, setTagFilter] = useState<string>('all');
@@ -86,7 +86,7 @@ export function DeckDetailPage({ deckId }: DeckDetailPageProps) {
   
   const { data: deck, isLoading: deckLoading } = useDeck(deckId);
   const { data: flashcardsData, isLoading: flashcardsLoading } = useFlashcards(deckId, {
-    difficulty: difficultyFilter !== 'all' ? (difficultyFilter as any) : undefined,
+    difficulty: difficultyFilter !== 'all' ? (difficultyFilter as 'easy' | 'medium' | 'hard') : undefined,
   });
   const deleteFlashcard = useDeleteFlashcard();
   
@@ -97,12 +97,12 @@ export function DeckDetailPage({ deckId }: DeckDetailPageProps) {
   
   // Calculate statistics
   const totalCards = flashcards.length;
-  const difficultyStats = flashcards.reduce((acc: Record<string, number>, card: any) => {
+  const difficultyStats = flashcards.reduce((acc: Record<string, number>, card: Flashcard) => {
     acc[card.difficulty] = (acc[card.difficulty] || 0) + 1;
     return acc;
   }, {});
   
-  const aiGeneratedCount = flashcards.filter((card: any) => card.ai_generated).length;
+  const aiGeneratedCount = flashcards.filter((card: Flashcard) => card.ai_generated).length;
 
   // Filter flashcards based on current filters
   const filteredFlashcards = flashcards.filter((card: Flashcard) => {
@@ -124,7 +124,7 @@ export function DeckDetailPage({ deckId }: DeckDetailPageProps) {
     try {
       await deleteFlashcard.mutateAsync(flashcardToDelete);
       toast.success('Flashcard deleted successfully');
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete flashcard');
     } finally {
       setFlashcardToDelete(null);
