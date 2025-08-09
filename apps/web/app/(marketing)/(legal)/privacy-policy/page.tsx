@@ -29,7 +29,7 @@ async function PrivacyPolicyPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">1. Introduction</h2>
             <p className="mb-4">
-              Neuroleaf ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains 
+              Neuroleaf (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy explains 
               how we collect, use, disclose, and safeguard your information when you use our AI-powered flashcard platform.
             </p>
           </section>
@@ -82,7 +82,7 @@ async function PrivacyPolicyPage() {
 
             <h3 className="text-xl font-semibold mb-3">3.2 AI Features</h3>
             <ul className="list-disc pl-6 mb-4">
-              <li>Sending your content to Google's Gemini API for flashcard generation</li>
+              <li>Sending your content to Google&apos;s Gemini API for flashcard generation</li>
               <li>Generating AI-powered test questions and grading</li>
               <li>Analyzing content for optimal learning recommendations</li>
               <li>Providing personalized feedback and insights</li>
@@ -185,7 +185,7 @@ async function PrivacyPolicyPage() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">9. Children's Privacy</h2>
+            <h2 className="text-2xl font-semibold mb-4">9. Children&apos;s Privacy</h2>
             <p className="mb-4">
               Neuroleaf is not intended for children under 13. We do not knowingly collect personal information 
               from children under 13. If you believe we have collected such information, please contact us immediately.

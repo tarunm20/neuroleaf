@@ -25,6 +25,7 @@ export function DevTierSwitcher({
 }: DevTierSwitcherProps) {
   const [isChanging, setIsChanging] = useState(false);
   const [selectedTier, setSelectedTier] = useState(currentTier);
+  const [message, setMessage] = useState('');
 
   // Debug logging
   console.log('DevTierSwitcher - shouldEnableTierSwitcher():', shouldEnableTierSwitcher());
@@ -44,6 +45,7 @@ export function DevTierSwitcher({
     if (newTier === currentTier) return;
 
     setIsChanging(true);
+    setMessage('');
     try {
       const response = await fetch('/api/dev/switch-tier', {
         method: 'POST',
@@ -62,12 +64,71 @@ export function DevTierSwitcher({
 
       setSelectedTier(newTier);
       onTierChange?.(newTier);
+      setMessage(`Upgraded to ${newTier.toUpperCase()} successfully!`);
       
       // Reload page to reflect changes
-      window.location.reload();
+      setTimeout(() => window.location.reload(), 1500);
     } catch (error) {
       console.error('Failed to switch tier:', error);
-      alert('Failed to switch tier. Please try again.');
+      setMessage('Failed to switch tier. Please try again.');
+    } finally {
+      setIsChanging(false);
+    }
+  };
+
+  const handleManualUpgrade = async () => {
+    setIsChanging(true);
+    setMessage('');
+    try {
+      const response = await fetch('/api/dev/upgrade-account', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to upgrade account');
+      }
+
+      setMessage('Account upgraded to Pro successfully!');
+      
+      // Reload page to reflect changes
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (error) {
+      console.error('Failed to upgrade account:', error);
+      setMessage(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsChanging(false);
+    }
+  };
+
+  const handleManualDowngrade = async () => {
+    setIsChanging(true);
+    setMessage('');
+    try {
+      const response = await fetch('/api/dev/upgrade-account', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to downgrade account');
+      }
+
+      setMessage('Account downgraded to Free successfully!');
+      
+      // Reload page to reflect changes
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (error) {
+      console.error('Failed to downgrade account:', error);
+      setMessage(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsChanging(false);
     }
@@ -112,6 +173,42 @@ export function DevTierSwitcher({
           {isChanging ? 'Switching...' : 'Switch Tier'}
         </Button>
       </div>
+
+      {/* Manual Stripe Test Buttons */}
+      <div className="border-t pt-3 space-y-2">
+        <div className="text-xs text-gray-500 font-medium">Stripe Testing:</div>
+        <div className="flex gap-2">
+          <Button
+            onClick={handleManualUpgrade}
+            disabled={isChanging}
+            size="sm"
+            variant="default"
+            className="flex-1 text-xs"
+          >
+            {isChanging ? '...' : '→ Pro'}
+          </Button>
+          <Button
+            onClick={handleManualDowngrade}
+            disabled={isChanging}
+            size="sm"
+            variant="outline"
+            className="flex-1 text-xs"
+          >
+            {isChanging ? '...' : '→ Free'}
+          </Button>
+        </div>
+      </div>
+
+      {/* Status Message */}
+      {message && (
+        <div className={`text-xs p-2 rounded ${
+          message.includes('Error') 
+            ? 'bg-red-50 text-red-600' 
+            : 'bg-green-50 text-green-600'
+        }`}>
+          {message}
+        </div>
+      )}
     </div>
   );
 }

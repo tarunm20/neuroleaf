@@ -21,7 +21,7 @@ export function CoreStatsGrid({
   studyStreak, 
   totalDecks, 
   subscriptionInfo,
-  sm2Features 
+  sm2Features: _sm2Features 
 }: CoreStatsGridProps) {
   const isPremium = subscriptionInfo?.tier !== 'free';
 

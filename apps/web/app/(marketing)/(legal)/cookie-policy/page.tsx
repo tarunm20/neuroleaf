@@ -182,7 +182,7 @@ async function CookiePolicyPage() {
             <ul className="list-disc pl-6 mb-4">
               <li><a href="https://www.allaboutcookies.org/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">AllAboutCookies.org</a></li>
               <li><a href="https://www.youronlinechoices.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Your Online Choices</a></li>
-              <li>Your browser's help documentation</li>
+              <li>Your browser&apos;s help documentation</li>
             </ul>
           </section>
         </div>

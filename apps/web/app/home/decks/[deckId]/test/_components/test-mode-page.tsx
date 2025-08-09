@@ -10,7 +10,6 @@ import {
   Trophy,
   Clock,
   CheckCircle,
-  XCircle,
   Loader2,
   BookOpen,
   Zap
@@ -138,7 +137,7 @@ interface ComprehensiveTestResults {
 
 export function TestModePage({ deckId, userId }: TestModePageProps) {
   const router = useRouter();
-  const user = useUser();
+  const _user = useUser();
   const { data: deck } = useDeck(deckId);
   const { data: flashcardsData } = useFlashcards(deckId, {
     sortBy: 'position',
@@ -657,7 +656,7 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
   }
 
   if (testState === 'completed' && (testResults || comprehensiveResults)) {
-    const results = comprehensiveResults || testResults;
+    const _results = comprehensiveResults || testResults;
     const hasComprehensiveResults = !!comprehensiveResults;
     const hierarchy = comprehensiveResults?.feedback_hierarchy;
 
