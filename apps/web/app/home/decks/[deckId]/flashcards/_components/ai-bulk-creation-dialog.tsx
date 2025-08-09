@@ -24,12 +24,13 @@ import {
 } from '@kit/ui/select';
 import { FileUploadButton } from '@kit/flashcards/components';
 import { useCreateFlashcard } from '@kit/flashcards/hooks';
+import { useUser } from '@kit/supabase/hooks/use-user';
+import { useSubscription } from '@kit/subscription/hooks';
 import { extractTextFromFileAction } from '~/lib/server-actions';
 import { 
   Brain, 
   FileText, 
   CheckCircle, 
-  AlertCircle, 
   Loader2,
   Wand2,
   Upload
@@ -43,6 +44,37 @@ interface AIBulkCreationDialogProps {
   deckId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+interface FileExtractionResult {
+  text: string;
+  success: boolean;
+  error?: string;
+  wordCount: number;
+  fileInfo: {
+    name: string;
+    size: number;
+    type: string;
+  };
+  name?: string; // For backward compatibility
+  size?: number; // For backward compatibility
+}
+
+interface MultiFileExtractionResult {
+  files: Array<{
+    text: string;
+    wordCount: number;
+    fileInfo: {
+      name: string;
+      size: number;
+      type: string;
+    };
+  }>;
+  combinedText: string;
+  totalWordCount: number;
+  totalSize: number;
+  success: boolean;
+  error?: string;
 }
 
 interface GeneratedFlashcard {
@@ -60,9 +92,29 @@ export function AIBulkCreationDialog({
   open, 
   onOpenChange 
 }: AIBulkCreationDialogProps) {
+  const user = useUser();
+  const { data: subscriptionInfo } = useSubscription(user?.data?.id || '');
+  
   const [currentStep, setCurrentStep] = useState<CreationStep>('input');
-  const [sourceText, setSourceText] = useState('');
-  const [extractedFileInfo, setExtractedFileInfo] = useState<any>(null);
+  const [sourceText, setSourceText] = useState(''); // User manual input
+  const [fileExtractedContent, setFileExtractedContent] = useState(''); // Hidden file content
+  const [extractedFileInfo, setExtractedFileInfo] = useState<FileExtractionResult | null>(null);
+  const [hasUploadedFile, setHasUploadedFile] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<Array<{
+    text: string;
+    wordCount: number;
+    fileInfo: {
+      name: string;
+      size: number;
+      type: string;
+    };
+  }>>([]);
+  
+  // For development/testing, default to Pro. In production, check actual subscription.
+  const isPro = process.env.NODE_ENV === 'development' 
+    ? true // Default to Pro in development for testing
+    : subscriptionInfo?.tier === 'pro';
+  
   const [generatedFlashcards, setGeneratedFlashcards] = useState<GeneratedFlashcard[]>([]);
   const [creationProgress, setCreationProgress] = useState(0);
   const [processingProgress, setProcessingProgress] = useState(0);
@@ -75,11 +127,45 @@ export function AIBulkCreationDialog({
 
   const createFlashcard = useCreateFlashcard();
 
-  const handleFileTextExtracted = (result: any) => {
+  const handleFileTextExtracted = (result: FileExtractionResult) => {
     if (result.success) {
-      setSourceText(result.text);
-      setExtractedFileInfo(result.fileInfo);
+      // Store file content separately - DON'T put it in sourceText (which is visible to user)
+      setFileExtractedContent(result.text);
+      setExtractedFileInfo(result);
+      setHasUploadedFile(true);
+      setUploadedFiles([{
+        text: result.text,
+        wordCount: result.wordCount,
+        fileInfo: result.fileInfo
+      }]);
+      // Clear any manual text input when file is uploaded
+      setSourceText('');
       toast.success(`Extracted ${result.wordCount} words from ${result.fileInfo.name}`);
+    } else {
+      toast.error(result.error || 'Failed to extract text');
+    }
+  };
+
+  const handleMultipleFilesExtracted = (result: MultiFileExtractionResult) => {
+    if (result.success) {
+      // Store combined file content separately
+      setFileExtractedContent(result.combinedText);
+      setUploadedFiles(result.files);
+      // Create a summary file info for the extractedFileInfo state
+      setExtractedFileInfo({
+        text: result.combinedText,
+        success: true,
+        wordCount: result.totalWordCount,
+        fileInfo: {
+          name: `${result.files.length} files`,
+          size: result.totalSize,
+          type: 'multiple'
+        }
+      });
+      setHasUploadedFile(true);
+      // Clear any manual text input when files are uploaded
+      setSourceText('');
+      toast.success(`Extracted ${result.totalWordCount} words from ${result.files.length} files`);
     } else {
       toast.error(result.error || 'Failed to extract text');
     }
@@ -89,9 +175,24 @@ export function AIBulkCreationDialog({
     toast.error(error);
   };
 
+  // Get the current content for AI generation (file content takes priority over manual input)
+  const getCurrentContent = (): string => {
+    return fileExtractedContent.trim() || sourceText.trim();
+  };
+
   const handleGenerateFlashcards = async () => {
-    if (!sourceText.trim()) {
+    const currentContent = getCurrentContent();
+    const maxCharacters = isPro ? 200000 : 50000;
+    
+    if (!currentContent) {
       toast.error('Please provide text content or upload a file');
+      return;
+    }
+    
+    if (currentContent.length > maxCharacters) {
+      const limit = maxCharacters.toLocaleString();
+      const current = currentContent.length.toLocaleString();
+      toast.error(`Content too long (maximum ${limit} characters). Your content has ${current} characters.`);
       return;
     }
 
@@ -111,7 +212,7 @@ export function AIBulkCreationDialog({
       }, 200);
 
       const result = await generateFlashcardsFromText({
-        content: sourceText,
+        content: currentContent,
         maxCards: generationOptions.maxCards,
         difficulty: generationOptions.difficulty,
         includeDefinitions: generationOptions.includeDefinitions,
@@ -122,7 +223,7 @@ export function AIBulkCreationDialog({
       setProcessingProgress(100);
 
       if (result.success && result.flashcards) {
-        const flashcardsWithSelection = result.flashcards.map((card: any) => ({
+        const flashcardsWithSelection = result.flashcards.map((card: Omit<GeneratedFlashcard, 'selected'>) => ({
           ...card,
           selected: true,
         }));
@@ -201,7 +302,10 @@ export function AIBulkCreationDialog({
   const resetDialog = () => {
     setCurrentStep('input');
     setSourceText('');
+    setFileExtractedContent('');
     setExtractedFileInfo(null);
+    setHasUploadedFile(false);
+    setUploadedFiles([]);
     setGeneratedFlashcards([]);
     setCreationProgress(0);
     setProcessingProgress(0);
@@ -222,7 +326,10 @@ export function AIBulkCreationDialog({
           Content Source
         </Label>
         <p className="text-sm text-muted-foreground mb-4">
-          Upload a file or paste text to generate flashcards from
+          {isPro 
+            ? 'Upload files or paste text to generate flashcards from (up to 200,000 characters)'
+            : 'Upload a file or paste text to generate flashcards from (up to 50,000 characters)'
+          }
         </p>
       </div>
 
@@ -231,46 +338,132 @@ export function AIBulkCreationDialog({
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
             <Upload className="h-4 w-4" />
-            Upload File
+            {isPro ? 'Upload Files' : 'Upload File'}
+            {isPro && (
+              <Badge variant="secondary" className="text-xs ml-2">
+                Pro - 200K characters
+              </Badge>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <FileUploadButton
             onTextExtracted={handleFileTextExtracted}
+            onMultipleFilesExtracted={handleMultipleFilesExtracted}
             onError={handleFileError}
             extractTextAction={extractTextFromFileAction}
+            multiple={isPro}
+            isPro={isPro}
+            maxTotalCharacters={isPro ? 200000 : 50000} // 200K for Pro, 50K for Free
           />
-          {extractedFileInfo && (
-            <div className="mt-3 p-3 bg-green-50 rounded-lg">
-              <div className="flex items-center gap-2 text-sm text-green-700">
-                <FileText className="h-4 w-4" />
-                <span className="font-medium">{extractedFileInfo.name}</span>
-                <Badge variant="secondary" className="text-xs">
-                  {Math.round(extractedFileInfo.size / 1024)} KB
-                </Badge>
+          {uploadedFiles.length > 0 && (
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-sm font-medium text-green-700">
+                    {uploadedFiles.length === 1 ? 'File uploaded' : `${uploadedFiles.length} files uploaded`}
+                  </span>
+                  {isPro && uploadedFiles.length > 1 && (
+                    <Badge variant="secondary" className="text-xs ml-2">
+                      Pro - Multi-file
+                    </Badge>
+                  )}
+                </div>
+                <Button
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => {
+                    setExtractedFileInfo(null);
+                    setFileExtractedContent('');
+                    setHasUploadedFile(false);
+                    setUploadedFiles([]);
+                    // Don't clear sourceText here - let user keep their manual input if they want
+                  }}
+                  className="h-6 px-2 text-xs text-green-600 hover:text-green-800"
+                >
+                  Clear All
+                </Button>
+              </div>
+              
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 max-h-40 overflow-y-auto">
+                <div className="space-y-2">
+                  {uploadedFiles.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <span className="font-medium text-green-700 truncate">
+                          {file.fileInfo.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 text-green-600 shrink-0">
+                        <span>
+                          {file.fileInfo.size < 1024 * 1024 
+                            ? `${Math.round(file.fileInfo.size / 1024)} KB`
+                            : `${(file.fileInfo.size / (1024 * 1024)).toFixed(1)} MB`
+                          }
+                        </span>
+                        <span>
+                          {file.wordCount.toLocaleString()} words
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Text Input Section */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm">Or Paste Text Content</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            placeholder="Paste your study material here..."
-            value={sourceText}
-            onChange={(e) => setSourceText(e.target.value)}
-            className="min-h-[120px] resize-none"
-          />
-          <div className="mt-2 text-xs text-muted-foreground">
-            {sourceText.length > 0 && `${sourceText.trim().split(/\s+/).length} words`}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Text Input Section - Only show if no file is uploaded and no source text from file */}
+      {!hasUploadedFile && sourceText.length === 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm">Or Paste Text Content</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              placeholder="Paste your study material here..."
+              value={sourceText}
+              onChange={(e) => setSourceText(e.target.value)}
+              className="min-h-[120px] resize-none"
+            />
+            <div className="mt-2 text-xs text-muted-foreground">
+              {sourceText.length > 0 && `${sourceText.trim().split(/\s+/).length} words`}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Show source text summary if we have text but no file info visible */}
+      {!hasUploadedFile && sourceText.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm">Text Content Ready</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+              <div className="flex items-center gap-2 text-sm text-blue-700">
+                <CheckCircle className="h-4 w-4" />
+                <span className="font-medium">Manual text input</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-xs">
+                  {sourceText.trim().split(/\s+/).filter(word => word.length > 0).length.toLocaleString()} words
+                </Badge>
+                <Button
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setSourceText('')}
+                  className="h-6 px-2 text-xs"
+                >
+                  Clear
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Generation Options */}
       <Card>
@@ -467,7 +660,7 @@ export function AIBulkCreationDialog({
               </Button>
               <Button 
                 onClick={handleGenerateFlashcards}
-                disabled={!sourceText.trim()}
+                disabled={!getCurrentContent() || getCurrentContent().length > (isPro ? 200000 : 50000)}
                 className="flex items-center gap-2"
               >
                 <Brain className="h-4 w-4" />

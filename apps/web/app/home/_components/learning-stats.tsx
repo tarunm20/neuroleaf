@@ -1,7 +1,7 @@
 'use client';
 
 import { Calendar, Target, TrendingUp, Clock, Award, BookOpen } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@kit/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@kit/ui/card';
 import { Badge } from '@kit/ui/badge';
 
 interface LearningStatsProps {

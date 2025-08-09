@@ -19,14 +19,10 @@ import {
 import { useFlashcards, useDeleteFlashcard } from '@kit/flashcards/hooks';
 import { useDeck } from '@kit/decks/hooks';
 import { 
-  Filter, 
-  Plus,
   Trash2,
   MoreHorizontal,
   BookOpen,
   Brain,
-  Download,
-  Upload,
   ArrowLeft
 } from 'lucide-react';
 import { 
@@ -93,7 +89,7 @@ export function FlashcardManagementPage({ deckId }: FlashcardManagementPageProps
       try {
         await deleteFlashcard.mutateAsync(flashcardId);
         toast.success('Flashcard deleted successfully');
-      } catch (error) {
+      } catch {
         toast.error('Failed to delete flashcard');
       }
     }

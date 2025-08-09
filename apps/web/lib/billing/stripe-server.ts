@@ -1,6 +1,5 @@
 import Stripe from 'stripe';
 import { getSupabaseServerAdminClient } from '@kit/supabase/server-admin-client';
-import { requireUser } from '@kit/supabase/require-user';
 
 function getStripeInstance() {
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
@@ -95,12 +94,20 @@ export async function createBillingPortalSession({
   // Get user account
   const { data: account, error } = await supabase
     .from('accounts')
-    .select('stripe_customer_id')
+    .select('stripe_customer_id, subscription_tier')
     .eq('id', userId)
     .single();
 
-  if (error || !account?.stripe_customer_id) {
-    throw new Error('No billing account found');
+  if (error) {
+    throw new Error('Account not found');
+  }
+
+  if (!account?.stripe_customer_id) {
+    throw new Error('No Stripe customer found. Please contact support.');
+  }
+
+  if (account.subscription_tier === 'free') {
+    throw new Error('No active subscription to manage');
   }
 
   // Create billing portal session
@@ -110,6 +117,77 @@ export async function createBillingPortalSession({
   });
 
   return session;
+}
+
+export async function cancelSubscription(userId: string) {
+  const stripe = getStripeInstance();
+  const supabase = getSupabaseServerAdminClient();
+  
+  // Get user account with subscription details
+  const { data: account, error } = await supabase
+    .from('accounts')
+    .select('stripe_subscription_id, subscription_tier, subscription_status')
+    .eq('id', userId)
+    .single();
+
+  if (error) {
+    throw new Error('Account not found');
+  }
+
+  if (account.subscription_tier === 'free') {
+    throw new Error('No active subscription to cancel');
+  }
+
+  if (!account.stripe_subscription_id) {
+    // Handle case where user is Pro but has no Stripe subscription ID
+    // This might happen with legacy data or manual upgrades
+    console.warn(`User ${userId} has Pro tier but no Stripe subscription ID`);
+    
+    // Just downgrade to free tier in database
+    await supabase
+      .from('accounts')
+      .update({ 
+        subscription_tier: 'free',
+        subscription_status: 'canceled',
+        subscription_expires_at: null,
+      })
+      .eq('id', userId);
+    
+    return true;
+  }
+
+  try {
+    // Cancel subscription at period end in Stripe
+    const canceledSubscription = await stripe.subscriptions.update(account.stripe_subscription_id, {
+      cancel_at_period_end: true,
+    });
+
+    // Update local database - keep Pro tier until period ends
+    await supabase
+      .from('accounts')
+      .update({ 
+        subscription_status: 'canceled',
+        subscription_expires_at: new Date((canceledSubscription as any).current_period_end * 1000).toISOString(),
+      })
+      .eq('id', userId);
+
+    return true;
+  } catch (stripeError) {
+    console.error('Stripe cancellation error:', stripeError);
+    
+    // If Stripe fails but we have a subscription ID, still update our database
+    // This handles cases where subscription might already be canceled in Stripe
+    await supabase
+      .from('accounts')
+      .update({ 
+        subscription_tier: 'free',
+        subscription_status: 'canceled',
+        subscription_expires_at: null,
+      })
+      .eq('id', userId);
+    
+    return true;
+  }
 }
 
 export async function getSubscriptionInfo(userId: string) {

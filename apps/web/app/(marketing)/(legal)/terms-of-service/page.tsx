@@ -29,7 +29,7 @@ async function TermsOfServicePage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">1. Acceptance of Terms</h2>
             <p className="mb-4">
-              By accessing or using Neuroleaf ("the Service"), you agree to be bound by these Terms of Service ("Terms"). 
+              By accessing or using Neuroleaf (&quot;the Service&quot;), you agree to be bound by these Terms of Service (&quot;Terms&quot;). 
               If you do not agree to these Terms, you may not use the Service.
             </p>
           </section>
@@ -101,16 +101,16 @@ async function TermsOfServicePage() {
               <li>Use the Service for any illegal or unauthorized purpose</li>
               <li>Upload content that violates copyright, trademark, or other intellectual property rights</li>
               <li>Share accounts or attempt to circumvent usage limits</li>
-              <li>Attempt to reverse engineer or access the Service's source code</li>
+              <li>Attempt to reverse engineer or access the Service&apos;s source code</li>
               <li>Use automated tools to access the Service without permission</li>
-              <li>Upload malicious content or attempt to compromise the Service's security</li>
+              <li>Upload malicious content or attempt to compromise the Service&apos;s security</li>
             </ul>
           </section>
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">7. AI Services</h2>
             <p className="mb-4">
-              Our AI features use Google's Gemini API to:
+              Our AI features use Google&apos;s Gemini API to:
             </p>
             <ul className="list-disc pl-6 mb-4">
               <li>Generate flashcards from uploaded content</li>
@@ -118,7 +118,7 @@ async function TermsOfServicePage() {
               <li>Analyze content for optimal learning strategies</li>
             </ul>
             <p className="mb-4">
-              AI-generated content is provided "as is" and may contain inaccuracies. You should review all AI-generated content.
+              AI-generated content is provided &quot;as is&quot; and may contain inaccuracies. You should review all AI-generated content.
             </p>
           </section>
 

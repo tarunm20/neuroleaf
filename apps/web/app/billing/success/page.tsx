@@ -29,7 +29,7 @@ export default function BillingSuccessPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TestTube className="h-5 w-5 text-emerald-600" />
-              What's unlocked for you
+              What&apos;s unlocked for you
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -66,7 +66,7 @@ export default function BillingSuccessPage() {
           </Button>
           
           <Button variant="outline" size="lg" asChild className="w-full">
-            <Link href="/home/billing">
+            <Link href="/home/settings">
               Manage Subscription
             </Link>
           </Button>

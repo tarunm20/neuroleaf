@@ -6,7 +6,8 @@ import { requireUser } from '@kit/supabase/require-user';
 import { 
   createCheckoutSession, 
   createBillingPortalSession,
-  getSubscriptionInfo 
+  getSubscriptionInfo,
+  cancelSubscription 
 } from '../billing/stripe-server';
 
 export async function createCheckoutAction(formData: FormData) {
@@ -45,6 +46,26 @@ export async function createCheckoutAction(formData: FormData) {
   redirect(session.url);
 }
 
+export async function cancelSubscriptionAction() {
+  const supabase = getSupabaseServerClient();
+  const { data: user } = await requireUser(supabase);
+
+  if (!user) {
+    return { success: false, message: 'User not found' };
+  }
+
+  try {
+    await cancelSubscription(user.id);
+    return { success: true, message: 'Subscription canceled successfully. You will retain Pro access until the end of your billing period.' };
+  } catch (error) {
+    console.error('Cancel subscription error:', error);
+    return { 
+      success: false, 
+      message: error instanceof Error ? error.message : 'Failed to cancel subscription' 
+    };
+  }
+}
+
 export async function manageBillingAction() {
   const supabase = getSupabaseServerClient();
   const { data: user } = await requireUser(supabase);
@@ -56,7 +77,7 @@ export async function manageBillingAction() {
   try {
     const session = await createBillingPortalSession({
       userId: user.id,
-      returnUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/home/billing`,
+      returnUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/home/settings`,
     });
 
     redirect(session.url);
