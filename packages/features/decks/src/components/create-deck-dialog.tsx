@@ -5,6 +5,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Type, Upload, Loader2, Plus, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useUser } from '@kit/supabase/hooks/use-user';
+import { useSubscription } from '@kit/subscription/hooks';
 
 import {
   Dialog,
@@ -17,11 +19,11 @@ import { Button } from '@kit/ui/button';
 import { Input } from '@kit/ui/input';
 import { Textarea } from '@kit/ui/textarea';
 import { z } from 'zod';
-import { FileUploadButton, TextExtractionResult } from '@kit/flashcards/components';
+import { FileUploadButton, TextExtractionResult, MultiFileExtractionResult } from '@kit/flashcards/components';
 
 const FormSchema = z.object({
   name: z.string().min(1, 'Name required').max(100),
-  content: z.string().min(10, 'Content too short').max(50000),
+  content: z.string().optional(), // Make optional since we handle file content separately
 });
 
 type FormData = z.infer<typeof FormSchema>;
@@ -43,13 +45,32 @@ export function CreateDeckDialog({
   onDeckCreated,
   extractTextAction
 }: CreateDeckDialogProps) {
+  const user = useUser();
+  const { data: subscriptionInfo } = useSubscription(user?.data?.id || '');
+  
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = controlledOnOpenChange || setInternalOpen;
   
+  // For development/testing, default to Pro. In production, check actual subscription.
+  const isPro = process.env.NODE_ENV === 'development' 
+    ? true // Default to Pro in development for testing
+    : subscriptionInfo?.tier === 'pro';
+  
   const [isLoading, setIsLoading] = useState(false);
   const [loadingState, setLoadingState] = useState<'idle' | 'creating' | 'analyzing' | 'generating' | 'complete'>('idle');
   const [inputMode, setInputMode] = useState<'text' | 'upload'>('text');
+  const [fileExtractedContent, setFileExtractedContent] = useState(''); // Hidden file content
+  const [extractedFileInfo, setExtractedFileInfo] = useState<TextExtractionResult | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<Array<{
+    text: string;
+    wordCount: number;
+    fileInfo: {
+      name: string;
+      size: number;
+      type: string;
+    };
+  }>>([]);
 
   const form = useForm<FormData>({
     resolver: zodResolver(FormSchema),
@@ -59,13 +80,34 @@ export function CreateDeckDialog({
     },
   });
 
+  // Get the current content for deck creation (file content takes priority over manual input)
+  const getCurrentContent = (): string => {
+    return fileExtractedContent.trim() || form.watch('content')?.trim() || '';
+  };
+
   const handleSubmit = async (data: FormData) => {
+    const currentContent = getCurrentContent();
+    const maxCharacters = isPro ? 200000 : 50000;
+    
+    // Validate that we have content (either from file or manual input)
+    if (!currentContent || currentContent.length < 10) {
+      toast.error('Please provide content by uploading a file or entering text (minimum 10 characters)');
+      return;
+    }
+    
+    if (currentContent.length > maxCharacters) {
+      const limit = maxCharacters.toLocaleString();
+      const current = currentContent.length.toLocaleString();
+      toast.error(`Content too long (maximum ${limit} characters). Your content has ${current} characters.`);
+      return;
+    }
+    
     setIsLoading(true);
     setLoadingState('creating');
     
     try {
       // Show analyzing state if content is provided
-      if (data.content && data.content.trim().length > 0) {
+      if (currentContent && currentContent.length > 0) {
         setLoadingState('analyzing');
         // Small delay to show the analyzing state
         await new Promise(resolve => setTimeout(resolve, 800));
@@ -77,7 +119,7 @@ export function CreateDeckDialog({
         description: '',
         visibility: 'private',
         tags: [],
-        content: data.content,
+        content: currentContent,
       });
       
       setLoadingState('complete');
@@ -87,6 +129,9 @@ export function CreateDeckDialog({
       
       setOpen(false);
       form.reset();
+      setFileExtractedContent('');
+      setExtractedFileInfo(null);
+      setUploadedFiles([]);
       setLoadingState('idle');
       
       if (result && 'id' in result && onDeckCreated) {
@@ -103,12 +148,47 @@ export function CreateDeckDialog({
 
   const handleFileUpload = (result: TextExtractionResult) => {
     if (result.success) {
-      form.setValue('content', result.text);
+      // Store file content separately - DON'T put it in the visible form content
+      setFileExtractedContent(result.text);
+      setExtractedFileInfo(result);
+      setUploadedFiles([{
+        text: result.text,
+        wordCount: result.wordCount,
+        fileInfo: result.fileInfo
+      }]);
+      // Clear any existing content in the form
+      form.setValue('content', '');
       if (!form.getValues('name')) {
         const fileName = result.fileInfo.name.replace(/\.[^/.]+$/, '');
         form.setValue('name', fileName);
       }
       toast.success(`Successfully extracted ${result.wordCount} words from ${result.fileInfo.name}`);
+    }
+  };
+
+  const handleMultipleFilesUpload = (result: MultiFileExtractionResult) => {
+    if (result.success) {
+      // Store combined file content separately
+      setFileExtractedContent(result.combinedText);
+      setUploadedFiles(result.files);
+      // Create a summary file info for the extractedFileInfo state
+      setExtractedFileInfo({
+        text: result.combinedText,
+        success: true,
+        wordCount: result.totalWordCount,
+        fileInfo: {
+          name: `${result.files.length} files`,
+          size: result.totalSize,
+          type: 'multiple'
+        }
+      });
+      // Clear any existing content in the form
+      form.setValue('content', '');
+      if (!form.getValues('name') && result.files.length === 1) {
+        const fileName = result.files[0]?.fileInfo.name.replace(/\.[^/.]+$/, '') || '';
+        form.setValue('name', fileName);
+      }
+      toast.success(`Successfully extracted ${result.totalWordCount} words from ${result.files.length} files`);
     }
   };
 
@@ -147,6 +227,9 @@ export function CreateDeckDialog({
       setOpen(newOpen);
       if (!newOpen) {
         form.reset();
+        setFileExtractedContent('');
+        setExtractedFileInfo(null);
+        setUploadedFiles([]);
         setInputMode('text');
         setLoadingState('idle');
       }
@@ -245,19 +328,87 @@ export function CreateDeckDialog({
             <div className="space-y-4">
               <FileUploadButton
                 onTextExtracted={handleFileUpload}
+                onMultipleFilesExtracted={handleMultipleFilesUpload}
                 onError={handleFileUploadError}
                 extractTextAction={extractTextAction}
                 disabled={isLoading}
+                multiple={isPro}
+                isPro={isPro}
+                maxTotalCharacters={isPro ? 200000 : 50000} // 200K for Pro, 50K for Free
               />
               
-              {form.watch('content') && (
-                <Textarea
-                  value={form.watch('content')}
-                  onChange={(e) => form.setValue('content', e.target.value)}
-                  rows={6}
-                  className="resize-none text-sm"
-                  disabled={isLoading}
-                />
+              {/* Show uploaded files list */}
+              {uploadedFiles.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <span className="text-sm font-medium text-green-700">
+                        {uploadedFiles.length === 1 ? 'File uploaded' : `${uploadedFiles.length} files uploaded`}
+                      </span>
+                      {isPro && uploadedFiles.length > 1 && (
+                        <span className="text-xs bg-primary/20 text-primary-foreground px-2 py-1 rounded border-primary/30">
+                          Pro - Multi-file
+                        </span>
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => {
+                        setExtractedFileInfo(null);
+                        setFileExtractedContent('');
+                        setUploadedFiles([]);
+                      }}
+                      disabled={isLoading}
+                      className="h-6 px-2 text-xs text-green-600 hover:text-green-800"
+                    >
+                      Clear All
+                    </Button>
+                  </div>
+                  
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 max-h-40 overflow-y-auto">
+                    <div className="space-y-2">
+                      {uploadedFiles.map((file, index) => (
+                        <div key={index} className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <span className="font-medium text-green-700 truncate">
+                              {file.fileInfo.name}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 text-green-600 shrink-0">
+                            <span>
+                              {file.fileInfo.size < 1024 * 1024 
+                                ? `${Math.round(file.fileInfo.size / 1024)} KB`
+                                : `${(file.fileInfo.size / (1024 * 1024)).toFixed(1)} MB`
+                              }
+                            </span>
+                            <span>
+                              {file.wordCount.toLocaleString()} words
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Only show manual text input if no file is uploaded */}
+              {uploadedFiles.length === 0 && (
+                <div>
+                  <Textarea
+                    {...form.register('content')}
+                    placeholder="Or paste your content here..."
+                    rows={6}
+                    disabled={isLoading}
+                    className="resize-none text-sm"
+                  />
+                  {form.formState.errors.content && (
+                    <p className="text-sm text-red-500 mt-1">{form.formState.errors.content.message}</p>
+                  )}
+                </div>
               )}
             </div>
           )}
@@ -275,7 +426,7 @@ export function CreateDeckDialog({
             </Button>
             <Button 
               type="submit" 
-              disabled={isLoading}
+              disabled={isLoading || !getCurrentContent() || getCurrentContent().length < 10 || getCurrentContent().length > (isPro ? 200000 : 50000)}
               className="flex-1"
             >
               {isLoading ? (

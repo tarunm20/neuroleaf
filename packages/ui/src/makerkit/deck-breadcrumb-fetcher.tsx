@@ -5,7 +5,7 @@ interface DeckData {
 }
 
 export function createDeckBreadcrumbFetcher(decks: DeckData): BreadcrumbLabelFetcher {
-  return (path: string, fullPath: string[]): string | null => {
+  return (path: string, _fullPath: string[]): string | null => {
     // Check if this is a deck ID (UUID format)
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(path);
     

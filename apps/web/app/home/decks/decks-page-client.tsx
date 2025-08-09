@@ -15,15 +15,15 @@ interface DecksPageClientProps {
 }
 
 export function DecksPageClient({ accountId }: DecksPageClientProps) {
-  const router = useRouter();
+  const _router = useRouter();
   const user = useUser();
-  const { data: subscriptionInfo } = useSubscription(user?.data?.id!);
+  const { data: subscriptionInfo } = useSubscription(user?.data?.id || '');
   const duplicateDeckMutation = useDuplicateDeck();
   const deleteDeckMutation = useDeleteDeck();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deckToDelete, setDeckToDelete] = useState<DeckWithStats | null>(null);
 
-  const handleEditDeck = useCallback((deck: DeckWithStats) => {
+  const handleEditDeck = useCallback((_deck: DeckWithStats) => {
     toast.info('Edit functionality coming soon!');
   }, []);
 

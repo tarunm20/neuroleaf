@@ -110,7 +110,7 @@ async function extractFromPDF(file: File): Promise<string> {
         try {
           const text = pdfParser.getRawTextContent();
           resolve(text);
-        } catch (error) {
+        } catch {
           reject(new Error('Failed to extract text from PDF'));
         }
       });

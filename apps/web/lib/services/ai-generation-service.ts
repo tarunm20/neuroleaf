@@ -49,7 +49,7 @@ export async function generateFlashcardsFromText(
 
     // Create sample flashcards based on content analysis
     const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 20);
-    const words = content.split(/\s+/);
+    const _words = content.split(/\s+/);
     const cardCount = Math.min(maxCards, Math.max(1, Math.floor(sentences.length / 2)));
 
     const sampleFlashcards: GeneratedFlashcard[] = [];

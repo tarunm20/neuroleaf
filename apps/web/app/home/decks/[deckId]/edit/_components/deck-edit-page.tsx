@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+// import { toast } from 'sonner';
 import { ArrowLeft, Plus, Upload, Sparkles } from 'lucide-react';
 
 // UI Components
@@ -22,7 +22,7 @@ interface DeckEditPageProps {
 
 export function DeckEditPage({ deckId }: DeckEditPageProps) {
   const router = useRouter();
-  const user = useUser();
+  const _user = useUser();
   const { data: deck, isLoading, error } = useDeck(deckId);
   
   const handleBack = () => {
