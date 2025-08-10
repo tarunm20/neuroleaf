@@ -28,7 +28,7 @@ import { useDeck } from '@kit/decks/hooks';
 import { useFlashcards } from '@kit/flashcards/hooks';
 import { useUser } from '@kit/supabase/hooks/use-user';
 import { useSubscription } from '@kit/subscription/hooks';
-import { generateQuestionsAction, gradeAnswersAction, gradeTestComprehensiveAction } from '@kit/test-mode/server';
+import { generateQuestionsAction, gradeAnswersAction, gradeTestComprehensiveAction, createTestSessionAction } from '@kit/test-mode/server';
 
 interface TestModePageProps {
   deckId: string;
@@ -174,25 +174,15 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
   const [comprehensiveResults, setComprehensiveResults] = useState<ComprehensiveTestResults | null>(null);
   const [selectedQuestionIndex, setSelectedQuestionIndex] = useState<number | null>(null);
   const [startTime, setStartTime] = useState<number>(0);
+  const [currentTestSessionId, setCurrentTestSessionId] = useState<string | null>(null);
 
   const flashcards = flashcardsData?.flashcards || [];
   const currentQuestion = questions[currentQuestionIndex];
 
-  // Check if user has Pro access
+  // Check if user has Pro access or remaining test sessions
   const hasProAccess = subscriptionInfo?.tier === 'pro';
 
-  useEffect(() => {
-    if (!hasProAccess && testState === 'setup') {
-      toast.error('Test mode requires Pro subscription');
-    }
-  }, [hasProAccess, testState]);
-
   const generateQuestions = async () => {
-    if (!hasProAccess) {
-      toast.error('Test mode requires Pro subscription');
-      return;
-    }
-
     if (flashcards.length === 0) {
       toast.error('No flashcards available for testing');
       return;
@@ -201,6 +191,26 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
     setIsGeneratingQuestions(true);
     
     try {
+      // First, create a test session - this will enforce the limit
+      const sessionResult = await createTestSessionAction({
+        deck_id: deckId,
+        test_mode: 'ai_questions',
+        total_questions: Math.min(10, flashcards.length),
+      });
+
+      if (!sessionResult.success) {
+        // Handle specific limit errors with better messaging
+        if (sessionResult.limitReached) {
+          toast.error(sessionResult.error || 'Test session limit reached');
+        } else {
+          toast.error(sessionResult.error || 'Failed to create test session');
+        }
+        return;
+      }
+
+      // Store the session ID for later use
+      const testSessionId = sessionResult.session.id;
+      setCurrentTestSessionId(testSessionId);
       const questionCount = Math.min(10, flashcards.length);
       const result = await generateQuestionsAction({
         flashcards: flashcards.map(card => ({
@@ -229,7 +239,13 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
         
         toast.success(`Generated ${generatedQuestions.length} AI questions`);
       } else {
-        throw new Error(result.error || 'Failed to generate questions');
+        // Handle specific limit errors with better messaging
+        if (result.limitReached) {
+          toast.error(result.error || 'Usage limit reached');
+        } else {
+          toast.error(result.error || 'Failed to generate questions');
+        }
+        return;
       }
     } catch (error) {
       console.error('Failed to generate questions:', error);
@@ -302,7 +318,7 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
 
       // Use comprehensive grading
       const result = await gradeTestComprehensiveAction({
-        test_session_id: 'temp-session-id', // This would be a real session ID in production
+        test_session_id: currentTestSessionId || 'fallback-session-id',
         answers: comprehensiveAnswers,
         time_spent_minutes: timeSpentMinutes,
       });
@@ -424,33 +440,7 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
     router.push(`/home/decks/${deckId}`);
   };
 
-  if (!hasProAccess) {
-    return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="text-center">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center mb-6">
-            <TestTube className="h-8 w-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold mb-4">AI Test Mode</h1>
-          <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-            Get AI-powered critical thinking questions with instant grading and detailed feedback.
-          </p>
-          <Badge variant="outline" className="mb-6">Pro Feature</Badge>
-          <div className="space-y-4">
-            <Button size="lg" className="w-full max-w-sm">
-              Upgrade to Pro
-            </Button>
-            <Button asChild variant="outline" size="lg" className="w-full max-w-sm">
-              <Link href={`/home/decks/${deckId}`}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Deck
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Remove the Pro gate - let the component handle limits through server actions
 
   if (testState === 'setup') {
     return (
