@@ -82,8 +82,6 @@ export function DecksPageClient({ accountId }: DecksPageClientProps) {
       
       <DeckDisplaySection
         accountId={accountId}
-        onEditDeck={handleEditDeck}
-        onDuplicateDeck={handleDuplicateDeck}
         onDeleteDeck={handleDeleteDeck}
       />
 

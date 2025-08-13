@@ -77,12 +77,14 @@ export function Hero({
           style={{
             MozAnimationDuration: '100ms',
           }}
-          className={cn('container mx-auto flex justify-center py-8', {
+          className={cn('w-screen relative left-[50%] right-[50%] ml-[-50vw] mr-[-50vw] flex justify-center py-8 px-4', {
             ['animate-in fade-in zoom-in-90 slide-in-from-top-32 fill-mode-both delay-600 duration-1000']:
               animate,
           })}
         >
-          {image}
+          <div style={{ maxWidth: '1200px', width: '100%' }}>
+            {image}
+          </div>
         </div>
       )}
     </div>

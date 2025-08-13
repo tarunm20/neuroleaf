@@ -40,8 +40,10 @@ export const pricingPlans: PricingPlan[] = [
     features: [
       '3 flashcard decks',
       '50 cards per deck',
-      'Manual card creation',
-      'Basic study mode',
+      '5 AI tests per month',
+      '1 file upload per deck',
+      'Rich text editing',
+      'AI-powered test mode',
       'Basic progress tracking',
     ],
     limits: {
@@ -61,9 +63,11 @@ export const pricingPlans: PricingPlan[] = [
     },
     features: [
       'Unlimited decks & cards',
-      'File upload (PDF, DOCX, TXT)',
+      'Unlimited AI tests',
+      'Multiple file uploads per deck',
+      'Multi-file bulk creation',
+      'Advanced analytics & insights',
       'Rich text editing',
-      'Advanced study features',
       'Priority support',
     ],
     limits: {
@@ -87,17 +91,19 @@ export const billingConfig = {
     free: {
       decks: 3,
       cardsPerDeck: 50,
-      hasFileUpload: false,
-      hasRichTextEditor: false,
+      hasFileUpload: true,
+      hasMultiFileUpload: false,
+      hasRichTextEditor: true,
       hasAdvancedStudy: false,
-      hasTestMode: false,
+      hasTestMode: true,
       hasAdvancedAnalytics: false,
-      aiTestsPerMonth: 0,
+      aiTestsPerMonth: 5,
     },
     pro: {
       decks: -1, // unlimited
       cardsPerDeck: -1, // unlimited
       hasFileUpload: true,
+      hasMultiFileUpload: true,
       hasRichTextEditor: true,
       hasAdvancedStudy: true,
       hasTestMode: true,

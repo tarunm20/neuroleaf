@@ -209,7 +209,11 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
       }
 
       // Store the session ID for later use
-      const testSessionId = sessionResult.session.id;
+      const testSessionId = sessionResult.session?.id;
+      if (!testSessionId) {
+        toast.error('Failed to create test session');
+        return;
+      }
       setCurrentTestSessionId(testSessionId);
       const questionCount = Math.min(10, flashcards.length);
       const result = await generateQuestionsAction({
@@ -240,7 +244,7 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
         toast.success(`Generated ${generatedQuestions.length} AI questions`);
       } else {
         // Handle specific limit errors with better messaging
-        if (result.limitReached) {
+        if ('limitReached' in result && result.limitReached) {
           toast.error(result.error || 'Usage limit reached');
         } else {
           toast.error(result.error || 'Failed to generate questions');
@@ -329,7 +333,7 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
 
         // Also set legacy test results for backward compatibility
         const overallScore = result.data.overall_analysis.overall_percentage;
-        const correctAnswers = result.data.individual_questions.filter(q => q.individual_score >= 70).length;
+        const correctAnswers = result.data.individual_questions.filter(q => q.individual_score >= 60).length;
 
         setTestResults({
           score: overallScore,
@@ -345,7 +349,7 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
             ...answer,
             score: questionResult?.individual_score || 0,
             feedback: questionResult?.detailed_feedback || 'No feedback available',
-            isCorrect: (questionResult?.individual_score || 0) >= 70,
+            isCorrect: (questionResult?.individual_score || 0) >= 60,
           };
         });
 
@@ -380,12 +384,12 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
             ...answer,
             score: basicResult.data![index]?.score || 0,
             feedback: basicResult.data![index]?.feedback || 'Basic feedback available',
-            isCorrect: (basicResult.data![index]?.score || 0) >= 70,
+            isCorrect: (basicResult.data![index]?.score || 0) >= 60,
           }));
 
           const totalScore = gradedAnswers.reduce((sum, answer) => sum + (answer.score || 0), 0);
           const averageScore = Math.round(totalScore / gradedAnswers.length);
-          const correctAnswers = gradedAnswers.filter(answer => (answer.score || 0) >= 70).length;
+          const correctAnswers = gradedAnswers.filter(answer => (answer.score || 0) >= 60).length;
           const timeSpent = Math.round((Date.now() - startTime) / 1000);
 
           setTestResults({
@@ -854,7 +858,7 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <span className="font-medium">Question {index + 1}</span>
-                          <Badge variant={question.individual_score >= 80 ? 'default' : question.individual_score >= 70 ? 'secondary' : 'destructive'}>
+                          <Badge variant={question.individual_score >= 80 ? 'default' : question.individual_score >= 60 ? 'secondary' : 'destructive'}>
                             {question.individual_grade} ({question.individual_score}%)
                           </Badge>
                         </div>

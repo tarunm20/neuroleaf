@@ -9,6 +9,7 @@ import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import { requireUserInServerComponent } from '~/lib/server/require-user-in-server-component';
 import { SubscriptionManagement } from './_components/subscription-management';
+import { SubscriptionSuccessToast } from './_components/subscription-success-toast';
 
 const callbackPath = pathsConfig.auth.callback;
 
@@ -35,6 +36,7 @@ function PersonalAccountSettingsPage() {
 
   return (
     <PageBody>
+      <SubscriptionSuccessToast />
       <div className="space-y-8 max-w-2xl">
         {/* Subscription Management */}
         <SubscriptionManagement userId={userId} />

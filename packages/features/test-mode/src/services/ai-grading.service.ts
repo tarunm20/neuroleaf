@@ -144,14 +144,16 @@ Please respond in the following JSON format:
 }
 
 Grading Criteria:
+Be encouraging and focus on learning progress rather than perfection:
 - 90-100: Excellent understanding, complete and accurate
 - 80-89: Good understanding, mostly correct with minor issues
-- 70-79: Fair understanding, correct main points but missing details
-- 60-69: Basic understanding, some correct elements but significant gaps
-- 50-59: Limited understanding, major misconceptions
-- 0-49: Incorrect or no meaningful understanding
+- 70-79: Good understanding, shows grasp of main concepts (minor details can be learned)
+- 60-69: Fair understanding, correct main points with some gaps (shows learning progress)
+- 50-59: Basic understanding, some correct elements (positive learning foundation)
+- 40-49: Shows effort and some knowledge (encourage continued learning)
+- 0-39: Needs more practice (provide supportive guidance)
 
-Provide specific, actionable feedback that helps the student improve their understanding.`;
+Give partial credit generously for correct concepts, relevant examples, or showing understanding of the topic even if details are missing. Focus on what the student got right before noting areas for improvement.`;
 
     return basePrompt;
   }
@@ -219,16 +221,19 @@ OUTPUT FORMAT (JSON):
   "confidence_level": <0-100>
 }
 
-GRADING SCALE:
-90-100: Excellent mastery  |  80-89: Good understanding  |  70-79: Fair grasp
-60-69: Basic knowledge     |  50-59: Limited understanding |  0-49: Needs review
+GRADING SCALE (Be Generous and Encouraging):
+90-100: Excellent mastery  |  80-89: Good understanding  |  70-79: Good grasp of main concepts
+60-69: Fair knowledge (positive progress)  |  50-59: Basic understanding (building foundation)  |  40-49: Shows effort and some knowledge  |  0-39: Needs more practice (supportive guidance)
 
 FEEDBACK PRINCIPLES:
 ✓ Start with positive observations (motivation-first)
+✓ Give partial credit generously for correct concepts or relevant ideas
+✓ Recognize effort and learning progress, not just perfection
 ✓ Use simple, clear language (8th grade level)
 ✓ Limit to 3-5 key points maximum (cognitive load theory)
 ✓ Focus on actionable next steps, not exhaustive analysis
-✓ Chunk information into digestible segments`;
+✓ Chunk information into digestible segments
+✓ Be encouraging - learning is a process, not a destination`;
   }
 
   /**
@@ -254,7 +259,7 @@ FEEDBACK PRINCIPLES:
       return {
         score: Math.max(0, Math.min(100, score)),
         feedback: aiResponse.length > 0 ? aiResponse : 'Unable to process response.',
-        is_correct: score >= 70,
+        is_correct: score >= 60,
       };
     } catch (error) {
       console.error('Error parsing AI grading response:', error);
@@ -320,13 +325,13 @@ FEEDBACK PRINCIPLES:
       return {
         score: Math.max(0, Math.min(100, score)),
         feedback: aiResponse.length > 0 ? aiResponse : 'Unable to process comprehensive response.',
-        is_correct: score >= 70,
+        is_correct: score >= 60,
         topic_analysis: [{
           topic: 'General Knowledge',
           performance: score >= 80 ? 'good' : score >= 60 ? 'fair' : 'poor',
           understanding_level: score,
           specific_gaps: ['Detailed analysis unavailable'],
-          strengths: score >= 70 ? ['Shows basic understanding'] : [],
+          strengths: score >= 60 ? ['Shows basic understanding'] : [],
         }],
         improvement_suggestions: ['Review the material thoroughly', 'Practice similar questions'],
         reasoning_chain: ['Fallback analysis due to parsing error'],
@@ -384,7 +389,7 @@ FEEDBACK PRINCIPLES:
     );
 
     const score = Math.round(similarity * 100);
-    const isCorrect = similarity > 0.6;
+    const isCorrect = similarity > 0.4;
 
     return {
       score,

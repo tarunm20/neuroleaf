@@ -163,11 +163,15 @@ export async function cancelSubscription(userId: string) {
     });
 
     // Update local database - keep Pro tier until period ends
+    const expiresAt = (canceledSubscription as any).current_period_end 
+      ? new Date((canceledSubscription as any).current_period_end * 1000).toISOString()
+      : null;
+      
     await supabase
       .from('accounts')
       .update({ 
         subscription_status: 'canceled',
-        subscription_expires_at: new Date((canceledSubscription as any).current_period_end * 1000).toISOString(),
+        subscription_expires_at: expiresAt,
       })
       .eq('id', userId);
 
@@ -187,6 +191,73 @@ export async function cancelSubscription(userId: string) {
       .eq('id', userId);
     
     return true;
+  }
+}
+
+export async function reactivateSubscription(userId: string) {
+  const stripe = getStripeInstance();
+  const supabase = getSupabaseServerAdminClient();
+  
+  // Get user account with subscription details
+  const { data: account, error } = await supabase
+    .from('accounts')
+    .select(`
+      stripe_subscription_id, 
+      subscription_tier, 
+      subscription_status,
+      subscription_expires_at
+    `)
+    .eq('id', userId)
+    .single();
+
+  if (error) {
+    throw new Error('Account not found');
+  }
+
+  if (account.subscription_tier === 'free') {
+    throw new Error('No subscription to reactivate');
+  }
+
+  if (!account.stripe_subscription_id) {
+    throw new Error('No Stripe subscription found');
+  }
+
+  try {
+    // Get the current subscription from Stripe
+    const subscription = await stripe.subscriptions.retrieve(account.stripe_subscription_id);
+    
+    // Check if subscription can be reactivated
+    if (subscription.cancel_at_period_end && subscription.status === 'active') {
+      // Reactivate by removing the cancellation
+      const reactivatedSubscription = await stripe.subscriptions.update(account.stripe_subscription_id, {
+        cancel_at_period_end: false,
+      });
+
+      // Update local database
+      const expiresAt = (reactivatedSubscription as any).current_period_end 
+        ? new Date((reactivatedSubscription as any).current_period_end * 1000).toISOString()
+        : null;
+        
+      await supabase
+        .from('accounts')
+        .update({ 
+          subscription_status: 'active',
+          subscription_expires_at: expiresAt,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', userId);
+
+      return { success: true, type: 'reactivated' };
+    } else if (subscription.status === 'canceled') {
+      // Subscription already ended - cannot reactivate, need new subscription
+      return { success: false, type: 'expired', message: 'Subscription has expired. Please create a new subscription.' };
+    } else {
+      // Subscription is already active
+      return { success: false, type: 'already_active', message: 'Subscription is already active.' };
+    }
+  } catch (stripeError) {
+    console.error('Stripe reactivation error:', stripeError);
+    throw new Error('Failed to reactivate subscription. Please try again or contact support.');
   }
 }
 

@@ -17,12 +17,16 @@ import {
   ArrowLeft,
   BarChart3,
   Trash2,
-  MoreHorizontal
+  MoreHorizontal,
+  Edit2,
+  Check,
+  X
 } from 'lucide-react';
 
 import { Button } from '@kit/ui/button';
 import { Card, CardContent, CardHeader } from '@kit/ui/card';
 import { Badge } from '@kit/ui/badge';
+import { Input } from '@kit/ui/input';
 import {
   Select,
   SelectContent,
@@ -47,11 +51,12 @@ import {
   AlertDialogTitle,
 } from '@kit/ui/alert-dialog';
 
-import { useDeck } from '@kit/decks/hooks';
+import { useDeck, useUpdateDeck } from '@kit/decks/hooks';
 import { useFlashcards, useDeleteFlashcard } from '@kit/flashcards/hooks';
 import { useUser } from '@kit/supabase/hooks/use-user';
 import { useCanAccessDeck } from '@kit/subscription/hooks';
 import { CreateFlashcardButton, EditFlashcardButton } from '@kit/flashcards/components';
+import { AIBulkCreationDialog } from '../flashcards/_components/ai-bulk-creation-dialog';
 import { toast } from 'sonner';
 
 interface DeckDetailPageProps {
@@ -83,12 +88,16 @@ export function DeckDetailPage({ deckId }: DeckDetailPageProps) {
   const [difficultyFilter, setDifficultyFilter] = useState<string>('all');
   const [tagFilter, setTagFilter] = useState<string>('all');
   const [flashcardToDelete, setFlashcardToDelete] = useState<string | null>(null);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editNameValue, setEditNameValue] = useState('');
   
   const { data: deck, isLoading: deckLoading } = useDeck(deckId);
   const { data: flashcardsData, isLoading: flashcardsLoading } = useFlashcards(deckId, {
     difficulty: difficultyFilter !== 'all' ? (difficultyFilter as 'easy' | 'medium' | 'hard') : undefined,
   });
   const deleteFlashcard = useDeleteFlashcard();
+  const updateDeck = useUpdateDeck();
   
   // Check if user can access this deck
   const { data: accessCheck, isLoading: accessLoading } = useCanAccessDeck(user?.data?.id || '', deckId);
@@ -128,6 +137,53 @@ export function DeckDetailPage({ deckId }: DeckDetailPageProps) {
       toast.error('Failed to delete flashcard');
     } finally {
       setFlashcardToDelete(null);
+    }
+  };
+
+  const handleStartEditName = () => {
+    if (!deck) return;
+    setEditNameValue(deck.name);
+    setIsEditingName(true);
+  };
+
+  const handleSaveName = async () => {
+    if (!deck || !user?.data?.id) return;
+    
+    const trimmedName = editNameValue.trim();
+    if (!trimmedName) {
+      toast.error('Deck name cannot be empty');
+      return;
+    }
+
+    if (trimmedName === deck.name) {
+      setIsEditingName(false);
+      return;
+    }
+
+    try {
+      await updateDeck.mutateAsync({
+        data: {
+          id: deck.id,
+          name: trimmedName,
+        },
+        userId: user.data.id,
+      });
+      setIsEditingName(false);
+    } catch {
+      toast.error('Failed to update deck name');
+    }
+  };
+
+  const handleCancelEditName = () => {
+    setIsEditingName(false);
+    setEditNameValue('');
+  };
+
+  const handleNameKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSaveName();
+    } else if (e.key === 'Escape') {
+      handleCancelEditName();
     }
   };
 
@@ -210,7 +266,45 @@ export function DeckDetailPage({ deckId }: DeckDetailPageProps) {
           </Button>
           
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold">{deck.name}</h1>
+            {isEditingName ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  value={editNameValue}
+                  onChange={(e) => setEditNameValue(e.target.value)}
+                  onKeyDown={handleNameKeyDown}
+                  className="text-3xl font-bold h-12 border-2"
+                  autoFocus
+                  disabled={updateDeck.isPending}
+                />
+                <Button 
+                  size="sm" 
+                  onClick={handleSaveName}
+                  disabled={updateDeck.isPending || !editNameValue.trim()}
+                >
+                  <Check className="h-4 w-4" />
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={handleCancelEditName}
+                  disabled={updateDeck.isPending}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 group">
+                <h1 className="text-3xl font-bold">{deck.name}</h1>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleStartEditName}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Edit2 className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
             <Badge 
               variant="secondary" 
               className={`${visibilityInfo.bgColor} ${visibilityInfo.color} border-0`}
@@ -257,11 +351,12 @@ export function DeckDetailPage({ deckId }: DeckDetailPageProps) {
           ) : (
             <div className="flex gap-2">
               <CreateFlashcardButton deckId={deckId} />
-              <Button asChild variant="outline">
-                <Link href={`/home/decks/${deckId}/upload`}>
-                  <Upload className="mr-2 h-4 w-4" />
-                  Upload & Generate
-                </Link>
+              <Button 
+                variant="outline"
+                onClick={() => setShowUploadDialog(true)}
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Upload & Generate
               </Button>
             </div>
           )}
@@ -326,11 +421,12 @@ export function DeckDetailPage({ deckId }: DeckDetailPageProps) {
             <h2 className="text-2xl font-bold">Flashcards</h2>
             <div className="flex gap-2">
               <CreateFlashcardButton deckId={deckId} />
-              <Button asChild variant="outline">
-                <Link href={`/home/decks/${deckId}/upload`}>
-                  <Upload className="mr-2 h-4 w-4" />
-                  Upload More
-                </Link>
+              <Button 
+                variant="outline"
+                onClick={() => setShowUploadDialog(true)}
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Upload More
               </Button>
             </div>
           </div>
@@ -494,11 +590,12 @@ export function DeckDetailPage({ deckId }: DeckDetailPageProps) {
             </p>
             <div className="flex gap-2 justify-center">
               <CreateFlashcardButton deckId={deckId} />
-              <Button asChild variant="outline">
-                <Link href={`/home/decks/${deckId}/upload`}>
-                  <Upload className="mr-2 h-4 w-4" />
-                  Upload & Generate
-                </Link>
+              <Button 
+                variant="outline"
+                onClick={() => setShowUploadDialog(true)}
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Upload & Generate
               </Button>
             </div>
           </CardContent>
@@ -525,6 +622,13 @@ export function DeckDetailPage({ deckId }: DeckDetailPageProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* AI Bulk Creation Dialog */}
+      <AIBulkCreationDialog 
+        deckId={deckId}
+        open={showUploadDialog}
+        onOpenChange={setShowUploadDialog}
+      />
     </div>
   );
 }

@@ -7,7 +7,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { useUser } from '@kit/supabase/hooks/use-user';
 import { useSubscription } from '@kit/subscription/hooks';
-import { useCreateDeck, useUpdateDeck, useDeleteDeck, useDuplicateDeck } from '@kit/decks/hooks';
+import { usePersonalAccountData } from '@kit/accounts/hooks/use-personal-account-data';
+import { useCreateDeck, useDeleteDeck } from '@kit/decks/hooks';
 import { generateFlashcardsWithAIAction } from '@kit/flashcards/server';
 import { CreateDeckData, DeckWithStats } from '@kit/decks/schemas';
 
@@ -41,6 +42,9 @@ export function UnifiedDashboard() {
   // Get subscription info
   const { data: subscriptionInfo } = useSubscription(user?.data?.id || '');
   
+  // Get account data including user name
+  const { data: accountData } = usePersonalAccountData(user?.data?.id || '');
+  
 
   // Fetch learning statistics
   const { data: learningStats, isLoading: statsLoading } = useQuery({
@@ -65,12 +69,10 @@ export function UnifiedDashboard() {
 
   // Deck management hooks  
   const createDeckMutation = useCreateDeck();
-  const _updateDeckMutation = useUpdateDeck();
   const deleteDeckMutation = useDeleteDeck();
-  const duplicateDeckMutation = useDuplicateDeck();
 
   // Extract user name for personalization
-  const userName = user?.data?.email?.split('@')[0] || undefined;
+  const userName = accountData?.name || user?.data?.email?.split('@')[0] || undefined;
 
   // Calculate core metrics (simplified for MVP)
   const cardsDue = learningStats?.cardsDue || 0;
@@ -171,30 +173,6 @@ export function UnifiedDashboard() {
     }, 1500);
   };
 
-  const handleEditDeck = useCallback((_deck: DeckWithStats) => {
-    toast.info('Edit functionality coming soon!');
-  }, []);
-
-  const handleDuplicateDeck = useCallback(async (deck: DeckWithStats) => {
-    try {
-      // Check subscription limits before duplicating deck
-      if (subscriptionInfo && !subscriptionInfo.canCreateDeck) {
-        const tierName = subscriptionInfo.tier === 'free' ? 'Free' : 
-                         subscriptionInfo.tier === 'pro' ? 'Pro' : 'Premium';
-        toast.error(`You've reached your deck limit of ${subscriptionInfo.deckLimit} for the ${tierName} plan. Please upgrade to create more decks.`);
-        return;
-      }
-
-      await duplicateDeckMutation.mutateAsync({
-        deckId: deck.id,
-        accountId: user?.data?.id || '',
-        userId: user?.data?.id || '',
-        newName: `${deck.name} (Copy)`,
-      });
-    } catch (error) {
-      console.error('Failed to duplicate deck:', error);
-    }
-  }, [subscriptionInfo, duplicateDeckMutation, user?.data?.id]);
 
   const handleDeleteDeck = useCallback(async (deck: DeckWithStats) => {
     setDeckToDelete(deck);
@@ -311,8 +289,6 @@ export function UnifiedDashboard() {
         
         <DeckDisplaySection
           accountId={user.data.id}
-          onEditDeck={handleEditDeck}
-          onDuplicateDeck={handleDuplicateDeck}
           onDeleteDeck={handleDeleteDeck}
         />
       </div>

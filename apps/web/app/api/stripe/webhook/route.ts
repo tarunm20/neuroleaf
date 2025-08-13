@@ -109,7 +109,10 @@ export async function POST(request: NextRequest) {
   const supabase = getSupabaseServerAdminClient();
 
   try {
-    console.log(`Processing webhook event: ${event.type} with ID: ${event.id}`);
+    console.log(`=== WEBHOOK RECEIVED ===`);
+    console.log(`Event: ${event.type}`);
+    console.log(`Event ID: ${event.id}`);
+    console.log(`Event created: ${event.created}`);
     
     switch (event.type) {
       case 'customer.subscription.created':
@@ -220,11 +223,24 @@ async function handleSubscriptionChange(
   
   console.log(`Price ID ${priceId} mapped to tier: ${tier}`);
 
+  // Determine the actual subscription status
+  let actualStatus = subscription.status;
+  
+  // Handle different cancellation scenarios
+  if (subscription.cancel_at_period_end && subscription.status === 'active') {
+    actualStatus = 'canceled';
+    console.log('Subscription is marked for cancellation at period end, setting status to canceled');
+  } else if (!subscription.cancel_at_period_end && subscription.status === 'active') {
+    // Subscription was reactivated (cancel_at_period_end removed)
+    actualStatus = 'active';
+    console.log('Subscription is active and not scheduled for cancellation, setting status to active');
+  }
+
   // Update account subscription info
   const updateData = {
     subscription_tier: tier,
     stripe_subscription_id: subscription.id,
-    subscription_status: subscription.status,
+    subscription_status: actualStatus,
     subscription_expires_at: (subscription as any).current_period_end 
       ? new Date((subscription as any).current_period_end * 1000).toISOString()
       : null,

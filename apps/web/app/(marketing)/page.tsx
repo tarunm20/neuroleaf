@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 
 import { ArrowRightIcon, LayoutDashboard } from 'lucide-react';
@@ -15,11 +14,14 @@ import {
 import { Trans } from '@kit/ui/trans';
 
 import { withI18n } from '~/lib/i18n/with-i18n';
+import { VimeoVideo } from './_components/vimeo-video';
+import { TestimonialsSection } from './_components/testimonials-section';
+import { TrustSignals } from './_components/trust-signals';
 
 function Home() {
   return (
     <div className={'mt-4 flex flex-col space-y-24 py-14'}>
-      <div className={'container mx-auto'}>
+      <div>
         <Hero
           pill={
             <Pill label={'AI-Powered'}>
@@ -34,25 +36,17 @@ function Home() {
           }
           subtitle={
             <span>
-              Transform any lecture or document into intelligent flashcards with AI-powered 
-              test mode that provides personalized feedback on your learning progress.
+              Stop spending hours creating study materials. Upload any lecture or document 
+              and get intelligent flashcards with AI-powered test mode in seconds. 
+              Join students worldwide who are improving their grades with smarter studying.
             </span>
           }
           cta={<MainCallToActionButton />}
-          image={
-            <Image
-              priority
-              className={
-                'dark:border-primary/10 rounded-2xl border border-gray-200'
-              }
-              width={3558}
-              height={2222}
-              src={`/images/dashboard.webp`}
-              alt={`App Image`}
-            />
-          }
+          image={<div id="video"><VimeoVideo /></div>}
         />
       </div>
+
+      <TrustSignals />
 
       <div className={'container mx-auto'}>
         <div
@@ -81,33 +75,35 @@ function Home() {
             <FeatureGrid>
               <FeatureCard
                 className={'relative col-span-2 overflow-hidden'}
-                label={'Convert Lectures to Flashcards'}
-                description={`Upload any lecture notes, PDFs, or documents and automatically convert them into comprehensive flashcards using AI.`}
+                label={'Study 3x Faster'}
+                description={`Upload lecture notes, PDFs, or documents and get comprehensive flashcards instantly. No more manual creation - focus on learning, not making cards.`}
               />
 
               <FeatureCard
                 className={
                   'relative col-span-2 w-full overflow-hidden lg:col-span-1'
                 }
-                label={'Create Detailed Flashcards'}
-                description={`Build rich, detailed flashcards with advanced formatting and multimedia support for comprehensive learning.`}
+                label={'Remember More'}
+                description={`Rich, detailed flashcards with advanced formatting help you retain complex information better than traditional study methods.`}
               />
 
               <FeatureCard
                 className={'relative col-span-2 overflow-hidden lg:col-span-1'}
-                label={'AI Test Mode'}
-                description={`Generate curated questions and get AI-powered grading with detailed feedback on your responses.`}
+                label={'Get Better Grades'}
+                description={`AI test mode generates personalized questions with detailed feedback, helping you identify weak spots and improve exam performance.`}
               />
 
               <FeatureCard
                 className={'relative col-span-2 overflow-hidden'}
-                label={'More Features Coming'}
-                description={`We're constantly adding new features to enhance your learning experience. Stay tuned for exciting updates!`}
+                label={'Works for Any Subject'}
+                description={`From medical school to law studies, our AI adapts to your field and creates relevant, high-quality study materials automatically.`}
               />
             </FeatureGrid>
           </FeatureShowcase>
         </div>
       </div>
+
+      <TestimonialsSection />
     </div>
   );
 }
@@ -116,12 +112,12 @@ export default withI18n(Home);
 
 function MainCallToActionButton() {
   return (
-    <div className={'flex space-x-4'}>
+    <div className={'flex flex-col sm:flex-row gap-4 items-center'}>
       <CtaButton>
         <Link href={'/auth/sign-up'}>
           <span className={'flex items-center space-x-0.5'}>
             <span>
-              <Trans i18nKey={'common:getStarted'} />
+              Start Learning for Free
             </span>
 
             <ArrowRightIcon
@@ -134,11 +130,19 @@ function MainCallToActionButton() {
         </Link>
       </CtaButton>
 
-      <CtaButton variant={'link'}>
-        <Link href={'/pricing'}>
-          View Pricing
-        </Link>
-      </CtaButton>
+      <div className={'flex space-x-3'}>
+        <CtaButton variant={'outline'}>
+          <Link href={'#video'}>
+            Watch Demo
+          </Link>
+        </CtaButton>
+
+        <CtaButton variant={'link'}>
+          <Link href={'/pricing'}>
+            View Pricing
+          </Link>
+        </CtaButton>
+      </div>
     </div>
   );
 }

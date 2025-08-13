@@ -7,7 +7,8 @@ import {
   createCheckoutSession, 
   createBillingPortalSession,
   getSubscriptionInfo,
-  cancelSubscription 
+  cancelSubscription,
+  reactivateSubscription
 } from '../billing/stripe-server';
 
 export async function createCheckoutAction(formData: FormData) {
@@ -30,7 +31,7 @@ export async function createCheckoutAction(formData: FormData) {
     session = await createCheckoutSession({
       priceId,
       userId: user.id,
-      successUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
+      successUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/home/settings?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/pricing`,
     });
   } catch (error) {
@@ -84,6 +85,32 @@ export async function manageBillingAction() {
   } catch (error) {
     console.error('Billing portal error:', error);
     throw new Error('Failed to access billing portal');
+  }
+}
+
+export async function reactivateSubscriptionAction() {
+  const supabase = getSupabaseServerClient();
+  const { data: user } = await requireUser(supabase);
+
+  if (!user) {
+    return { success: false, message: 'User not found', type: 'error' };
+  }
+
+  try {
+    const result = await reactivateSubscription(user.id);
+    
+    if (result.success) {
+      return { success: true, message: 'Subscription reactivated successfully!', type: 'reactivated' };
+    } else {
+      return { success: false, message: result.message || 'Failed to reactivate subscription', type: result.type };
+    }
+  } catch (error) {
+    console.error('Reactivate subscription error:', error);
+    return { 
+      success: false, 
+      message: error instanceof Error ? error.message : 'Failed to reactivate subscription',
+      type: 'error'
+    };
   }
 }
 

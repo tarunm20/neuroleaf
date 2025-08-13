@@ -30,8 +30,8 @@ function PricingPage() {
           }
           subtitle={
             <span>
-              Start free with 3 decks, or upgrade to Pro for unlimited decks 
-              and advanced features.
+              Start free with 3 decks and single file uploads, or upgrade to Pro for unlimited decks 
+              and multiple file uploads per deck.
             </span>
           }
           cta={<PricingCallToActionButton />}
@@ -48,7 +48,7 @@ function PricingPage() {
           </div>
           <h2 className="text-3xl font-bold mb-4">Choose Your Learning Journey</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Choose the plan that fits your learning needs - start free or upgrade to Pro for unlimited decks.
+            Both plans include AI-powered testing and rich text editing. Upgrade to Pro for unlimited decks and advanced features.
           </p>
         </div>
 
@@ -199,17 +199,67 @@ function PricingPage() {
               </div>
 
               <div className="p-4 border-b border-r">
-                <span className="text-sm font-medium">File Upload Support</span>
+                <span className="text-sm font-medium">Cards per Deck</span>
               </div>
               <div className="p-4 border-b border-r text-center">
-                <span className="text-sm text-muted-foreground">Text only</span>
+                <span className="text-sm text-muted-foreground">50 cards</span>
+              </div>
+              <div className="p-4 border-b text-center">
+                <span className="text-sm text-primary font-medium">Unlimited</span>
+              </div>
+
+              <div className="p-4 border-b border-r">
+                <span className="text-sm font-medium">AI Test Sessions</span>
+              </div>
+              <div className="p-4 border-b border-r text-center">
+                <span className="text-sm text-muted-foreground">5/month</span>
+              </div>
+              <div className="p-4 border-b text-center">
+                <span className="text-sm text-primary font-medium">Unlimited</span>
+              </div>
+
+              <div className="p-4 border-b border-r">
+                <span className="text-sm font-medium">File Uploads</span>
+              </div>
+              <div className="p-4 border-b border-r text-center">
+                <span className="text-sm text-muted-foreground">1 per deck</span>
+              </div>
+              <div className="p-4 border-b text-center">
+                <span className="text-sm text-primary font-medium">Multiple per deck</span>
+              </div>
+
+              <div className="p-4 border-b border-r">
+                <span className="text-sm font-medium">File Types</span>
+              </div>
+              <div className="p-4 border-b border-r text-center">
+                <span className="text-sm text-muted-foreground">PDF, DOCX, TXT</span>
               </div>
               <div className="p-4 border-b text-center">
                 <span className="text-sm text-primary font-medium">PDF, DOCX, TXT</span>
               </div>
 
+              <div className="p-4 border-b border-r">
+                <span className="text-sm font-medium">Test Mode</span>
+              </div>
+              <div className="p-4 border-b border-r text-center">
+                <span className="text-sm text-muted-foreground">AI-Powered</span>
+              </div>
+              <div className="p-4 border-b text-center">
+                <span className="text-sm text-primary font-medium">AI-Powered</span>
+              </div>
+
+              <div className="p-4 border-b border-r">
+                <span className="text-sm font-medium">Rich Text Editor</span>
+              </div>
+              <div className="p-4 border-b border-r text-center">
+                <span className="text-sm text-muted-foreground">✓</span>
+              </div>
+              <div className="p-4 border-b text-center">
+                <span className="text-sm text-primary font-medium">✓</span>
+              </div>
+
               <div className="p-4 border-r">
-                <span className="text-sm font-medium">Rich Text Editing</span>
+                <span className="text-sm font-medium">Analytics</span>
               </div>
               <div className="p-4 border-r text-center">
                 <span className="text-sm text-muted-foreground">Basic</span>
@@ -235,18 +285,23 @@ function PricingPage() {
           {[
             {
               question: "What file types can I upload for flashcard creation?",
-              answer: "Pro users can upload PDF, DOCX, and TXT files to automatically extract content and create flashcard decks. Free users can create flashcards manually using our text editor.",
+              answer: "Both Free and Pro users can upload PDF, DOCX, and TXT files to automatically extract content and create flashcards. Free users can upload 1 file per deck, while Pro users can upload multiple files per deck for comprehensive content creation.",
               icon: Brain
             },
             {
+              question: "What's the difference between Free and Pro test modes?",
+              answer: "Both tiers have access to the same AI-powered test mode with intelligent question generation and grading. Free users get 5 AI test sessions per month, while Pro users get unlimited test sessions.",
+              icon: TestTube
+            },
+            {
               question: "What happens when I upgrade to Pro?",
-              answer: "You'll immediately get access to unlimited decks, file upload support for PDF/DOCX/TXT, advanced rich text editing, and enhanced study features. Your existing data stays safe and accessible.",
+              answer: "You'll immediately get unlimited decks and cards, unlimited AI test sessions, multiple file uploads per deck, and advanced analytics. All your existing data remains safe and accessible.",
               icon: Zap
             },
             {
               question: "What happens to my data if I downgrade?",
               answer: "Your data is always safe with us. If you downgrade to free, you'll keep access to your first 3 decks with 50 cards each. Additional content remains saved but becomes read-only until you upgrade again.",
-              icon: TestTube
+              icon: Brain
             }
           ].map((faq, index) => (
             <Card 

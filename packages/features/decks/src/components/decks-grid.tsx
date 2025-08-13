@@ -25,8 +25,6 @@ interface DecksGridProps {
   isLoading?: boolean;
   onCreateDeck: (data: any) => Promise<void>;
   onCreateWithContent?: (deck: any) => void;
-  onEditDeck?: (deck: DeckWithStats) => void;
-  onDuplicateDeck?: (deck: DeckWithStats) => void;
   onDeleteDeck?: (deck: DeckWithStats) => void;
   filters?: Partial<DeckFilters>;
   onFiltersChange?: (filters: Partial<DeckFilters>) => void;
@@ -39,8 +37,6 @@ export function DecksGrid({
   isLoading,
   onCreateDeck,
   onCreateWithContent,
-  onEditDeck,
-  onDuplicateDeck,
   onDeleteDeck,
   filters,
   onFiltersChange,
@@ -216,8 +212,6 @@ export function DecksGrid({
             <DeckCard
               key={deck.id}
               deck={deck}
-              onEdit={onEditDeck}
-              onDuplicate={onDuplicateDeck}
               onDelete={onDeleteDeck}
               className={viewMode === 'list' ? 'max-w-none' : undefined}
             />

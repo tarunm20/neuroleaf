@@ -126,7 +126,8 @@ async function extractFromPDF(file: File): Promise<string> {
 
 async function extractFromDOCX(file: File): Promise<string> {
   const arrayBuffer = await file.arrayBuffer();
-  const result = await mammoth.extractRawText({ arrayBuffer });
+  const buffer = Buffer.from(arrayBuffer);
+  const result = await mammoth.extractRawText({ buffer });
   return result.value;
 }
 

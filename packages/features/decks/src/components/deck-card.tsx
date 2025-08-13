@@ -2,17 +2,15 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { 
   BookOpen, 
   Calendar, 
-  MoreHorizontal, 
   Eye, 
   Users, 
   Lock,
   Play,
-  Edit,
-  Copy,
   Trash2,
   Crown
 } from 'lucide-react';
@@ -24,13 +22,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@kit/ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@kit/ui/dropdown-menu';
 import { Button } from '@kit/ui/button';
 import { Badge } from '@kit/ui/badge';
 import { cn } from '@kit/ui/utils';
@@ -39,8 +30,6 @@ import { DeckWithStats } from '../schemas/deck.schema';
 
 interface DeckCardProps {
   deck: DeckWithStats;
-  onEdit?: (deck: DeckWithStats) => void;
-  onDuplicate?: (deck: DeckWithStats) => void;
   onDelete?: (deck: DeckWithStats) => void;
   showActions?: boolean;
   className?: string;
@@ -55,48 +44,40 @@ const visibilityConfig = {
 
 export function DeckCard({ 
   deck, 
-  onEdit, 
-  onDuplicate, 
   onDelete,
   showActions = true,
   className,
   isLocked = false
 }: DeckCardProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
+  const router = useRouter();
   const visibilityInfo = visibilityConfig[deck.visibility];
   const VisibilityIcon = visibilityInfo.icon;
 
-  const handleEdit = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onEdit?.(deck);
-    setIsMenuOpen(false);
-  };
-
-  const handleDuplicate = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onDuplicate?.(deck);
-    setIsMenuOpen(false);
+  const handleCardClick = () => {
+    if (!isLocked) {
+      router.push(`/home/decks/${deck.id}`);
+    }
   };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     onDelete?.(deck);
-    setIsMenuOpen(false);
   };
 
 
   return (
-    <Card className={cn(
-      'group hover:shadow-lg transition-all duration-200 neuroleaf-card',
-      isLocked 
-        ? 'cursor-not-allowed opacity-60 border-muted-foreground/20 bg-gradient-to-br from-muted/10 via-muted/20 to-muted/30'
-        : 'cursor-pointer border-primary/20 hover:border-primary/30 bg-gradient-to-br from-card via-primary/5 to-primary/10',
-      className
-    )}>
+    <div 
+      className={cn(
+        'group hover:shadow-lg transition-all duration-200 neuroleaf-card',
+        'rounded-lg border bg-card text-card-foreground shadow-sm',
+        isLocked 
+          ? 'cursor-not-allowed opacity-60 border-muted-foreground/20 bg-gradient-to-br from-muted/10 via-muted/20 to-muted/30'
+          : 'cursor-pointer border-primary/20 hover:border-primary/30 bg-gradient-to-br from-card via-primary/5 to-primary/10',
+        className
+      )}
+      onClick={handleCardClick}
+    >
       {isLocked && (
         <div className="absolute inset-0 bg-background/40 backdrop-blur-[1px] rounded-lg z-10 flex items-center justify-center">
           <div className="text-center space-y-2">
@@ -107,74 +88,36 @@ export function DeckCard({
           </div>
         </div>
       )}
-      <Link href={isLocked ? '#' : `/home/decks/${deck.id}`} className={isLocked ? 'pointer-events-none' : ''}>
         <CardHeader className="pb-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex-1 min-w-0 space-y-2">
-              <CardTitle className="text-lg font-semibold text-card-foreground line-clamp-2 leading-tight">
-                {deck.name}
-              </CardTitle>
-              {deck.description && (
-                <CardDescription className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                  {deck.description}
-                </CardDescription>
-              )}
+          {/* Header with visibility and delete button */}
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div className="flex items-center gap-1">
+              <div className={cn('w-2 h-2 rounded-full', visibilityInfo.color)} />
+              <VisibilityIcon className="h-3 w-3 text-muted-foreground" />
             </div>
 
-            <div className="flex items-start gap-2 flex-shrink-0">
-              <div className="flex items-center gap-1">
-                <div className={cn('w-2 h-2 rounded-full', visibilityInfo.color)} />
-                <VisibilityIcon className="h-3 w-3 text-muted-foreground" />
-              </div>
+            {showActions && onDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={handleDelete}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
 
-              {showActions && (
-                <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                      }}
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    {onEdit && !isLocked && (
-                      <DropdownMenuItem onClick={handleEdit}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit Deck
-                      </DropdownMenuItem>
-                    )}
-                    {onDuplicate && !isLocked && (
-                      <DropdownMenuItem onClick={handleDuplicate}>
-                        <Copy className="mr-2 h-4 w-4" />
-                        Duplicate
-                      </DropdownMenuItem>
-                    )}
-                    {isLocked && (
-                      <DropdownMenuItem disabled>
-                        <Crown className="mr-2 h-4 w-4" />
-                        Upgrade to Access
-                      </DropdownMenuItem>
-                    )}
-                    {(onEdit || onDuplicate) && !isLocked && <DropdownMenuSeparator />}
-                    {onDelete && (
-                      <DropdownMenuItem 
-                        onClick={handleDelete}
-                        className="text-red-600 focus:text-red-600"
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
+          {/* Title and description with full space */}
+          <div className="space-y-2">
+            <CardTitle className="text-lg font-semibold text-card-foreground leading-tight break-words">
+              {deck.name}
+            </CardTitle>
+            {deck.description && (
+              <CardDescription className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                {deck.description}
+              </CardDescription>
+            )}
           </div>
 
           {deck.tags && deck.tags.length > 0 && (
@@ -226,41 +169,56 @@ export function DeckCard({
 
           {/* Action Buttons */}
           <div className="flex gap-2">
-            <Button 
-              className="flex-1 neuroleaf-button-primary" 
-              size="sm"
-              disabled={isLocked}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (!isLocked) {
-                  // Navigate to study mode
-                  window.location.href = `/home/decks/${deck.id}/study`;
-                }
-              }}
-            >
-              {isLocked ? <Crown className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
-              {isLocked ? 'Upgrade' : 'Study'}
-            </Button>
-            <Button 
-              variant="outline"
-              size="sm"
-              disabled={isLocked}
-              className="border-primary/20 text-primary hover:bg-primary/5"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (!isLocked) {
-                  // Navigate to test mode
-                  window.location.href = `/home/decks/${deck.id}/test`;
-                }
-              }}
-            >
-              Test
-            </Button>
+            {isLocked ? (
+              <Button 
+                className="flex-1 neuroleaf-button-primary" 
+                size="sm"
+                disabled={true}
+              >
+                <Crown className="mr-2 h-4 w-4" />
+                Upgrade
+              </Button>
+            ) : (
+              <Button 
+                asChild 
+                className="flex-1 neuroleaf-button-primary" 
+                size="sm"
+              >
+                <Link 
+                  href={`/home/decks/${deck.id}/study`}
+                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                >
+                  <Play className="mr-2 h-4 w-4" />
+                  Study
+                </Link>
+              </Button>
+            )}
+            {isLocked ? (
+              <Button 
+                variant="outline"
+                size="sm"
+                disabled={true}
+                className="border-primary/20 text-primary hover:bg-primary/5"
+              >
+                Test
+              </Button>
+            ) : (
+              <Button 
+                asChild
+                variant="outline"
+                size="sm"
+                className="border-primary/20 text-primary hover:bg-primary/5"
+              >
+                <Link 
+                  href={`/home/decks/${deck.id}/test`}
+                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                >
+                  Test
+                </Link>
+              </Button>
+            )}
           </div>
         </CardContent>
-      </Link>
-    </Card>
+    </div>
   );
 }

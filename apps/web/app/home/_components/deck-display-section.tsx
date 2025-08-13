@@ -12,15 +12,11 @@ import { DeckWithStats } from '@kit/decks/schemas';
 
 interface DeckDisplaySectionProps {
   accountId: string;
-  onEditDeck?: (deck: DeckWithStats) => void;
-  onDuplicateDeck?: (deck: DeckWithStats) => void;
   onDeleteDeck?: (deck: DeckWithStats) => void;
 }
 
 export function DeckDisplaySection({
   accountId,
-  onEditDeck,
-  onDuplicateDeck,
   onDeleteDeck,
 }: DeckDisplaySectionProps) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -146,8 +142,6 @@ export function DeckDisplaySection({
                   <DeckCard
                     key={deck.id}
                     deck={deck}
-                    onEdit={onEditDeck}
-                    onDuplicate={onDuplicateDeck}
                     onDelete={onDeleteDeck}
                   />
                 ))}
@@ -171,8 +165,6 @@ export function DeckDisplaySection({
                       key={deck.id}
                       deck={deck}
                       isLocked={true}
-                      onEdit={undefined} // Disable editing for locked decks
-                      onDuplicate={undefined} // Disable duplication for locked decks
                       onDelete={onDeleteDeck} // Allow deletion to free up slots
                     />
                   ))}

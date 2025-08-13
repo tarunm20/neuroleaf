@@ -18,8 +18,6 @@ interface SimpleDecksGridProps {
   accountId: string; // Required for client-side search
   onCreateDeck: (data: any) => Promise<{ id: string } | void>;
   onDeckCreated?: (deckId: string) => void;
-  onEditDeck?: (deck: DeckWithStats) => void;
-  onDuplicateDeck?: (deck: DeckWithStats) => void;
   onDeleteDeck?: (deck: DeckWithStats) => void;
   filters?: Partial<DeckFilters>;
   onFiltersChange?: (filters: Partial<DeckFilters>) => void;
@@ -32,8 +30,6 @@ export function SimpleDecksGrid({
   accountId,
   onCreateDeck,
   onDeckCreated,
-  onEditDeck,
-  onDuplicateDeck,
   onDeleteDeck,
   filters,
   onFiltersChange,
@@ -170,8 +166,6 @@ export function SimpleDecksGrid({
             <DeckCard
               key={deck.id}
               deck={deck}
-              onEdit={onEditDeck}
-              onDuplicate={onDuplicateDeck}
               onDelete={onDeleteDeck}
             />
           ))}

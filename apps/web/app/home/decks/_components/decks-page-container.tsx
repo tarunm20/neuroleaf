@@ -172,8 +172,6 @@ export function DecksPageContainer({ userId }: DecksPageContainerProps) {
         accountId={userId}
         onCreateDeck={handleCreateDeck}
         onDeckCreated={handleDeckCreated}
-        onEditDeck={handleEditDeck}
-        onDuplicateDeck={handleDuplicateDeck}
         onDeleteDeck={handleDeleteDeck}
         filters={filters}
         onFiltersChange={(newFilters) => setFilters(prev => ({ ...prev, ...newFilters }))}
