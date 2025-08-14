@@ -14,7 +14,7 @@ import {
 import { Trans } from '@kit/ui/trans';
 
 import { withI18n } from '~/lib/i18n/with-i18n';
-import { VimeoVideo } from './_components/vimeo-video';
+import { DemoVideo } from './_components/demo-video';
 import { TestimonialsSection } from './_components/testimonials-section';
 import { TrustSignals } from './_components/trust-signals';
 
@@ -42,7 +42,7 @@ function Home() {
             </span>
           }
           cta={<MainCallToActionButton />}
-          image={<div id="video"><VimeoVideo /></div>}
+          image={<div id="video"><DemoVideo /></div>}
         />
       </div>
 

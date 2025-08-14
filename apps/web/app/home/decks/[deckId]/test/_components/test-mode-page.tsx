@@ -20,7 +20,6 @@ import { Button } from '@kit/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@kit/ui/card';
 import { Progress } from '@kit/ui/progress';
 import { Badge } from '@kit/ui/badge';
-import { Textarea } from '@kit/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@kit/ui/tabs';
 
 // Feature Components
@@ -29,22 +28,29 @@ import { useFlashcards } from '@kit/flashcards/hooks';
 import { useUser } from '@kit/supabase/hooks/use-user';
 import { useSubscription } from '@kit/subscription/hooks';
 import { generateQuestionsAction, gradeAnswersAction, gradeTestComprehensiveAction, createTestSessionAction } from '@kit/test-mode/server';
+import type { AIQuestion, MultipleChoiceQuestion, TrueFalseQuestion, OpenEndedQuestion } from '@kit/test-mode/schemas';
+
+// Question Components
+import { MultipleChoiceQuestionComponent } from './multiple-choice-question';
+import { TrueFalseQuestionComponent } from './true-false-question';
+import { OpenEndedQuestionComponent } from './open-ended-question';
 
 interface TestModePageProps {
   deckId: string;
   userId: string;
 }
 
-interface Question {
+// Use the schema types directly
+type TestQuestion = AIQuestion & {
   id: string;
-  question: string;
   flashcardId: string;
-  expectedAnswer: string;
-}
+};
 
 interface Answer {
   questionId: string;
   userAnswer: string;
+  userAnswerIndex?: number; // For MCQ answers
+  userAnswerBoolean?: boolean; // For T/F answers
   score?: number;
   feedback?: string;
   isCorrect?: boolean;
@@ -149,10 +155,12 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
 
   // Test state
   const [testState, setTestState] = useState<'setup' | 'active' | 'completed'>('setup');
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questions, setQuestions] = useState<TestQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [currentAnswer, setCurrentAnswer] = useState('');
+  const [currentMCQAnswer, setCurrentMCQAnswer] = useState<number | null>(null);
+  const [currentTFAnswer, setCurrentTFAnswer] = useState<boolean | null>(null);
   
   // Update current answer when question changes (for navigation)
   useEffect(() => {
@@ -160,6 +168,8 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
       const currentQuestionId = questions[currentQuestionIndex]?.id;
       const existingAnswer = answers.find(a => a.questionId === currentQuestionId);
       setCurrentAnswer(existingAnswer?.userAnswer || '');
+      setCurrentMCQAnswer(existingAnswer?.userAnswerIndex ?? null);
+      setCurrentTFAnswer(existingAnswer?.userAnswerBoolean ?? null);
     }
   }, [currentQuestionIndex, questions, answers, testState]);
   const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false);
@@ -227,11 +237,10 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
       });
 
       if (result.success && result.data) {
-        const generatedQuestions: Question[] = result.data.map((aiQuestion, index) => ({
+        const generatedQuestions: TestQuestion[] = result.data.map((aiQuestion, index) => ({
+          ...aiQuestion,
           id: `q-${index}`,
-          question: aiQuestion.question,
-          flashcardId: flashcards[index % flashcards.length]?.id || '',
-          expectedAnswer: aiQuestion.suggested_answer || flashcards[index % flashcards.length]?.back_content || ''
+          flashcardId: flashcards[index % flashcards.length]?.id || ''
         }));
 
         setQuestions(generatedQuestions);
@@ -240,6 +249,8 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
         setCurrentQuestionIndex(0);
         setAnswers([]);
         setCurrentAnswer('');
+        setCurrentMCQAnswer(null);
+        setCurrentTFAnswer(null);
         
         toast.success(`Generated ${generatedQuestions.length} AI questions`);
       } else {
@@ -260,7 +271,28 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
   };
 
   const submitAnswer = async () => {
-    if (!currentAnswer.trim()) {
+    if (!currentQuestion) return;
+
+    // Validate based on question type
+    let isValid = false;
+    let userAnswer = '';
+    let userAnswerIndex: number | undefined;
+    let userAnswerBoolean: boolean | undefined;
+
+    if (currentQuestion.type === 'multiple_choice') {
+      isValid = currentMCQAnswer !== null;
+      userAnswer = isValid ? (currentQuestion as MultipleChoiceQuestion).options[currentMCQAnswer!] : '';
+      userAnswerIndex = currentMCQAnswer ?? undefined;
+    } else if (currentQuestion.type === 'true_false') {
+      isValid = currentTFAnswer !== null;
+      userAnswer = currentTFAnswer !== null ? (currentTFAnswer ? 'True' : 'False') : '';
+      userAnswerBoolean = currentTFAnswer ?? undefined;
+    } else {
+      isValid = currentAnswer.trim().length > 0;
+      userAnswer = currentAnswer;
+    }
+
+    if (!isValid) {
       toast.error('Please provide an answer');
       return;
     }
@@ -268,11 +300,11 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
     setIsSubmittingAnswer(true);
 
     try {
-      if (!currentQuestion) return;
-      
       const answer: Answer = {
         questionId: currentQuestion.id,
-        userAnswer: currentAnswer
+        userAnswer,
+        userAnswerIndex,
+        userAnswerBoolean
       };
 
       setAnswers(prev => {
@@ -291,6 +323,8 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
       if (currentQuestionIndex < questions.length - 1) {
         setCurrentQuestionIndex(prev => prev + 1);
         setCurrentAnswer('');
+        setCurrentMCQAnswer(null);
+        setCurrentTFAnswer(null);
       } else {
         // All questions answered, grade the test
         await gradeTest([...answers, answer]);
@@ -310,11 +344,26 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
       // Prepare answers for comprehensive grading
       const comprehensiveAnswers = allAnswers.map((answer) => {
         const question = questions.find(q => q.id === answer.questionId);
+        let expectedAnswer = 'No expected answer';
+        
+        if (question) {
+          if (question.type === 'multiple_choice') {
+            const mcq = question as MultipleChoiceQuestion;
+            expectedAnswer = mcq.options[mcq.correct_answer];
+          } else if (question.type === 'true_false') {
+            const tf = question as TrueFalseQuestion;
+            expectedAnswer = tf.correct_answer ? 'True' : 'False';
+          } else if (question.type === 'open_ended') {
+            const oe = question as OpenEndedQuestion;
+            expectedAnswer = oe.suggested_answer || 'No suggested answer';
+          }
+        }
+        
         return {
           question_id: answer.questionId,
           question: question?.question || 'Unknown question',
           user_answer: answer.userAnswer,
-          expected_answer: question?.expectedAnswer || 'No expected answer',
+          expected_answer: expectedAnswer,
         };
       });
 
@@ -368,10 +417,25 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
       try {
         const basicAnswers = allAnswers.map((answer) => {
           const question = questions.find(q => q.id === answer.questionId);
+          let expectedAnswer = 'No expected answer';
+          
+          if (question) {
+            if (question.type === 'multiple_choice') {
+              const mcq = question as MultipleChoiceQuestion;
+              expectedAnswer = mcq.options[mcq.correct_answer];
+            } else if (question.type === 'true_false') {
+              const tf = question as TrueFalseQuestion;
+              expectedAnswer = tf.correct_answer ? 'True' : 'False';
+            } else if (question.type === 'open_ended') {
+              const oe = question as OpenEndedQuestion;
+              expectedAnswer = oe.suggested_answer || 'No suggested answer';
+            }
+          }
+          
           return {
             question: question?.question || 'Unknown question',
             user_answer: answer.userAnswer,
-            expected_answer: question?.expectedAnswer || 'No expected answer',
+            expected_answer: expectedAnswer,
           };
         });
 
@@ -435,6 +499,8 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
     setCurrentQuestionIndex(0);
     setAnswers([]);
     setCurrentAnswer('');
+    setCurrentMCQAnswer(null);
+    setCurrentTFAnswer(null);
     setTestResults(null);
     setComprehensiveResults(null);
     setSelectedQuestionIndex(null);
@@ -474,7 +540,7 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
           <CardContent className="space-y-6">
             <div className="text-center space-y-2">
               <p className="text-muted-foreground">
-                AI will generate critical thinking questions based on your flashcards
+                AI will generate multiple choice, true/false, and critical thinking questions based on your flashcards
               </p>
               <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">
                 {Math.min(10, flashcards.length)} questions available
@@ -487,8 +553,8 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
                   <Zap className="h-5 w-5 text-blue-600" />
                 </div>
                 <div className="text-sm">
-                  <div className="font-medium">AI Generated</div>
-                  <div className="text-muted-foreground">Smart questions</div>
+                  <div className="font-medium">Mixed Questions</div>
+                  <div className="text-muted-foreground">MCQ, T/F & Essays</div>
                 </div>
               </div>
               <div className="space-y-2">
@@ -505,8 +571,8 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
                   <BookOpen className="h-5 w-5 text-orange-600" />
                 </div>
                 <div className="text-sm">
-                  <div className="font-medium">Deep Learning</div>
-                  <div className="text-muted-foreground">Critical thinking</div>
+                  <div className="font-medium">Smart Testing</div>
+                  <div className="text-muted-foreground">Adaptive difficulty</div>
                 </div>
               </div>
             </div>
@@ -573,65 +639,66 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
           </div>
         </div>
 
-        {/* Question Card */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-emerald-600" />
-              Question {currentQuestionIndex + 1}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg font-medium leading-relaxed mb-6">
-              {currentQuestion?.question}
-            </div>
-            
-            <div className="space-y-4">
-              <Textarea
-                value={currentAnswer}
-                onChange={(e) => setCurrentAnswer(e.target.value)}
-                placeholder="Type your answer here..."
-                rows={6}
-                className="resize-none"
+        {/* Question Component - Dynamic based on type */}
+        {currentQuestion && (
+          <div>
+            {currentQuestion.type === 'multiple_choice' && (
+              <MultipleChoiceQuestionComponent
+                question={currentQuestion as MultipleChoiceQuestion}
+                questionNumber={currentQuestionIndex + 1}
+                selectedAnswer={currentMCQAnswer}
+                onAnswerSelect={setCurrentMCQAnswer}
+                onSubmit={submitAnswer}
+                isSubmitting={isSubmittingAnswer}
               />
-              
-              <div className="flex gap-3">
-                <Button
-                  onClick={submitAnswer}
-                  disabled={isSubmittingAnswer || !currentAnswer.trim()}
-                  className="flex-1"
-                >
-                  {isSubmittingAnswer ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Submitting...
-                    </>
-                  ) : currentQuestionIndex < questions.length - 1 ? (
-                    'Next Question'
-                  ) : (
-                    'Complete Test'
-                  )}
-                </Button>
-                {currentQuestionIndex > 0 && (
-                  <Button
-                    onClick={() => {
-                      const prevIndex = currentQuestionIndex - 1;
-                      const prevQuestionId = questions[prevIndex]?.id;
-                      const existingAnswer = answers.find(a => a.questionId === prevQuestionId);
-                      
-                      setCurrentQuestionIndex(prevIndex);
-                      setCurrentAnswer(existingAnswer?.userAnswer || '');
-                    }}
-                    variant="outline"
-                    disabled={isSubmittingAnswer}
-                  >
-                    Previous
-                  </Button>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            )}
+            
+            {currentQuestion.type === 'true_false' && (
+              <TrueFalseQuestionComponent
+                question={currentQuestion as TrueFalseQuestion}
+                questionNumber={currentQuestionIndex + 1}
+                selectedAnswer={currentTFAnswer}
+                onAnswerSelect={setCurrentTFAnswer}
+                onSubmit={submitAnswer}
+                isSubmitting={isSubmittingAnswer}
+              />
+            )}
+            
+            {currentQuestion.type === 'open_ended' && (
+              <OpenEndedQuestionComponent
+                question={currentQuestion as OpenEndedQuestion}
+                questionNumber={currentQuestionIndex + 1}
+                userAnswer={currentAnswer}
+                onAnswerChange={setCurrentAnswer}
+                onSubmit={submitAnswer}
+                isSubmitting={isSubmittingAnswer}
+              />
+            )}
+          </div>
+        )}
+        
+        {/* Navigation Controls */}
+        {currentQuestionIndex > 0 && (
+          <div className="mb-6">
+            <Button
+              onClick={() => {
+                const prevIndex = currentQuestionIndex - 1;
+                const prevQuestionId = questions[prevIndex]?.id;
+                const existingAnswer = answers.find(a => a.questionId === prevQuestionId);
+                
+                setCurrentQuestionIndex(prevIndex);
+                setCurrentAnswer(existingAnswer?.userAnswer || '');
+                setCurrentMCQAnswer(existingAnswer?.userAnswerIndex ?? null);
+                setCurrentTFAnswer(existingAnswer?.userAnswerBoolean ?? null);
+              }}
+              variant="outline"
+              disabled={isSubmittingAnswer}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Previous Question
+            </Button>
+          </div>
+        )}
 
         {/* Grading State */}
         {isGrading && (

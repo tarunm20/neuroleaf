@@ -1,5 +1,9 @@
 import { z } from 'zod';
 
+// Question type enum (needs to be defined early as it's used in other schemas)
+export const QuestionTypeSchema = z.enum(['open_ended', 'multiple_choice', 'true_false']);
+export type QuestionType = z.infer<typeof QuestionTypeSchema>;
+
 // Test mode enum
 export const TestModeSchema = z.enum(['flashcard', 'ai_questions']);
 export type TestMode = z.infer<typeof TestModeSchema>;
@@ -40,8 +44,12 @@ export const TestResponseSchema = z.object({
   test_session_id: z.string().uuid(),
   flashcard_id: z.string().uuid().nullable(),
   question_text: z.string(),
+  question_type: QuestionTypeSchema,
+  question_data: z.record(z.any()).optional(), // Stores MCQ options, T/F statement, etc.
   expected_answer: z.string().nullable(),
   user_response: z.string(),
+  user_answer_index: z.number().nullable(), // For MCQ answers
+  user_answer_boolean: z.boolean().nullable(), // For T/F answers
   ai_score: z.number().min(0).max(100),
   ai_feedback: z.string(),
   ai_model_used: z.string().nullable(),
@@ -56,8 +64,12 @@ export const CreateTestResponseSchema = z.object({
   test_session_id: z.string().uuid(),
   flashcard_id: z.string().uuid().optional(),
   question_text: z.string().min(1),
+  question_type: QuestionTypeSchema,
+  question_data: z.record(z.any()).optional(),
   expected_answer: z.string().optional(),
   user_response: z.string().min(1),
+  user_answer_index: z.number().optional(),
+  user_answer_boolean: z.boolean().optional(),
   response_time_seconds: z.number().optional(),
 });
 export type CreateTestResponseData = z.infer<typeof CreateTestResponseSchema>;
@@ -91,13 +103,53 @@ export const AIGradingResponseSchema = z.object({
 });
 export type AIGradingResponse = z.infer<typeof AIGradingResponseSchema>;
 
-// AI question generation schema
-export const AIQuestionSchema = z.object({
+// Base AI question schema
+export const BaseAIQuestionSchema = z.object({
   question: z.string(),
-  suggested_answer: z.string().optional(),
   difficulty: z.enum(['easy', 'medium', 'hard']).optional(),
+  type: QuestionTypeSchema,
 });
+
+// Multiple choice question schema
+export const MultipleChoiceQuestionSchema = BaseAIQuestionSchema.extend({
+  type: z.literal('multiple_choice'),
+  options: z.array(z.string()).length(4),
+  correct_answer: z.number().min(0).max(3),
+  explanation: z.string(),
+});
+export type MultipleChoiceQuestion = z.infer<typeof MultipleChoiceQuestionSchema>;
+
+// True/False question schema
+export const TrueFalseQuestionSchema = BaseAIQuestionSchema.extend({
+  type: z.literal('true_false'),
+  statement: z.string(),
+  correct_answer: z.boolean(),
+  explanation: z.string(),
+});
+export type TrueFalseQuestion = z.infer<typeof TrueFalseQuestionSchema>;
+
+// Open-ended question schema (existing)
+export const OpenEndedQuestionSchema = BaseAIQuestionSchema.extend({
+  type: z.literal('open_ended'),
+  suggested_answer: z.string().optional(),
+});
+export type OpenEndedQuestion = z.infer<typeof OpenEndedQuestionSchema>;
+
+// Union of all question types
+export const AIQuestionSchema = z.discriminatedUnion('type', [
+  OpenEndedQuestionSchema,
+  MultipleChoiceQuestionSchema,
+  TrueFalseQuestionSchema,
+]);
 export type AIQuestion = z.infer<typeof AIQuestionSchema>;
+
+// Question distribution schema
+export const QuestionDistributionSchema = z.object({
+  multiple_choice: z.number().min(0),
+  true_false: z.number().min(0),
+  open_ended: z.number().min(0),
+});
+export type QuestionDistribution = z.infer<typeof QuestionDistributionSchema>;
 
 // Generate questions request schema
 export const GenerateQuestionsSchema = z.object({
@@ -108,6 +160,7 @@ export const GenerateQuestionsSchema = z.object({
   })),
   question_count: z.number().min(1).max(50),
   difficulty: z.enum(['easy', 'medium', 'hard']).optional(),
+  distribution: QuestionDistributionSchema.optional(),
 });
 export type GenerateQuestionsData = z.infer<typeof GenerateQuestionsSchema>;
 

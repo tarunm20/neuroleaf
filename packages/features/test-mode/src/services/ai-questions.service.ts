@@ -1,5 +1,13 @@
 import { createGeminiClient } from '@kit/ai/gemini';
-import type { AIQuestion, GenerateQuestionsData } from '../schemas';
+import type { 
+  AIQuestion, 
+  GenerateQuestionsData, 
+  QuestionDistribution,
+  MultipleChoiceQuestion,
+  TrueFalseQuestion,
+  OpenEndedQuestion,
+  QuestionType
+} from '../schemas';
 
 export class AIQuestionsService {
   private ai: ReturnType<typeof createGeminiClient>;
@@ -9,28 +17,132 @@ export class AIQuestionsService {
   }
 
   /**
-   * Generate critical thinking questions from flashcards
+   * Generate mixed questions from flashcards with smart distribution
    */
   async generateQuestions({
     flashcards,
     question_count,
     difficulty = 'medium',
+    distribution,
   }: GenerateQuestionsData): Promise<AIQuestion[]> {
     try {
-      const prompt = this.buildQuestionGenerationPrompt({
-        flashcards,
-        question_count,
-        difficulty,
-      });
+      // Calculate question distribution
+      const questionDistribution = distribution || this.calculateDefaultDistribution(question_count);
+      
+      // Generate questions by type
+      const questions: AIQuestion[] = [];
+      
+      if (questionDistribution.multiple_choice > 0) {
+        const mcqQuestions = await this.generateMCQQuestions({
+          flashcards,
+          question_count: questionDistribution.multiple_choice,
+          difficulty,
+        });
+        questions.push(...mcqQuestions);
+      }
+      
+      if (questionDistribution.true_false > 0) {
+        const tfQuestions = await this.generateTrueFalseQuestions({
+          flashcards,
+          question_count: questionDistribution.true_false,
+          difficulty,
+        });
+        questions.push(...tfQuestions);
+      }
+      
+      if (questionDistribution.open_ended > 0) {
+        const openQuestions = await this.generateOpenEndedQuestions({
+          flashcards,
+          question_count: questionDistribution.open_ended,
+          difficulty,
+        });
+        questions.push(...openQuestions);
+      }
 
-      const response = await this.ai.generateContent(prompt);
-      const text = response.text;
-
-      return this.parseQuestionsResponse(text, question_count);
+      // Shuffle questions for variety
+      return this.shuffleArray(questions);
     } catch (error) {
       console.error('AI question generation error:', error);
       return this.getFallbackQuestions(flashcards, question_count);
     }
+  }
+
+  /**
+   * Calculate default question distribution
+   */
+  private calculateDefaultDistribution(totalQuestions: number): QuestionDistribution {
+    const mcqCount = Math.floor(totalQuestions * 0.4); // 40% MCQ
+    const tfCount = Math.floor(totalQuestions * 0.3);  // 30% True/False
+    const openCount = totalQuestions - mcqCount - tfCount; // Remaining open-ended
+    
+    return {
+      multiple_choice: mcqCount,
+      true_false: tfCount,
+      open_ended: Math.max(openCount, 1), // Ensure at least 1 open-ended
+    };
+  }
+
+  /**
+   * Generate Multiple Choice Questions
+   */
+  private async generateMCQQuestions({
+    flashcards,
+    question_count,
+    difficulty,
+  }: Pick<GenerateQuestionsData, 'flashcards' | 'question_count' | 'difficulty'>): Promise<MultipleChoiceQuestion[]> {
+    const prompt = this.buildMCQPrompt(flashcards, question_count, difficulty);
+    const response = await this.ai.generateContent(prompt);
+    return this.parseMCQResponse(response.text, question_count);
+  }
+
+  /**
+   * Generate True/False Questions
+   */
+  private async generateTrueFalseQuestions({
+    flashcards,
+    question_count,
+    difficulty,
+  }: Pick<GenerateQuestionsData, 'flashcards' | 'question_count' | 'difficulty'>): Promise<TrueFalseQuestion[]> {
+    const prompt = this.buildTrueFalsePrompt(flashcards, question_count, difficulty);
+    const response = await this.ai.generateContent(prompt);
+    return this.parseTrueFalseResponse(response.text, question_count);
+  }
+
+  /**
+   * Generate Open-Ended Questions (existing logic)
+   */
+  private async generateOpenEndedQuestions({
+    flashcards,
+    question_count,
+    difficulty,
+  }: Pick<GenerateQuestionsData, 'flashcards' | 'question_count' | 'difficulty'>): Promise<OpenEndedQuestion[]> {
+    const prompt = this.buildQuestionGenerationPrompt({
+      flashcards,
+      question_count,
+      difficulty,
+    });
+    const response = await this.ai.generateContent(prompt);
+    const questions = this.parseQuestionsResponse(response.text, question_count);
+    
+    // Convert to OpenEndedQuestion format
+    return questions.map(q => ({
+      type: 'open_ended' as const,
+      question: q.question,
+      suggested_answer: q.suggested_answer,
+      difficulty: q.difficulty || difficulty,
+    }));
+  }
+
+  /**
+   * Shuffle array utility
+   */
+  private shuffleArray<T>(array: T[]): T[] {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!];
+    }
+    return shuffled;
   }
 
   /**
@@ -78,6 +190,168 @@ Please respond in the following JSON format:
 }
 
 Generate ${question_count} questions that promote deep understanding of the material.`;
+  }
+
+  /**
+   * Build MCQ prompt template
+   */
+  private buildMCQPrompt(flashcards: GenerateQuestionsData['flashcards'], count: number, difficulty?: string): string {
+    const flashcardContent = flashcards
+      .map((card, index) => `${index + 1}. Q: ${card.front_content}\n   A: ${card.back_content}`)
+      .join('\n\n');
+
+    const difficultyInstructions = {
+      easy: 'Focus on basic recall and recognition. Create straightforward MCQs testing key terms and definitions.',
+      medium: 'Focus on comprehension and application. Create MCQs that test understanding of relationships and concepts.',
+      hard: 'Focus on analysis and evaluation. Create MCQs that require critical thinking and comparison of concepts.',
+    };
+
+    return `You are an expert test creator. Generate high-quality multiple choice questions from flashcard content.
+
+FLASHCARD CONTENT:
+${flashcardContent}
+
+INSTRUCTIONS:
+- Generate exactly ${count} multiple choice questions
+- Each question has exactly 4 options (A, B, C, D) with exactly 1 correct answer
+- ${difficultyInstructions[difficulty as keyof typeof difficultyInstructions] || difficultyInstructions.medium}
+- Distractors should be plausible but clearly incorrect to someone who understands the concept
+- Avoid "all of the above" or "none of the above" options
+- Test conceptual understanding, not memorization of exact wording
+- Vary question stems: "Which...", "What is...", "How does...", "Why...", "When..."
+
+DISTRACTOR GUIDELINES:
+- Make wrong answers seem reasonable but contain clear errors
+- Use common misconceptions as distractors
+- Keep all options similar in length and structure
+- Mix obvious and subtle incorrect options
+
+DIFFICULTY LEVEL: ${difficulty?.toUpperCase() || 'MEDIUM'}
+
+Respond in this exact JSON format:
+{
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "question": "Clear, specific question stem",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correct_answer": 0,
+      "explanation": "Brief explanation of why this answer is correct",
+      "difficulty": "${difficulty || 'medium'}"
+    }
+  ]
+}
+
+Generate ${count} MCQ questions now.`;
+  }
+
+  /**
+   * Build True/False prompt template
+   */
+  private buildTrueFalsePrompt(flashcards: GenerateQuestionsData['flashcards'], count: number, difficulty?: string): string {
+    const flashcardContent = flashcards
+      .map((card, index) => `${index + 1}. Q: ${card.front_content}\n   A: ${card.back_content}`)
+      .join('\n\n');
+
+    const difficultyInstructions = {
+      easy: 'Create clear, straightforward statements about basic facts and definitions.',
+      medium: 'Create statements about relationships, processes, and applications that require understanding.',
+      hard: 'Create nuanced statements that test deep understanding of implications and complex relationships.',
+    };
+
+    return `You are an expert test creator. Generate high-quality True/False questions from flashcard content.
+
+FLASHCARD CONTENT:
+${flashcardContent}
+
+INSTRUCTIONS:
+- Generate exactly ${count} true/false questions
+- Aim for roughly 50% true statements and 50% false statements
+- ${difficultyInstructions[difficulty as keyof typeof difficultyInstructions] || difficultyInstructions.medium}
+- False statements should be subtly wrong, not obviously incorrect
+- Test understanding of concepts, relationships, and applications
+- Avoid trick questions or ambiguous wording
+- Each statement should be clear and unambiguous
+
+TRUE STATEMENT GUIDELINES:
+- Make accurate statements about concepts, processes, or relationships
+- Include important facts that students should know
+- Test understanding of cause-and-effect relationships
+
+FALSE STATEMENT GUIDELINES:
+- Include common misconceptions or errors
+- Slightly modify correct information to make it false
+- Test boundary conditions or exceptions
+- Avoid obviously false statements
+
+DIFFICULTY LEVEL: ${difficulty?.toUpperCase() || 'MEDIUM'}
+
+Respond in this exact JSON format:
+{
+  "questions": [
+    {
+      "type": "true_false",
+      "statement": "Clear, testable statement",
+      "correct_answer": true,
+      "explanation": "Brief explanation of why this statement is true/false",
+      "difficulty": "${difficulty || 'medium'}"
+    }
+  ]
+}
+
+Generate ${count} True/False questions now.`;
+  }
+
+  /**
+   * Parse MCQ response
+   */
+  private parseMCQResponse(aiResponse: string, expectedCount: number): MultipleChoiceQuestion[] {
+    try {
+      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        if (parsed.questions && Array.isArray(parsed.questions)) {
+          return parsed.questions.slice(0, expectedCount).map((q: any) => ({
+            type: 'multiple_choice' as const,
+            question: q.question || 'Generated MCQ question',
+            options: q.options || ['Option A', 'Option B', 'Option C', 'Option D'],
+            correct_answer: typeof q.correct_answer === 'number' ? q.correct_answer : 0,
+            explanation: q.explanation || 'No explanation provided',
+            difficulty: q.difficulty || 'medium',
+          }));
+        }
+      }
+      return this.getFallbackMCQQuestions(expectedCount);
+    } catch (error) {
+      console.error('Error parsing MCQ response:', error);
+      return this.getFallbackMCQQuestions(expectedCount);
+    }
+  }
+
+  /**
+   * Parse True/False response
+   */
+  private parseTrueFalseResponse(aiResponse: string, expectedCount: number): TrueFalseQuestion[] {
+    try {
+      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        if (parsed.questions && Array.isArray(parsed.questions)) {
+          return parsed.questions.slice(0, expectedCount).map((q: any) => ({
+            type: 'true_false' as const,
+            question: q.statement || q.question || 'Generated T/F statement',
+            statement: q.statement || q.question || 'Generated T/F statement',
+            correct_answer: typeof q.correct_answer === 'boolean' ? q.correct_answer : true,
+            explanation: q.explanation || 'No explanation provided',
+            difficulty: q.difficulty || 'medium',
+          }));
+        }
+      }
+      return this.getFallbackTrueFalseQuestions(expectedCount);
+    } catch (error) {
+      console.error('Error parsing True/False response:', error);
+      return this.getFallbackTrueFalseQuestions(expectedCount);
+    }
   }
 
   /**
@@ -170,5 +444,45 @@ Generate ${question_count} questions that promote deep understanding of the mate
     }
 
     return questions;
+  }
+
+  /**
+   * Generate fallback MCQ questions when AI is not available
+   */
+  private getFallbackMCQQuestions(count: number): MultipleChoiceQuestion[] {
+    const fallbackQuestions: MultipleChoiceQuestion[] = [];
+    
+    for (let i = 0; i < count; i++) {
+      fallbackQuestions.push({
+        type: 'multiple_choice',
+        question: `Sample multiple choice question ${i + 1}`,
+        options: ['Option A', 'Option B', 'Option C', 'Option D'],
+        correct_answer: 0,
+        explanation: 'AI generation failed, this is a fallback question.',
+        difficulty: 'medium',
+      });
+    }
+    
+    return fallbackQuestions;
+  }
+
+  /**
+   * Generate fallback True/False questions when AI is not available
+   */
+  private getFallbackTrueFalseQuestions(count: number): TrueFalseQuestion[] {
+    const fallbackQuestions: TrueFalseQuestion[] = [];
+    
+    for (let i = 0; i < count; i++) {
+      fallbackQuestions.push({
+        type: 'true_false',
+        question: `Sample true/false statement ${i + 1}`,
+        statement: `Sample true/false statement ${i + 1}`,
+        correct_answer: i % 2 === 0, // Alternate true/false
+        explanation: 'AI generation failed, this is a fallback question.',
+        difficulty: 'medium',
+      });
+    }
+    
+    return fallbackQuestions;
   }
 }
