@@ -87,7 +87,7 @@ export class FlashcardService {
   /**
    * Create a new flashcard
    */
-  async createFlashcard(data: CreateFlashcardData, userId: string): Promise<Flashcard> {
+  async createFlashcard(data: CreateFlashcardData, _userId: string): Promise<Flashcard> {
     // Get the next position if not specified
     if (data.position === undefined) {
       const { count } = await this.supabase
@@ -118,7 +118,7 @@ export class FlashcardService {
   /**
    * Update an existing flashcard
    */
-  async updateFlashcard(data: UpdateFlashcardData, userId: string): Promise<Flashcard> {
+  async updateFlashcard(data: UpdateFlashcardData, _userId: string): Promise<Flashcard> {
     const { data: flashcard, error } = await this.supabase
       .from('flashcards')
       .update({
@@ -235,7 +235,7 @@ export class FlashcardService {
   /**
    * Bulk import flashcards
    */
-  async bulkImportFlashcards(data: BulkImportData, userId: string): Promise<Flashcard[]> {
+  async bulkImportFlashcards(data: BulkImportData, _userId: string): Promise<Flashcard[]> {
     if (data.overwrite_existing) {
       // Delete existing flashcards in the deck
       await this.supabase

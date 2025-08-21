@@ -1,16 +1,13 @@
 'use client';
 
 import React from 'react';
-import { Card } from '@kit/ui/card';
 import { Button } from '@kit/ui/button';
-import { Badge } from '@kit/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@kit/ui/dialog';
 import { FlashcardForm } from './flashcard-form';
 import { FlashcardPreview } from './flashcard-preview';
 import { useCreateFlashcard, useUpdateFlashcard } from '../hooks/use-flashcards';
 import { CreateFlashcardData, UpdateFlashcardData } from '../schemas/flashcard.schema';
 import { Edit, Eye, Plus } from 'lucide-react';
-import { toast } from 'sonner';
 
 interface Flashcard {
   id: string;

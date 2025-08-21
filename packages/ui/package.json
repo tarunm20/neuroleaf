@@ -128,7 +128,11 @@
     "./deck-breadcrumb-fetcher": "./src/makerkit/deck-breadcrumb-fetcher.tsx",
     "./use-deck-breadcrumbs": "./src/makerkit/use-deck-breadcrumbs.tsx",
     "./empty-state": "./src/makerkit/empty-state.tsx",
-    "./marketing": "./src/makerkit/marketing/index.tsx"
+    "./marketing": "./src/makerkit/marketing/index.tsx",
+    "./math-renderer": "./src/math-renderer.tsx",
+    "./chem-renderer": "./src/chem-renderer.tsx",
+    "./math-content": "./src/math-content.tsx",
+    "./formula-renderer": "./src/formula-renderer.tsx"
   },
   "typesVersions": {
     "*": {

@@ -130,19 +130,11 @@ function MainCallToActionButton() {
         </Link>
       </CtaButton>
 
-      <div className={'flex space-x-3'}>
-        <CtaButton variant={'outline'}>
-          <Link href={'#video'}>
-            Watch Demo
-          </Link>
-        </CtaButton>
-
-        <CtaButton variant={'link'}>
-          <Link href={'/pricing'}>
-            View Pricing
-          </Link>
-        </CtaButton>
-      </div>
+      <CtaButton variant={'link'}>
+        <Link href={'/pricing'}>
+          View Pricing
+        </Link>
+      </CtaButton>
     </div>
   );
 }

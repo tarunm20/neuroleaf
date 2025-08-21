@@ -17,9 +17,6 @@ export const generateRootMetadata = async (): Promise<Metadata> => {
     description: appConfig.description,
     metadataBase: new URL(appConfig.url),
     applicationName: appConfig.name,
-    other: {
-      'csrf-token': csrfToken,
-    },
     openGraph: {
       url: appConfig.url,
       siteName: appConfig.name,
@@ -32,8 +29,35 @@ export const generateRootMetadata = async (): Promise<Metadata> => {
       description: appConfig.description,
     },
     icons: {
-      icon: '/images/favicon/neuroleaf-favicon.ico',
+      icon: [
+        { url: '/images/favicon/favicon.ico' },
+        { url: '/images/favicon/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+        { url: '/images/favicon/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+        { url: '/images/favicon/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
+        { url: '/images/favicon/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' },
+      ],
       apple: '/images/favicon/apple-touch-icon.png',
+      other: [
+        {
+          rel: 'manifest',
+          url: '/images/favicon/site.webmanifest',
+        },
+        {
+          rel: 'mask-icon',
+          url: '/images/favicon/safari-pinned-tab.svg',
+          color: '#667eea',
+        },
+        {
+          rel: 'shortcut icon',
+          url: '/images/favicon/favicon.ico',
+        },
+      ],
+    },
+    other: {
+      'csrf-token': csrfToken,
+      'msapplication-TileColor': '#667eea',
+      'msapplication-config': '/images/favicon/browserconfig.xml',
+      'theme-color': '#667eea',
     },
   };
 };

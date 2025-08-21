@@ -29,9 +29,6 @@ import {
   Image as ImageIcon,
   Table as TableIcon,
   Type,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
   Undo,
   Redo,
 } from 'lucide-react';

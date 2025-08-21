@@ -68,6 +68,7 @@ export function DecksPageContainer({ userId }: DecksPageContainerProps) {
             card_type: 'basic',
             language: 'en',
             subject: undefined,
+            is_image: false,
           });
           
           if (!aiResult.success) {

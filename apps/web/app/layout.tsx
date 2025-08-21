@@ -9,6 +9,7 @@ import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { generateRootMetadata } from '~/lib/root-metdata';
 
 import '../styles/globals.css';
+import 'katex/dist/katex.min.css';
 
 export default async function RootLayout({
   children,

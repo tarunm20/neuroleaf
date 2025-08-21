@@ -32,11 +32,28 @@ import {
   DropdownMenuTrigger,
 } from '@kit/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { MathContent } from '@kit/ui/math-content';
 import { AIBulkCreationDialog } from './ai-bulk-creation-dialog';
 
 interface FlashcardManagementPageProps {
   deckId: string;
 }
+
+// Helper function to filter out section-related tags
+const filterSectionTags = (tags: string[]): string[] => {
+  const sectionPatterns = [
+    /section/i,
+    /chapter/i,
+    /part\s*\d+/i,
+    /unit\s*\d+/i,
+    /^sec\s*\d+/i,
+    /^ch\s*\d+/i,
+  ];
+  
+  return tags.filter(tag => {
+    return !sectionPatterns.some(pattern => pattern.test(tag));
+  });
+};
 
 interface Flashcard {
   id: string;
@@ -60,6 +77,9 @@ export function FlashcardManagementPage({ deckId }: FlashcardManagementPageProps
   const { data: deck, isLoading: deckLoading } = useDeck(deckId);
   const { data: flashcardsData, isLoading: flashcardsLoading, error } = useFlashcards(deckId, {
     difficulty: difficultyFilter !== 'all' ? (difficultyFilter as any) : undefined,
+    limit: 1000, // Show all flashcards in the deck
+    sortBy: 'position',
+    sortOrder: 'asc',
   });
   
   const flashcards = flashcardsData?.flashcards || [];
@@ -70,16 +90,18 @@ export function FlashcardManagementPage({ deckId }: FlashcardManagementPageProps
   const filteredFlashcards = React.useMemo(() => {
     return flashcards.filter((card: Flashcard) => {
       const matchesDifficulty = difficultyFilter === 'all' || card.difficulty === difficultyFilter;
-      const matchesTag = tagFilter === 'all' || card.tags.includes(tagFilter);
+      const filteredCardTags = filterSectionTags(card.tags);
+      const matchesTag = tagFilter === 'all' || filteredCardTags.includes(tagFilter);
       return matchesDifficulty && matchesTag;
     });
   }, [flashcards, difficultyFilter, tagFilter]);
 
-  // Get all unique tags
+  // Get all unique tags (excluding section-related tags)
   const allTags = React.useMemo(() => {
     const tags = new Set<string>();
     flashcards.forEach((card: Flashcard) => {
-      card.tags.forEach(tag => tags.add(tag));
+      const filteredTags = filterSectionTags(card.tags);
+      filteredTags.forEach(tag => tags.add(tag));
     });
     return Array.from(tags).sort();
   }, [flashcards]);
@@ -97,7 +119,7 @@ export function FlashcardManagementPage({ deckId }: FlashcardManagementPageProps
 
   const handleFlashcardClick = (flashcard: Flashcard) => {
     // For now, we'll show a simple alert. Later this could open a detailed view
-    console.log('Clicked flashcard:', flashcard);
+    // TODO: Implement detailed flashcard view
   };
 
   const getDifficultyStats = () => {
@@ -342,8 +364,9 @@ export function FlashcardManagementPage({ deckId }: FlashcardManagementPageProps
                   <div 
                     className="text-sm line-clamp-2 cursor-pointer hover:text-primary"
                     onClick={() => handleFlashcardClick(flashcard)}
-                    dangerouslySetInnerHTML={{ __html: flashcard.front_content }}
-                  />
+                  >
+                    <MathContent>{flashcard.front_content}</MathContent>
+                  </div>
                 </div>
                 
                 <div>
@@ -351,24 +374,28 @@ export function FlashcardManagementPage({ deckId }: FlashcardManagementPageProps
                   <div 
                     className="text-sm line-clamp-2 cursor-pointer hover:text-primary"
                     onClick={() => handleFlashcardClick(flashcard)}
-                    dangerouslySetInnerHTML={{ __html: flashcard.back_content }}
-                  />
+                  >
+                    <MathContent>{flashcard.back_content}</MathContent>
+                  </div>
                 </div>
 
-                {flashcard.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {flashcard.tags.slice(0, 3).map((tag, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                    {flashcard.tags.length > 3 && (
-                      <Badge variant="secondary" className="text-xs">
-                        +{flashcard.tags.length - 3}
-                      </Badge>
-                    )}
-                  </div>
-                )}
+                {(() => {
+                  const displayTags = filterSectionTags(flashcard.tags);
+                  return displayTags.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {displayTags.slice(0, 3).map((tag, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                      {displayTags.length > 3 && (
+                        <Badge variant="secondary" className="text-xs">
+                          +{displayTags.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
                   <span>

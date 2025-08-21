@@ -40,7 +40,7 @@ export class TextExtractor {
     }
   }
 
-  private static async extractFromPDF(file: File): Promise<string> {
+  private static async extractFromPDF(_file: File): Promise<string> {
     // PDF support disabled for now due to browser compatibility issues
     throw new Error('PDF support is temporarily disabled. Please use DOCX or TXT files instead.');
   }

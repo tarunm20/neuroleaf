@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Type, Upload, Loader2, Plus, CheckCircle } from 'lucide-react';
@@ -85,16 +85,28 @@ export function CreateDeckDialog({
     return fileExtractedContent.trim() || form.watch('content')?.trim() || '';
   };
 
-  const handleSubmit = async (data: FormData) => {
-    const currentContent = getCurrentContent();
-    const maxCharacters = isPro ? 200000 : 50000;
+  // Reactive validation state for text content only
+  const isFormValid = useMemo(() => {
+    const formName = form.watch('name')?.trim() || '';
+    const textContent = getCurrentContent();
+    const hasValidText = textContent.length >= 10;
+    const hasValidName = formName.length >= 1;
     
-    // Validate that we have content (either from file or manual input)
-    if (!currentContent || currentContent.length < 10) {
-      toast.error('Please provide content by uploading a file or entering text (minimum 10 characters)');
+    // Valid if we have a name AND valid text content
+    return hasValidName && hasValidText;
+  }, [form.watch('name'), fileExtractedContent, form.watch('content')]);
+
+  const handleSubmit = async (data: FormData) => {
+    // Use the same validation logic as the button
+    if (!isFormValid) {
+      toast.error('Please provide content by uploading a file/image or entering text (minimum 10 characters)');
       return;
     }
     
+    const currentContent = getCurrentContent();
+    const maxCharacters = isPro ? 200000 : 50000;
+    
+    // Check character limit
     if (currentContent.length > maxCharacters) {
       const limit = maxCharacters.toLocaleString();
       const current = currentContent.length.toLocaleString();
@@ -119,7 +131,7 @@ export function CreateDeckDialog({
         description: '',
         visibility: 'private',
         tags: [],
-        content: currentContent,
+        content: currentContent
       });
       
       setLoadingState('complete');
@@ -426,7 +438,7 @@ export function CreateDeckDialog({
             </Button>
             <Button 
               type="submit" 
-              disabled={isLoading || !getCurrentContent() || getCurrentContent().length < 10 || getCurrentContent().length > (isPro ? 200000 : 50000)}
+              disabled={isLoading || !isFormValid}
               className="flex-1"
             >
               {isLoading ? (

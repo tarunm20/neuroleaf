@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@kit/ui/card';
 import { Button } from '@kit/ui/button';
 import { Badge } from '@kit/ui/badge';
 import { CheckCircle, XCircle, Circle, Clock } from 'lucide-react';
+import { MathContent } from '@kit/ui/math-content';
 import type { TrueFalseQuestion } from '@kit/test-mode/schemas';
 
 interface TrueFalseQuestionProps {
@@ -115,7 +116,7 @@ export function TrueFalseQuestionComponent({
       <CardContent className="space-y-6">
         {/* Statement */}
         <div className="text-lg font-medium leading-relaxed p-4 bg-muted/30 rounded-lg border">
-          {question.statement}
+          <MathContent>{question.statement}</MathContent>
         </div>
 
         {/* Instruction */}
@@ -174,7 +175,7 @@ export function TrueFalseQuestionComponent({
               Explanation:
             </h4>
             <p className="text-sm text-blue-700 leading-relaxed">
-              {question.explanation}
+              <MathContent>{question.explanation}</MathContent>
             </p>
             <div className="mt-3 pt-3 border-t border-blue-200">
               <div className="flex items-center gap-2">

@@ -58,6 +58,7 @@ import { useCanAccessDeck } from '@kit/subscription/hooks';
 import { CreateFlashcardButton, EditFlashcardButton } from '@kit/flashcards/components';
 import { AIBulkCreationDialog } from '../flashcards/_components/ai-bulk-creation-dialog';
 import { toast } from 'sonner';
+import { MathContent } from '@kit/ui/math-content';
 
 interface DeckDetailPageProps {
   deckId: string;
@@ -82,6 +83,22 @@ interface Flashcard {
   ai_generated?: boolean;
 }
 
+// Helper function to filter out section-related tags
+const filterSectionTags = (tags: string[]): string[] => {
+  const sectionPatterns = [
+    /section/i,
+    /chapter/i,
+    /part\s*\d+/i,
+    /unit\s*\d+/i,
+    /^sec\s*\d+/i,
+    /^ch\s*\d+/i,
+  ];
+  
+  return tags.filter(tag => {
+    return !sectionPatterns.some(pattern => pattern.test(tag));
+  });
+};
+
 export function DeckDetailPage({ deckId }: DeckDetailPageProps) {
   const _router = useRouter();
   const user = useUser();
@@ -95,6 +112,9 @@ export function DeckDetailPage({ deckId }: DeckDetailPageProps) {
   const { data: deck, isLoading: deckLoading } = useDeck(deckId);
   const { data: flashcardsData, isLoading: flashcardsLoading } = useFlashcards(deckId, {
     difficulty: difficultyFilter !== 'all' ? (difficultyFilter as 'easy' | 'medium' | 'hard') : undefined,
+    limit: 1000, // Show all flashcards in the deck
+    sortBy: 'position',
+    sortOrder: 'asc',
   });
   const deleteFlashcard = useDeleteFlashcard();
   const updateDeck = useUpdateDeck();
@@ -116,12 +136,13 @@ export function DeckDetailPage({ deckId }: DeckDetailPageProps) {
   // Filter flashcards based on current filters
   const filteredFlashcards = flashcards.filter((card: Flashcard) => {
     const matchesDifficulty = difficultyFilter === 'all' || card.difficulty === difficultyFilter;
-    const matchesTag = tagFilter === 'all' || card.tags.includes(tagFilter);
+    const filteredCardTags = filterSectionTags(card.tags);
+    const matchesTag = tagFilter === 'all' || filteredCardTags.includes(tagFilter);
     return matchesDifficulty && matchesTag;
   });
 
-  // Get all unique tags
-  const allTags = Array.from(new Set(flashcards.flatMap((card: Flashcard) => card.tags))).sort();
+  // Get all unique tags (excluding section-related tags)
+  const allTags = Array.from(new Set(flashcards.flatMap((card: Flashcard) => filterSectionTags(card.tags)))).sort();
 
   const handleDeleteFlashcard = (flashcardId: string) => {
     setFlashcardToDelete(flashcardId);
@@ -538,34 +559,35 @@ export function DeckDetailPage({ deckId }: DeckDetailPageProps) {
                   <CardContent className="space-y-3">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Front</p>
-                      <div 
-                        className="text-sm line-clamp-2"
-                        dangerouslySetInnerHTML={{ __html: flashcard.front_content }}
-                      />
+                      <div className="text-sm line-clamp-2">
+                        <MathContent>{flashcard.front_content}</MathContent>
+                      </div>
                     </div>
                     
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Back</p>
-                      <div 
-                        className="text-sm line-clamp-2"
-                        dangerouslySetInnerHTML={{ __html: flashcard.back_content }}
-                      />
+                      <div className="text-sm line-clamp-2">
+                        <MathContent>{flashcard.back_content}</MathContent>
+                      </div>
                     </div>
 
-                    {flashcard.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {flashcard.tags.slice(0, 3).map((tag, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                        {flashcard.tags.length > 3 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{flashcard.tags.length - 3}
-                          </Badge>
-                        )}
-                      </div>
-                    )}
+                    {(() => {
+                      const displayTags = filterSectionTags(flashcard.tags);
+                      return displayTags.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {displayTags.slice(0, 3).map((tag, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                          {displayTags.length > 3 && (
+                            <Badge variant="secondary" className="text-xs">
+                              +{displayTags.length - 3}
+                            </Badge>
+                          )}
+                        </div>
+                      );
+                    })()}
 
                     <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
                       <span>

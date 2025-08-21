@@ -32,7 +32,7 @@ type FlashcardFormData = z.infer<typeof FlashcardFormSchema>;
 
 interface FlashcardFormProps {
   deckId: string;
-  initialData?: Partial<FlashcardFormData>;
+  initialData?: Partial<FlashcardFormData> & { id?: string };
   isEditing?: boolean;
   onSubmit: (data: CreateFlashcardData | UpdateFlashcardData) => Promise<void>;
   onCancel?: () => void;
@@ -63,7 +63,6 @@ export function FlashcardForm({
   });
 
   const {
-    register,
     handleSubmit,
     watch,
     setValue,
@@ -91,9 +90,9 @@ export function FlashcardForm({
   };
 
   const handleFormSubmit = async (data: FlashcardFormData) => {
-    if (isEditing && 'id' in (initialData as any)) {
+    if (isEditing && initialData?.id) {
       await onSubmit({
-        id: (initialData as any).id,
+        id: initialData.id,
         front_content: data.front_content,
         back_content: data.back_content,
         tags: data.tags,

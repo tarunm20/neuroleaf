@@ -12,10 +12,13 @@ export type FlashcardGeneration = z.infer<typeof FlashcardGenerationSchema>;
 
 export const GenerateFlashcardsRequestSchema = z.object({
   content: z.string().min(1, 'Content is required'),
-  numberOfCards: z.number().min(1).max(50).default(10),
+  numberOfCards: z.number().min(1).max(1000).default(100),
   difficulty: z.enum(['easy', 'medium', 'hard']).optional(),
   language: z.string().default('en'),
   subject: z.string().optional(),
+  // Image support
+  imageData: z.string().optional(), // base64 encoded image
+  isImage: z.boolean().default(false),
 });
 
 export type GenerateFlashcardsRequest = z.infer<typeof GenerateFlashcardsRequestSchema>;
@@ -32,6 +35,42 @@ export interface ContentAnalysis {
   lists: number;
   recommendedCardCount: number;
   estimatedDifficulty: 'easy' | 'medium' | 'hard';
+  // Advanced semantic analysis
+  educationalConcepts: EducationalConcept[];
+  contentType: ContentType;
+  metadata: ContentMetadata;
+}
+
+// Educational concept extraction
+export interface EducationalConcept {
+  concept: string;
+  definition?: string;
+  context: string;
+  importance: 'high' | 'medium' | 'low';
+  type: 'definition' | 'process' | 'relationship' | 'example' | 'principle';
+  prerequisites?: string[];
+}
+
+// Content type classification
+export type ContentType = 
+  | 'lecture_slides'
+  | 'academic_paper'
+  | 'textbook_chapter' 
+  | 'notes'
+  | 'documentation'
+  | 'general_text'
+  | 'unknown';
+
+// Content metadata that should NOT become flashcards
+export interface ContentMetadata {
+  titles: string[];
+  headings: string[];
+  pageNumbers: string[];
+  chapterReferences: string[];
+  tableOfContents: string[];
+  authorInfo: string[];
+  citations: string[];
+  navigationElements: string[];
 }
 
 export const GenerateFlashcardsResponseSchema = z.object({

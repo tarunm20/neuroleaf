@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { Upload, Loader2, FileText } from 'lucide-react';
+import { Upload, Loader2 } from 'lucide-react';
 import { Button } from '@kit/ui/button';
 // We'll import the server action and TextExtractionResult from the web app
 // since server actions need to be defined there
@@ -35,6 +35,77 @@ export interface MultiFileExtractionResult {
   error?: string;
 }
 
+// Client-side image processing function
+async function processImageFile(file: File): Promise<TextExtractionResult> {
+  try {
+    // Convert image to base64
+    const base64 = await fileToBase64(file);
+    
+    // Call Gemini Vision API directly from client
+    const response = await fetch('/api/vision-ocr', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        imageData: base64,
+        fileName: file.name
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`OCR failed: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'OCR processing failed');
+    }
+    
+    // Count words in extracted text (handle potential undefined)
+    const extractedText = data.text || '';
+    const wordCount = extractedText.trim() ? extractedText.trim().split(/\s+/).length : 0;
+    
+    return {
+      text: extractedText,
+      success: true,
+      wordCount,
+      fileInfo: {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      }
+    };
+  } catch (error) {
+    console.error('Image processing error:', error);
+    return {
+      text: '',
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to extract text from image',
+      wordCount: 0,
+      fileInfo: {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      }
+    };
+  }
+}
+
+// Helper function to convert file to base64
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      resolve(result);
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
+  });
+}
+
 interface FileUploadButtonProps {
   onTextExtracted?: (result: TextExtractionResult) => void; // For single file (backward compatibility)
   onMultipleFilesExtracted?: (result: MultiFileExtractionResult) => void; // For multiple files
@@ -53,7 +124,7 @@ export function FileUploadButton({
   extractTextAction,
   disabled = false,
   multiple = false,
-  isPro = false,
+  isPro: _isPro = false,
   maxTotalCharacters = 50000 // 50K characters for Free, 200K for Pro
 }: FileUploadButtonProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -70,13 +141,16 @@ export function FileUploadButton({
     const supportedTypes = [
       'application/pdf',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'text/plain'
+      'text/plain',
+      'image/jpeg',
+      'image/png',
+      'image/jpg'
     ];
 
     // Validate file types
     for (const file of files) {
       if (!supportedTypes.includes(file.type)) {
-        onError(`Unsupported file type: ${file.name}. Please upload PDF, DOCX, or TXT files.`);
+        onError(`Unsupported file type: ${file.name}. Please upload PDF, DOCX, TXT, or image files (JPG, PNG).`);
         return;
       }
     }
@@ -101,10 +175,18 @@ export function FileUploadButton({
       const processedFiles = [];
       
       for (const file of files) {
-        const formData = new FormData();
-        formData.append('file', file);
+        let result: TextExtractionResult;
         
-        const result = await extractTextAction(formData);
+        // Check if it's an image file
+        if (file.type.startsWith('image/')) {
+          // Process image on client side with OCR
+          result = await processImageFile(file);
+        } else {
+          // Process document files using server action
+          const formData = new FormData();
+          formData.append('file', file);
+          result = await extractTextAction(formData);
+        }
         
         if (result.success) {
           combinedText += `\n\n--- From ${file.name} ---\n\n${result.text}`;
@@ -169,7 +251,7 @@ export function FileUploadButton({
       <input
         ref={fileInputRef}
         type="file"
-        accept=".pdf,.docx,.txt"
+        accept=".pdf,.docx,.txt,.jpg,.jpeg,.png"
         onChange={handleFileSelect}
         multiple={multiple}
         style={{ display: 'none' }}
@@ -191,8 +273,8 @@ export function FileUploadButton({
           <>
             <Upload className="mr-2 h-4 w-4" />
             {multiple 
-              ? `Upload Files (PDF, DOCX, TXT) - Max ${maxCharsFormatted} characters`
-              : `Upload File (PDF, DOCX, TXT) - Max ${maxCharsFormatted} characters`
+              ? `Upload Files (Documents & Images)`
+              : `Upload File (Documents & Images)`
             }
           </>
         )}

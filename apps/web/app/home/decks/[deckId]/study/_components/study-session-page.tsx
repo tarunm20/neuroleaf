@@ -26,6 +26,7 @@ import { useDeck } from '@kit/decks/hooks';
 import { useFlashcards } from '@kit/flashcards/hooks';
 import { useUser } from '@kit/supabase/hooks/use-user';
 import { useSubscription } from '@kit/subscription/hooks';
+import { MathContent } from '@kit/ui/math-content';
 
 interface StudySessionPageProps {
   deckId: string;
@@ -62,6 +63,17 @@ export function StudySessionPage({ deckId }: StudySessionPageProps) {
   // Keyboard navigation
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
+      // Don't handle keyboard shortcuts if user is typing in an input/textarea
+      const target = event.target as HTMLElement;
+      const isTyping = target.tagName === 'INPUT' || 
+                       target.tagName === 'TEXTAREA' || 
+                       target.contentEditable === 'true' ||
+                       target.isContentEditable;
+      
+      if (isTyping) {
+        return; // Let the user type normally
+      }
+
       if (event.code === 'Space') {
         event.preventDefault();
         handleFlipCard();
@@ -174,23 +186,23 @@ export function StudySessionPage({ deckId }: StudySessionPageProps) {
         </div>
       </div>
 
-      {/* Flashcard */}
+      {/* Flashcard Display */}
       <div className="mb-6">
         <Card 
-          className="min-h-[400px] cursor-pointer transition-all duration-300 hover:shadow-lg border-primary/20"
+          className="min-h-[300px] sm:min-h-[400px] cursor-pointer transition-all duration-300 hover:shadow-lg border-primary/20"
           onClick={handleFlipCard}
         >
-          <CardContent className="p-8 flex flex-col justify-center items-center text-center h-full min-h-[400px]">
+          <CardContent className="p-4 sm:p-6 lg:p-8 flex flex-col justify-center items-center text-center h-full min-h-[300px] sm:min-h-[400px]">
             {!isFlipped ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-center gap-2 mb-4">
                   <BookOpen className="h-5 w-5 text-primary" />
                   <Badge variant="outline">Question</Badge>
                 </div>
-                <div className="text-xl font-medium leading-relaxed">
-                  {currentCard?.front_content}
+                <div className="text-lg sm:text-xl font-medium leading-relaxed">
+                  <MathContent>{currentCard?.front_content || ''}</MathContent>
                 </div>
-                <p className="text-sm text-muted-foreground mt-6">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-6">
                   Click or press spacebar to reveal answer
                 </p>
               </div>
@@ -202,10 +214,10 @@ export function StudySessionPage({ deckId }: StudySessionPageProps) {
                     Answer
                   </Badge>
                 </div>
-                <div className="text-lg leading-relaxed">
-                  {currentCard?.back_content}
+                <div className="text-lg sm:text-xl leading-relaxed">
+                  <MathContent>{currentCard?.back_content || ''}</MathContent>
                 </div>
-                <p className="text-sm text-muted-foreground mt-6">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-6">
                   Use the navigation buttons or arrow keys to continue
                 </p>
               </div>

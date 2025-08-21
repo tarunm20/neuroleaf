@@ -128,7 +128,7 @@ export class AIQuestionsService {
     return questions.map(q => ({
       type: 'open_ended' as const,
       question: q.question,
-      suggested_answer: q.suggested_answer,
+      suggested_answer: q.type === 'open_ended' ? q.suggested_answer || 'No suggested answer provided' : 'No suggested answer provided',
       difficulty: q.difficulty || difficulty,
     }));
   }
@@ -364,8 +364,9 @@ Generate ${count} True/False questions now.`;
         const parsed = JSON.parse(jsonMatch[0]);
         if (parsed.questions && Array.isArray(parsed.questions)) {
           return parsed.questions.slice(0, expectedCount).map((q: any) => ({
+            type: 'open_ended' as const,
             question: q.question || 'Generated question',
-            suggested_answer: q.suggested_answer,
+            suggested_answer: q.suggested_answer || 'No suggested answer provided',
             difficulty: q.difficulty || 'medium',
           }));
         }
@@ -392,7 +393,9 @@ Generate ${count} True/False questions now.`;
         const cleanQuestion = line.replace(/^\d+\.\s*/, '').trim();
         if (cleanQuestion.length > 10) {
           questions.push({
+            type: 'open_ended' as const,
             question: cleanQuestion,
+            suggested_answer: 'No suggested answer provided',
             difficulty: 'medium',
           });
         }
@@ -435,6 +438,7 @@ Generate ${count} True/False questions now.`;
       const template = templates[templateIndex];
       
       questions.push({
+        type: 'open_ended' as const,
         question: template!.replace('{front}', card!.front_content),
         suggested_answer: `Consider the definition: ${card!.back_content}`,
         difficulty: 'medium',

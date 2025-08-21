@@ -1,7 +1,6 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { getSupabaseServerAdminClient } from '@kit/supabase/server-admin-client';
 import { getSupabaseServerClient } from '@kit/supabase/server-client';
 import { requireUser } from '@kit/supabase/require-user';
@@ -269,8 +268,16 @@ export async function generateFlashcardsWithAIAction(data: AIGenerationRequestDa
     }
 
     // Validate input data
-    if (!data.content || data.content.trim().length < 10) {
-      throw new Error('Content is too short. Please provide at least 10 characters of content to generate flashcards.');
+    if (data.is_image) {
+      // For images, validate that image_data is provided
+      if (!data.image_data) {
+        throw new Error('Image data is required for image-based flashcard generation.');
+      }
+    } else {
+      // For text content, validate length
+      if (!data.content || data.content.trim().length < 10) {
+        throw new Error('Content is too short. Please provide at least 10 characters of content to generate flashcards.');
+      }
     }
 
     console.log('[AI Generation] Starting flashcard generation:', {
@@ -279,6 +286,8 @@ export async function generateFlashcardsWithAIAction(data: AIGenerationRequestDa
       difficulty: data.difficulty,
       language: data.language,
       subject: data.subject,
+      isImage: data.is_image,
+      hasImageData: !!data.image_data,
     });
 
     // Create AI client and generator
@@ -292,6 +301,8 @@ export async function generateFlashcardsWithAIAction(data: AIGenerationRequestDa
       difficulty: data.difficulty,
       language: data.language,
       subject: data.subject,
+      imageData: data.image_data,
+      isImage: data.is_image,
     });
     
     // Validate card limits after AI generation

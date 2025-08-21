@@ -9,22 +9,27 @@
     "typecheck": "tsc --noEmit"
   },
   "exports": {
+    ".": "./src/index.ts",
     "./gemini": "./src/gemini/index.ts",
     "./types": "./src/types.ts",
     "./utils": "./src/utils.ts",
     "./flashcard-generator": "./src/services/flashcard-generator.ts",
-    "./content-enhancer": "./src/services/content-enhancer.ts"
+    "./content-enhancer": "./src/services/content-enhancer.ts",
+    "./tutor-feedback": "./src/services/tutor-feedback.service.ts",
+    "./server": "./src/server/tutor-feedback-actions.ts"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.21.0"
+    "@google/generative-ai": "^0.21.0",
+    "@kit/subscription": "workspace:*",
+    "@kit/supabase": "workspace:*",
+    "zod": "^3.25.32"
   },
   "devDependencies": {
     "@kit/eslint-config": "workspace:*",
     "@kit/prettier-config": "workspace:*",
     "@kit/shared": "workspace:*",
     "@kit/tsconfig": "workspace:*",
-    "@types/node": "^22.15.23",
-    "zod": "^3.25.32"
+    "@types/node": "^22.15.23"
   },
   "prettier": "@kit/prettier-config",
   "typesVersions": {

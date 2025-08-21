@@ -281,7 +281,7 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
 
     if (currentQuestion.type === 'multiple_choice') {
       isValid = currentMCQAnswer !== null;
-      userAnswer = isValid ? (currentQuestion as MultipleChoiceQuestion).options[currentMCQAnswer!] : '';
+      userAnswer = isValid ? (currentQuestion as MultipleChoiceQuestion).options[currentMCQAnswer!] || '' : '';
       userAnswerIndex = currentMCQAnswer ?? undefined;
     } else if (currentQuestion.type === 'true_false') {
       isValid = currentTFAnswer !== null;
@@ -349,7 +349,7 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
         if (question) {
           if (question.type === 'multiple_choice') {
             const mcq = question as MultipleChoiceQuestion;
-            expectedAnswer = mcq.options[mcq.correct_answer];
+            expectedAnswer = mcq.options[mcq.correct_answer] || 'No expected answer';
           } else if (question.type === 'true_false') {
             const tf = question as TrueFalseQuestion;
             expectedAnswer = tf.correct_answer ? 'True' : 'False';
@@ -422,7 +422,7 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
           if (question) {
             if (question.type === 'multiple_choice') {
               const mcq = question as MultipleChoiceQuestion;
-              expectedAnswer = mcq.options[mcq.correct_answer];
+              expectedAnswer = mcq.options[mcq.correct_answer] || 'No expected answer';
             } else if (question.type === 'true_false') {
               const tf = question as TrueFalseQuestion;
               expectedAnswer = tf.correct_answer ? 'True' : 'False';

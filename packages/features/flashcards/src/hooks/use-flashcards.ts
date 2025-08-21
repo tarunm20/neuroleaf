@@ -2,12 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { FlashcardService } from '../server/flashcard-service';
 import { 
-  CreateFlashcardData, 
-  UpdateFlashcardData, 
-  FlashcardFilters,
-  BulkImportData,
-  ReorderFlashcardsData,
-  AIGenerationRequestData 
+  FlashcardFilters
 } from '../schemas/flashcard.schema';
 import { 
   createFlashcardAction,

@@ -53,7 +53,7 @@ export function AITextConverter({
   const [isLoading, setIsLoading] = useState(false);
   const [generatedCards, setGeneratedCards] = useState<GeneratedFlashcard[]>([]);
   const [showPreview, setShowPreview] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState<{ name: string; wordCount: number } | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<{ name: string; wordCount: number; isImage?: boolean; imageData?: string } | null>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(FormSchema) as any,
@@ -78,6 +78,9 @@ export function AITextConverter({
         difficulty: data.difficulty,
         language: 'en',
         subject: undefined,
+        // Include image data if available
+        image_data: uploadedFile?.imageData,
+        is_image: uploadedFile?.isImage || false,
       });
 
       if (result.success && result.flashcards) {
@@ -96,8 +99,13 @@ export function AITextConverter({
 
   const handleFileUpload = (result: TextExtractionResult) => {
     if (result.success) {
+      // All files (documents and images) are now processed to text
       form.setValue('content', result.text);
-      setUploadedFile({ name: result.fileInfo.name, wordCount: result.wordCount });
+      setUploadedFile({ 
+        name: result.fileInfo.name, 
+        wordCount: result.wordCount, 
+        isImage: false 
+      });
     }
   };
 
@@ -163,7 +171,7 @@ export function AITextConverter({
                     disabled={isLoading}
                   />
                   <p className="text-sm text-muted-foreground">
-                    Upload PDF, DOCX, or TXT files to extract text content
+                    Upload PDF, DOCX, TXT files or images (JPG, PNG) to extract content
                   </p>
                 </div>
                 
@@ -173,9 +181,26 @@ export function AITextConverter({
                       <FileText className="h-4 w-4" />
                       <span className="font-medium">{uploadedFile.name}</span>
                     </div>
-                    <p className="text-sm text-green-600 mt-1">
-                      {uploadedFile.wordCount} words extracted successfully
-                    </p>
+                    {uploadedFile.isImage ? (
+                      <div className="mt-2">
+                        <p className="text-sm text-green-600 mb-2">
+                          Image uploaded successfully - ready for AI processing
+                        </p>
+                        {uploadedFile.imageData && (
+                          <div className="max-w-sm">
+                            <img 
+                              src={uploadedFile.imageData} 
+                              alt="Uploaded preview" 
+                              className="w-full h-auto rounded border max-h-32 object-cover"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-green-600 mt-1">
+                        {uploadedFile.wordCount} words extracted successfully
+                      </p>
+                    )}
                   </div>
                 )}
                 
@@ -236,7 +261,7 @@ export function AITextConverter({
             {/* Generate Button */}
             <Button 
               type="submit" 
-              disabled={isLoading || !form.watch('content')}
+              disabled={isLoading || (!form.watch('content') && !uploadedFile?.isImage)}
               className="w-full"
             >
               {isLoading ? (

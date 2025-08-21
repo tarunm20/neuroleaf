@@ -222,6 +222,90 @@ export class GeminiClient {
     return new AIServiceError(message, 'GEMINI_ERROR', error?.status);
   }
 
+  /**
+   * Generate content from text prompt and image using Gemini Vision API
+   */
+  async generateContentWithImage(params: {
+    prompt: string;
+    imageData: string; // base64 encoded image
+    maxTokens?: number;
+  }): Promise<{
+    content: string;
+    tokensUsed: number;
+    estimatedCost: number;
+  }> {
+    return this.withRetry(async () => {
+      const startTime = Date.now();
+      
+      // Validate inputs
+      if (!params.prompt || params.prompt.trim().length === 0) {
+        throw new InvalidRequestError('Prompt cannot be empty');
+      }
+      
+      if (!params.imageData) {
+        throw new InvalidRequestError('Image data is required');
+      }
+
+      try {
+        // Create vision model (using latest vision-capable model)
+        const visionModel = this.client.getGenerativeModel({ 
+          model: 'gemini-1.5-flash',
+          generationConfig: {
+            temperature: this.config.temperature ?? 0.7,
+            topP: this.config.topP ?? 0.95,
+            topK: this.config.topK ?? 40,
+            maxOutputTokens: params.maxTokens ?? 2048,
+          },
+        });
+
+        // Convert base64 to the format expected by Gemini
+        const imageBase64 = params.imageData.split(',')[1] || params.imageData;
+        
+        const imagePart = {
+          inlineData: {
+            data: imageBase64,
+            mimeType: params.imageData.startsWith('data:image/png') ? 'image/png' : 'image/jpeg'
+          }
+        };
+
+        const result = await visionModel.generateContent([params.prompt, imagePart]);
+        const response = await result.response;
+        const text = response.text();
+
+        if (!text) {
+          throw new Error('No content generated from image');
+        }
+
+        // Calculate processing time and tokens (estimated)
+        const processingTime = Date.now() - startTime;
+        const estimatedTokensUsed = Math.ceil(text.length / 4); // Rough estimate
+        const estimatedCost = this.calculateCost(estimatedTokensUsed);
+
+        console.log(`[GeminiClient] Vision API - Generated ${text.length} characters in ${processingTime}ms`);
+
+        return {
+          content: text,
+          tokensUsed: estimatedTokensUsed,
+          estimatedCost,
+        };
+
+      } catch (error: any) {
+        console.error('[GeminiClient] Vision generation error:', error);
+        
+        // Handle specific error cases
+        if (error?.message?.includes('Unable to submit request because the service is temporarily overloaded')) {
+          throw new QuotaExceededError('Gemini Vision service is temporarily overloaded. Please try again later.');
+        }
+        
+        if (error?.message?.includes('quota')) {
+          throw new QuotaExceededError('Gemini Vision quota exceeded');
+        }
+        
+        throw this.handleError(error);
+      }
+    });
+  }
+
   // Health check method
   async healthCheck(): Promise<boolean> {
     try {

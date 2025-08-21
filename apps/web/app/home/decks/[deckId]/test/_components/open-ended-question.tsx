@@ -6,6 +6,7 @@ import { Button } from '@kit/ui/button';
 import { Badge } from '@kit/ui/badge';
 import { Textarea } from '@kit/ui/textarea';
 import { Clock, MessageSquare } from 'lucide-react';
+import { MathContent } from '@kit/ui/math-content';
 import type { OpenEndedQuestion } from '@kit/test-mode/schemas';
 
 interface OpenEndedQuestionProps {
@@ -71,7 +72,7 @@ export function OpenEndedQuestionComponent({
       <CardContent className="space-y-6">
         {/* Question */}
         <div className="text-lg font-medium leading-relaxed">
-          {question.question}
+          <MathContent>{question.question}</MathContent>
         </div>
 
         {/* Answer Textarea */}
@@ -103,7 +104,7 @@ export function OpenEndedQuestionComponent({
               💡 Hint for a good answer:
             </h5>
             <p className="text-xs text-amber-700">
-              {question.suggested_answer}
+              <MathContent>{question.suggested_answer}</MathContent>
             </p>
           </div>
         )}
@@ -118,7 +119,7 @@ export function OpenEndedQuestionComponent({
                 AI Feedback:
               </h4>
               <p className="text-sm text-blue-700 leading-relaxed">
-                {feedback}
+                <MathContent>{feedback}</MathContent>
               </p>
             </div>
 
@@ -129,7 +130,7 @@ export function OpenEndedQuestionComponent({
                   Reference Answer:
                 </h4>
                 <p className="text-sm text-green-700 leading-relaxed">
-                  {expectedAnswer}
+                  <MathContent>{expectedAnswer}</MathContent>
                 </p>
               </div>
             )}

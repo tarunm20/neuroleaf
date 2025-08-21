@@ -121,6 +121,7 @@ export function UnifiedDashboard() {
             card_type: 'basic',
             language: 'en',
             subject: undefined,
+            is_image: false,
           });
           
           if (!aiResult.success) {
@@ -295,12 +296,12 @@ export function UnifiedDashboard() {
 
 
       {/* Dev Tier Switcher - only shows in development */}
-      {subscriptionInfo && user?.data?.id && (
+      {/* {subscriptionInfo && user?.data?.id && (
         <DevTierSwitcher
           currentTier={subscriptionInfo.tier}
           accountId={user.data.id}
         />
-      )}
+      )} */}
 
       {/* Upgrade Dialog */}
       <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>

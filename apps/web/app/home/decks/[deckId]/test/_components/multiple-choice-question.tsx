@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@kit/ui/card';
 import { Button } from '@kit/ui/button';
 import { Badge } from '@kit/ui/badge';
 import { CheckCircle, Circle, Clock } from 'lucide-react';
+import { MathContent } from '@kit/ui/math-content';
 import type { MultipleChoiceQuestion } from '@kit/test-mode/schemas';
 
 interface MultipleChoiceQuestionProps {
@@ -99,7 +100,7 @@ export function MultipleChoiceQuestionComponent({
       <CardContent className="space-y-6">
         {/* Question */}
         <div className="text-lg font-medium leading-relaxed">
-          {question.question}
+          <MathContent>{question.question}</MathContent>
         </div>
 
         {/* Options */}
@@ -122,7 +123,9 @@ export function MultipleChoiceQuestionComponent({
                   <span className="font-medium text-sm">
                     {String.fromCharCode(65 + index)}.
                   </span>
-                  <span className="text-sm">{option}</span>
+                  <span className="text-sm">
+                    <MathContent>{option}</MathContent>
+                  </span>
                 </div>
               </div>
             </div>
@@ -136,7 +139,7 @@ export function MultipleChoiceQuestionComponent({
               Explanation:
             </h4>
             <p className="text-sm text-blue-700 leading-relaxed">
-              {question.explanation}
+              <MathContent>{question.explanation}</MathContent>
             </p>
           </div>
         )}

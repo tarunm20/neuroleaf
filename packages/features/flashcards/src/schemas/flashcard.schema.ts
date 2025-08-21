@@ -100,6 +100,9 @@ export const AIGenerationRequestSchema = z.object({
   language: z.string().min(2).max(10).default('en'),
   subject: z.string().max(100).optional(),
   card_type: z.enum(['basic', 'cloze', 'image_occlusion']).default('basic'),
+  // For image uploads
+  image_data: z.string().optional(), // base64 encoded image
+  is_image: z.boolean().default(false),
 });
 
 export type AIGenerationRequestData = z.infer<typeof AIGenerationRequestSchema>;

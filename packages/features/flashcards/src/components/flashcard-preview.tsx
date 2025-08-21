@@ -9,6 +9,22 @@ import { cn } from '@kit/ui/utils';
 import { RotateCcw, Tag, Calendar, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
+// Helper function to filter out section-related tags
+const filterSectionTags = (tags: string[]): string[] => {
+  const sectionPatterns = [
+    /section/i,
+    /chapter/i,
+    /part\s*\d+/i,
+    /unit\s*\d+/i,
+    /^sec\s*\d+/i,
+    /^ch\s*\d+/i,
+  ];
+  
+  return tags.filter(tag => {
+    return !sectionPatterns.some(pattern => pattern.test(tag));
+  });
+};
+
 interface Flashcard {
   id: string;
   front_content: string;
@@ -138,18 +154,21 @@ export function FlashcardPreview({
       {showMetadata && (
         <div className="space-y-3">
           {/* Tags */}
-          {flashcard.tags.length > 0 && (
-            <div className="flex items-center gap-2 flex-wrap">
-              <Tag className="h-4 w-4 text-muted-foreground" />
-              <div className="flex flex-wrap gap-1">
-                {flashcard.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
+          {(() => {
+            const displayTags = filterSectionTags(flashcard.tags);
+            return displayTags.length > 0 && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <Tag className="h-4 w-4 text-muted-foreground" />
+                <div className="flex flex-wrap gap-1">
+                  {displayTags.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Difficulty */}
           <div className="flex items-center gap-2">
