@@ -1,7 +1,6 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@kit/ui/card';
-import { Badge } from '@kit/ui/badge';
 import { 
   Trophy, 
   Target, 

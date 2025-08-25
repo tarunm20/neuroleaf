@@ -54,10 +54,19 @@ export interface SaveTestHistoryData {
   }>;
   results: {
     individual_grades: Array<{
-      score: number;
-      feedback: string;
+      id: string;
+      question_text: string;
+      user_response: string;
+      ai_score: number;
+      ai_feedback: string;
       is_correct: boolean;
+      question_type: 'multiple_choice' | 'true_false' | 'open_ended';
+      question_options: string[];
+      correct_answer?: number | boolean | string;
+      expected_answer: string;
       grading_method: string;
+      response_time_seconds: number | null;
+      created_at: string;
     }>;
     overall_feedback: string;
     average_score: number;

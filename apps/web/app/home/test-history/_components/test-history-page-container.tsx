@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { TestHistoryList } from './test-history-list';
 import { TestHistoryFilters } from './test-history-filters';
 import { TestSessionDetails } from './test-session-details';
-import { Card, CardContent, CardHeader, CardTitle } from '@kit/ui/card';
-import { Badge } from '@kit/ui/badge';
+import { Card, CardContent } from '@kit/ui/card';
 import { Button } from '@kit/ui/button';
 import { RefreshCw, History, TrendingUp } from 'lucide-react';
 import { 
@@ -25,10 +24,10 @@ export interface TestHistoryEntry {
   time_spent_seconds: number;
   started_at: string;
   completed_at: string;
-  test_questions: any[];
-  test_results: any;
-  overall_analysis: any;
-  grading_metadata: any;
+  test_questions: unknown[];
+  test_results: unknown;
+  overall_analysis: unknown;
+  grading_metadata: unknown;
 }
 
 export interface TestStatistics {
@@ -44,14 +43,14 @@ interface TestHistoryPageContainerProps {
   user: User;
 }
 
-export function TestHistoryPageContainer({ user }: TestHistoryPageContainerProps) {
+export function TestHistoryPageContainer({ user: _user }: TestHistoryPageContainerProps) {
   const [testHistory, setTestHistory] = useState<TestHistoryEntry[]>([]);
   const [selectedDeck, setSelectedDeck] = useState<string | null>(null);
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadTestHistory = async (deckId?: string) => {
+  const loadTestHistory = useCallback(async (deckId?: string) => {
     try {
       setLoading(true);
       setError(null);
@@ -72,26 +71,26 @@ export function TestHistoryPageContainer({ user }: TestHistoryPageContainerProps
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleDeckFilter = (deckId: string | null) => {
+  const handleDeckFilter = useCallback((deckId: string | null) => {
     setSelectedDeck(deckId);
     setSelectedSession(null); // Clear session selection when changing deck filter
     loadTestHistory(deckId || undefined);
-  };
+  }, [loadTestHistory]);
 
-  const handleSessionSelect = (sessionId: string | null) => {
+  const handleSessionSelect = useCallback((sessionId: string | null) => {
     setSelectedSession(sessionId);
-  };
+  }, []);
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     loadTestHistory(selectedDeck || undefined);
-  };
+  }, [loadTestHistory, selectedDeck]);
 
   // Load initial data
   useEffect(() => {
     loadTestHistory();
-  }, []);
+  }, [loadTestHistory]);
 
   if (selectedSession) {
     return (

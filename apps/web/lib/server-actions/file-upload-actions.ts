@@ -182,7 +182,7 @@ async function extractFromPDF(file: File): Promise<string> {
           } else {
             resolve(text);
           }
-        } catch (error) {
+        } catch {
           clearTimeout(timeout);
           reject(new Error('Failed to extract text from PDF'));
         }

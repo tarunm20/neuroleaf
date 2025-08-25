@@ -14,10 +14,8 @@ import {
   XCircle,
   AlertCircle,
   Zap,
-  Brain,
   RefreshCw,
-  Trophy,
-  TrendingUp
+  Trophy
 } from 'lucide-react';
 import { getTestSessionDetailsAction } from '@kit/test-mode/server';
 import type { DetailedTestHistory } from '@kit/test-mode';
@@ -33,27 +31,27 @@ export function TestSessionDetails({ sessionId, onBack }: TestSessionDetailsProp
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadTestDetails = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const result = await getTestSessionDetailsAction(sessionId);
-      
-      if (result.success && result.data) {
-        setTestDetails(result.data);
-      } else {
-        setError(result.error || 'Failed to load test details');
-      }
-    } catch (err) {
-      console.error('Error loading test details:', err);
-      setError('An unexpected error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const loadTestDetails = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const result = await getTestSessionDetailsAction(sessionId);
+        
+        if (result.success && result.data) {
+          setTestDetails(result.data);
+        } else {
+          setError(result.error || 'Failed to load test details');
+        }
+      } catch (err) {
+        console.error('Error loading test details:', err);
+        setError('An unexpected error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadTestDetails();
   }, [sessionId]);
 

@@ -789,65 +789,6 @@ export class TestSessionService {
     };
   }
 
-  /**
-   * Save test history after completion with optimized grading
-   */
-  async saveTestHistoryOptimized(
-    sessionId: string,
-    userId: string,
-    questions: Array<{
-      question: string;
-      question_type: 'multiple_choice' | 'true_false' | 'open_ended';
-      options?: string[];
-      correct_answer?: number | boolean | string;
-      explanation?: string;
-    }>,
-    results: {
-      individual_grades: Array<{
-        score: number;
-        feedback: string;
-        is_correct: boolean;
-        model_used: string;
-      }>;
-      overall_feedback: string;
-      grading_metadata: {
-        objective_questions: number;
-        ai_graded_questions: number;
-        total_questions: number;
-      };
-    },
-    analysis?: any
-  ): Promise<boolean> {
-    try {
-      const averageScore = results.individual_grades.reduce((sum, grade) => sum + grade.score, 0) / results.individual_grades.length;
-
-      const testHistoryData = {
-        session_id: sessionId,
-        questions,
-        results: {
-          individual_grades: results.individual_grades.map(grade => ({
-            score: grade.score,
-            feedback: grade.feedback,
-            is_correct: grade.is_correct,
-            grading_method: grade.model_used,
-          })),
-          overall_feedback: results.overall_feedback,
-          average_score: averageScore,
-        },
-        analysis,
-        metadata: {
-          ...results.grading_metadata,
-          grading_efficiency: results.grading_metadata.objective_questions / results.grading_metadata.total_questions,
-        },
-      };
-
-      return await this.testHistory.saveCompleteTestSession(userId, testHistoryData);
-    } catch (error) {
-      console.error('Error saving test history:', error);
-      // Don't throw error to avoid breaking the grading flow
-      return false;
-    }
-  }
 
   /**
    * Get test session analytics for a deck

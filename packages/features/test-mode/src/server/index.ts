@@ -10,7 +10,6 @@ export {
   completeTestSessionAction,
   gradeAnswersAction,
   gradeAnswersOptimizedAction,
-  gradeAnswersWithHistoryAction,
   gradeTestComprehensiveAction,
 } from './test-actions';
 
