@@ -8,6 +8,7 @@ import { requireUser } from '@kit/supabase/require-user';
 import { checkTestSessionLimit, checkAIGenerationLimit } from '@kit/subscription/server';
 import { TestSessionService } from './test-session.service';
 import { AIGradingService } from '../services/ai-grading.service';
+import { TestHistoryService } from '../services/test-history.service';
 import {
   CreateTestSessionSchema,
   CreateTestResponseSchema,
@@ -135,6 +136,75 @@ export async function generateQuestionsAction(
 }
 
 /**
+ * Grade answers using optimized grading (objective for MCQ/T-F, AI for open-ended)
+ */
+export async function gradeAnswersOptimizedAction(data: {
+  answers: Array<{
+    question: string;
+    user_answer: string;
+    expected_answer: string;
+    question_type?: 'multiple_choice' | 'true_false' | 'open_ended';
+    correct_answer?: number | boolean;
+    options?: string[];
+    explanation?: string;
+  }>;
+}) {
+  const supabase = getSupabaseServerClient();
+  const result = await requireUser(supabase);
+  const testSessionService = new TestSessionService(supabase);
+
+  if (result.error || !result.data) {
+    return { success: false, error: 'User not authenticated' };
+  }
+
+  const user = result.data;
+
+  // Only check AI generation limit for questions that will use AI grading
+  const aiQuestionsCount = data.answers.filter(answer => 
+    !(answer.question_type === 'multiple_choice' && typeof answer.correct_answer === 'number') &&
+    !(answer.question_type === 'true_false' && typeof answer.correct_answer === 'boolean')
+  ).length;
+
+  if (aiQuestionsCount > 0) {
+    const aiLimitCheck = await checkAIGenerationLimit(user.id);
+    if (!aiLimitCheck.canGenerate) {
+      return { 
+        success: false, 
+        error: `AI grading limit reached (${aiLimitCheck.current}/${aiLimitCheck.limit}). Please upgrade to Pro for more AI-powered features.`,
+        limitReached: true,
+        usage: { current: aiLimitCheck.current, limit: aiLimitCheck.limit }
+      };
+    }
+  }
+
+  try {
+    const results = await testSessionService.gradeAnswersOptimized(data.answers);
+    
+    return { 
+      success: true, 
+      data: [
+        ...results.individual_grades.map((grade) => ({
+          score: grade.score,
+          feedback: grade.feedback,
+        })),
+        {
+          score: 0,
+          feedback: results.overall_feedback
+        }
+      ],
+      // Include metadata about grading efficiency
+      metadata: results.grading_metadata
+    };
+  } catch (error) {
+    console.error('Grade answers optimized error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to grade answers',
+    };
+  }
+}
+
+/**
  * Grade answers using AI (legacy method for backward compatibility)
  */
 export async function gradeAnswersAction(data: {
@@ -200,6 +270,10 @@ export async function gradeTestComprehensiveAction(data: {
     question: string;
     user_answer: string;
     expected_answer: string;
+    question_type?: 'multiple_choice' | 'true_false' | 'open_ended';
+    correct_answer?: number | boolean;
+    options?: string[];
+    explanation?: string;
   }>;
   time_spent_minutes: number;
 }) {
@@ -236,6 +310,73 @@ export async function gradeTestComprehensiveAction(data: {
     // Transform results into progressive disclosure hierarchy for cognitive load reduction
     const aiGradingService = new AIGradingService();
     const transformedResults = aiGradingService.transformToProgressiveDisclosure(comprehensiveResults);
+    
+    // Save test history to database
+    try {
+      const testHistoryService = new TestHistoryService(supabase);
+      
+      // Prepare questions data for history
+      const questionsForHistory = data.answers.map(answer => ({
+        question: answer.question,
+        question_type: answer.question_type || 'open_ended' as const,
+        options: answer.options,
+        correct_answer: answer.correct_answer,
+        explanation: answer.explanation,
+      }));
+      
+      // Prepare results data for history
+      const resultsForHistory = {
+        individual_grades: comprehensiveResults.individual_questions.map((q, index) => {
+          const answer = data.answers[index];
+          return {
+            id: `response-${index}`,
+            question_text: answer?.question || 'Unknown question',
+            user_response: answer?.user_answer || '',
+            ai_score: q.individual_score,
+            ai_feedback: q.detailed_feedback,
+            is_correct: q.individual_score >= 60,
+            question_type: answer?.question_type || 'open_ended',
+            question_options: answer?.options || [],
+            correct_answer: answer?.correct_answer,
+            expected_answer: answer?.expected_answer || '',
+            grading_method: answer?.question_type === 'multiple_choice' || answer?.question_type === 'true_false' 
+              ? 'objective_grading_v1' 
+              : 'ai_grading',
+            response_time_seconds: null,
+            created_at: new Date().toISOString(),
+          };
+        }),
+        overall_feedback: comprehensiveResults.overall_analysis.grade_explanation || 'Test completed successfully',
+        average_score: comprehensiveResults.overall_analysis.overall_percentage,
+      };
+      
+      // Save to database
+      await testHistoryService.saveCompleteTestSession(user.id, {
+        session_id: data.test_session_id,
+        questions: questionsForHistory,
+        results: resultsForHistory,
+        overall_analysis: comprehensiveResults.overall_analysis,
+        grading_metadata: {
+          grading_method: 'comprehensive_with_optimized',
+          model_version: 'gemini_v1',
+          total_questions: data.answers.length,
+          objective_questions: data.answers.filter(a => 
+            (a.question_type === 'multiple_choice' && typeof a.correct_answer === 'number') ||
+            (a.question_type === 'true_false' && typeof a.correct_answer === 'boolean')
+          ).length,
+          ai_graded_questions: data.answers.filter(a => 
+            !(a.question_type === 'multiple_choice' && typeof a.correct_answer === 'number') &&
+            !(a.question_type === 'true_false' && typeof a.correct_answer === 'boolean')
+          ).length,
+          processing_time_ms: Date.now() // This would be better calculated properly
+        },
+      });
+      
+      console.log('✅ Test history saved successfully');
+    } catch (historyError) {
+      console.error('Failed to save test history:', historyError);
+      // Don't fail the whole request if history saving fails
+    }
     
     return { 
       success: true, 
@@ -359,6 +500,98 @@ export async function getUserPerformanceAction(deckId?: string) {
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to get performance analytics',
+    };
+  }
+}
+
+/**
+ * Grade answers with optimized grading and save complete test history
+ */
+export async function gradeAnswersWithHistoryAction(data: {
+  session_id: string;
+  answers: Array<{
+    question: string;
+    user_answer: string;
+    expected_answer: string;
+    question_type?: 'multiple_choice' | 'true_false' | 'open_ended';
+    correct_answer?: number | boolean;
+    options?: string[];
+    explanation?: string;
+  }>;
+  analysis?: any;
+}) {
+  const supabase = getSupabaseServerClient();
+  const result = await requireUser(supabase);
+  const testSessionService = new TestSessionService(supabase);
+
+  if (result.error || !result.data) {
+    return { success: false, error: 'User not authenticated' };
+  }
+
+  const user = result.data;
+
+  // Only check AI generation limit for questions that will use AI grading
+  const aiQuestionsCount = data.answers.filter(answer => 
+    !(answer.question_type === 'multiple_choice' && typeof answer.correct_answer === 'number') &&
+    !(answer.question_type === 'true_false' && typeof answer.correct_answer === 'boolean')
+  ).length;
+
+  if (aiQuestionsCount > 0) {
+    const aiLimitCheck = await checkAIGenerationLimit(user.id);
+    if (!aiLimitCheck.canGenerate) {
+      return { 
+        success: false, 
+        error: `AI grading limit reached (${aiLimitCheck.current}/${aiLimitCheck.limit}). Please upgrade to Pro for more AI-powered features.`,
+        limitReached: true,
+        usage: { current: aiLimitCheck.current, limit: aiLimitCheck.limit }
+      };
+    }
+  }
+
+  try {
+    // Grade the answers using optimized method
+    const results = await testSessionService.gradeAnswersOptimized(data.answers);
+    
+    // Prepare questions data for history
+    const questionsForHistory = data.answers.map(answer => ({
+      question: answer.question,
+      question_type: answer.question_type || 'open_ended' as const,
+      options: answer.options,
+      correct_answer: answer.correct_answer,
+      explanation: answer.explanation,
+    }));
+
+    // Save test history asynchronously (don't block the response)
+    testSessionService.saveTestHistoryOptimized(
+      data.session_id,
+      user.id,
+      questionsForHistory,
+      results,
+      data.analysis
+    ).catch(error => {
+      console.error('Failed to save test history (non-blocking):', error);
+    });
+
+    return { 
+      success: true, 
+      data: [
+        ...results.individual_grades.map((grade) => ({
+          score: grade.score,
+          feedback: grade.feedback,
+        })),
+        {
+          score: 0,
+          feedback: results.overall_feedback
+        }
+      ],
+      // Include metadata about grading efficiency
+      metadata: results.grading_metadata
+    };
+  } catch (error) {
+    console.error('Grade answers with history error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to grade answers',
     };
   }
 }

@@ -12,7 +12,8 @@ import {
   CheckCircle,
   Loader2,
   BookOpen,
-  Zap
+  Zap,
+  Settings
 } from 'lucide-react';
 
 // UI Components
@@ -27,8 +28,9 @@ import { useDeck } from '@kit/decks/hooks';
 import { useFlashcards } from '@kit/flashcards/hooks';
 import { useUser } from '@kit/supabase/hooks/use-user';
 import { useSubscription } from '@kit/subscription/hooks';
-import { generateQuestionsAction, gradeAnswersAction, gradeTestComprehensiveAction, createTestSessionAction } from '@kit/test-mode/server';
+import { generateQuestionsAction, gradeAnswersAction, gradeTestComprehensiveAction, createTestSessionAction, getCurrentUsageAction } from '@kit/test-mode/server';
 import type { AIQuestion, MultipleChoiceQuestion, TrueFalseQuestion, OpenEndedQuestion } from '@kit/test-mode/schemas';
+import { ModernTestConfigurator, type TestConfiguration, UsageIndicator } from '@kit/test-mode/components';
 
 // Question Components
 import { MultipleChoiceQuestionComponent } from './multiple-choice-question';
@@ -162,6 +164,17 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
   const [currentMCQAnswer, setCurrentMCQAnswer] = useState<number | null>(null);
   const [currentTFAnswer, setCurrentTFAnswer] = useState<boolean | null>(null);
   
+  // Configuration state
+  const [showConfigDialog, setShowConfigDialog] = useState(false);
+  const [testConfiguration, setTestConfiguration] = useState<TestConfiguration | null>(null);
+  const [usageData, setUsageData] = useState<{
+    currentUsage: number;
+    limit: number;
+    canConsumeQuestions: boolean;
+    remainingQuestions: number;
+    isProTier: boolean;
+  } | null>(null);
+  
   // Update current answer when question changes (for navigation)
   useEffect(() => {
     if (testState === 'active' && questions.length > 0) {
@@ -191,10 +204,31 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
 
   // Check if user has Pro access or remaining test sessions
   const hasProAccess = subscriptionInfo?.tier === 'pro';
+  
+  // Load usage data on mount
+  useEffect(() => {
+    const loadUsageData = async () => {
+      try {
+        const usage = await getCurrentUsageAction();
+        setUsageData(usage);
+      } catch (error) {
+        console.error('Failed to load usage data:', error);
+      }
+    };
+    
+    loadUsageData();
+  }, []);
 
-  const generateQuestions = async () => {
+  const generateQuestions = async (config?: TestConfiguration) => {
     if (flashcards.length === 0) {
       toast.error('No flashcards available for testing');
+      return;
+    }
+
+    // Use provided config or existing testConfiguration
+    const finalConfig = config || testConfiguration;
+    if (!finalConfig) {
+      toast.error('Test configuration missing');
       return;
     }
 
@@ -205,7 +239,7 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
       const sessionResult = await createTestSessionAction({
         deck_id: deckId,
         test_mode: 'ai_questions',
-        total_questions: Math.min(10, flashcards.length),
+        total_questions: finalConfig.totalQuestions,
       });
 
       if (!sessionResult.success) {
@@ -225,15 +259,23 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
         return;
       }
       setCurrentTestSessionId(testSessionId);
-      const questionCount = Math.min(10, flashcards.length);
+      
+      // Create distribution based on config
+      const distribution = {
+        multiple_choice: finalConfig.enableMultipleChoice ? finalConfig.multipleChoiceCount : 0,
+        true_false: finalConfig.enableTrueFalse ? finalConfig.trueFalseCount : 0,
+        open_ended: finalConfig.enableOpenEnded ? finalConfig.openEndedCount : 0,
+      };
+      
       const result = await generateQuestionsAction({
         flashcards: flashcards.map(card => ({
           id: card.id,
           front_content: card.front_content,
           back_content: card.back_content,
         })),
-        question_count: questionCount,
-        difficulty: 'medium',
+        question_count: finalConfig.totalQuestions,
+        difficulty: finalConfig.difficulty,
+        distribution,
       });
 
       if (result.success && result.data) {
@@ -252,11 +294,28 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
         setCurrentMCQAnswer(null);
         setCurrentTFAnswer(null);
         
+        // Update usage data after successful generation
+        if (result.questionsUsed && result.questionsUsed > 0 && usageData) {
+          setUsageData(prev => prev ? {
+            ...prev,
+            currentUsage: prev.currentUsage + result.questionsUsed,
+            remainingQuestions: Math.max(0, prev.remainingQuestions - result.questionsUsed),
+            canConsumeQuestions: (prev.remainingQuestions - result.questionsUsed) > 0
+          } : null);
+        }
+        
         toast.success(`Generated ${generatedQuestions.length} AI questions`);
       } else {
-        // Handle specific limit errors with better messaging
-        if ('limitReached' in result && result.limitReached) {
-          toast.error(result.error || 'Usage limit reached');
+        // Handle specific usage limit errors
+        if ('usageLimitReached' in result && result.usageLimitReached) {
+          toast.error(result.error || 'Token limit reached');
+          // Reload usage data to get updated limits
+          try {
+            const updatedUsage = await getCurrentUsageAction();
+            setUsageData(updatedUsage);
+          } catch (error) {
+            console.error('Failed to reload usage data:', error);
+          }
         } else {
           toast.error(result.error || 'Failed to generate questions');
         }
@@ -268,6 +327,20 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
     } finally {
       setIsGeneratingQuestions(false);
     }
+  };
+
+  const handleConfigureTest = () => {
+    if (!usageData?.canConsumeQuestions && !usageData?.isProTier) {
+      toast.error('Question limit reached. Please upgrade to Pro for unlimited questions.');
+      return;
+    }
+    setShowConfigDialog(true);
+  };
+
+  const handleConfigConfirm = async (config: TestConfiguration) => {
+    setTestConfiguration(config);
+    setShowConfigDialog(false);
+    await generateQuestions(config);
   };
 
   const submitAnswer = async () => {
@@ -359,11 +432,35 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
           }
         }
         
+        // Format user_answer appropriately for objective grading and display consistency
+        let formattedUserAnswer = answer.userAnswer;
+        if (question?.type === 'multiple_choice' && answer.userAnswerIndex !== undefined) {
+          // For MCQ, convert numeric index to letter format (A, B, C, D) to match correct answer format
+          formattedUserAnswer = String.fromCharCode(65 + answer.userAnswerIndex);
+        } else if (question?.type === 'true_false' && answer.userAnswerBoolean !== undefined) {
+          // For T/F, send the boolean value as capitalized string to match correct answer format
+          formattedUserAnswer = answer.userAnswerBoolean ? 'True' : 'False';
+        }
+
         return {
           question_id: answer.questionId,
           question: question?.question || 'Unknown question',
-          user_answer: answer.userAnswer,
+          user_answer: formattedUserAnswer,
           expected_answer: expectedAnswer,
+          question_type: question?.type as 'multiple_choice' | 'true_false' | 'open_ended' || 'open_ended',
+          correct_answer: question?.type === 'multiple_choice' 
+            ? (question as MultipleChoiceQuestion).correct_answer 
+            : question?.type === 'true_false' 
+            ? (question as TrueFalseQuestion).correct_answer 
+            : undefined,
+          options: question?.type === 'multiple_choice' 
+            ? (question as MultipleChoiceQuestion).options 
+            : undefined,
+          explanation: question?.type === 'multiple_choice' 
+            ? (question as MultipleChoiceQuestion).explanation 
+            : question?.type === 'true_false' 
+            ? (question as TrueFalseQuestion).explanation 
+            : undefined,
         };
       });
 
@@ -432,9 +529,19 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
             }
           }
           
+          // Format user_answer appropriately for basic grading too
+          let formattedUserAnswer = answer.userAnswer;
+          if (question?.type === 'multiple_choice' && answer.userAnswerIndex !== undefined) {
+            // For MCQ, send the numeric index as a string for objective grading
+            formattedUserAnswer = answer.userAnswerIndex.toString();
+          } else if (question?.type === 'true_false' && answer.userAnswerBoolean !== undefined) {
+            // For T/F, send the boolean value as a lowercase string
+            formattedUserAnswer = answer.userAnswerBoolean.toString();
+          }
+          
           return {
             question: question?.question || 'Unknown question',
-            user_answer: answer.userAnswer,
+            user_answer: formattedUserAnswer,
             expected_answer: expectedAnswer,
           };
         });
@@ -529,82 +636,115 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
           </div>
         </div>
 
-        {/* Setup Card */}
-        <Card className="max-w-2xl mx-auto">
-          <CardHeader className="text-center">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center mb-4">
-              <TestTube className="h-8 w-8 text-white" />
-            </div>
-            <CardTitle className="text-2xl">Ready to Test Your Knowledge?</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="text-center space-y-2">
-              <p className="text-muted-foreground">
-                AI will generate multiple choice, true/false, and critical thinking questions based on your flashcards
-              </p>
-              <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">
-                {Math.min(10, flashcards.length)} questions available
-              </Badge>
-            </div>
+        <div className="max-w-2xl mx-auto space-y-6">
+          {/* Usage Indicator for Free tier users */}
+          {usageData && !usageData.isProTier && (
+            <UsageIndicator
+              currentUsage={usageData.currentUsage}
+              limit={usageData.limit}
+              isProTier={usageData.isProTier}
+              showTestSessions={false}
+              className="mb-6"
+            />
+          )}
 
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div className="space-y-2">
-                <div className="mx-auto w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Zap className="h-5 w-5 text-blue-600" />
-                </div>
-                <div className="text-sm">
-                  <div className="font-medium">Mixed Questions</div>
-                  <div className="text-muted-foreground">MCQ, T/F & Essays</div>
-                </div>
+          {/* Setup Card */}
+          <Card>
+            <CardHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center mb-4">
+                <TestTube className="h-8 w-8 text-white" />
               </div>
-              <div className="space-y-2">
-                <div className="mx-auto w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                  <Trophy className="h-5 w-5 text-purple-600" />
-                </div>
-                <div className="text-sm">
-                  <div className="font-medium">Instant Grading</div>
-                  <div className="text-muted-foreground">AI feedback</div>
-                </div>
+              <CardTitle className="text-2xl">Ready to Test Your Knowledge?</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="text-center space-y-2">
+                <p className="text-muted-foreground">
+                  Customize your test with different question types and difficulty levels
+                </p>
+                <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">
+                  {flashcards.length} flashcards available
+                </Badge>
               </div>
-              <div className="space-y-2">
-                <div className="mx-auto w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                  <BookOpen className="h-5 w-5 text-orange-600" />
-                </div>
-                <div className="text-sm">
-                  <div className="font-medium">Smart Testing</div>
-                  <div className="text-muted-foreground">Adaptive difficulty</div>
-                </div>
-              </div>
-            </div>
 
-            <div className="flex gap-3">
-              <Button 
-                onClick={generateQuestions}
-                disabled={isGeneratingQuestions || flashcards.length === 0}
-                className="flex-1"
-                size="lg"
-              >
-                {isGeneratingQuestions ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating Questions...
-                  </>
-                ) : (
-                  <>
-                    <TestTube className="mr-2 h-4 w-4" />
-                    Start Test
-                  </>
-                )}
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link href={`/home/decks/${deckId}/study`}>
-                  <BookOpen className="mr-2 h-4 w-4" />
-                  Study First
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="space-y-2">
+                  <div className="mx-auto w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Settings className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div className="text-sm">
+                    <div className="font-medium">Customizable</div>
+                    <div className="text-muted-foreground">Choose question types</div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="mx-auto w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                    <Trophy className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <div className="text-sm">
+                    <div className="font-medium">Instant Grading</div>
+                    <div className="text-muted-foreground">AI feedback</div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="mx-auto w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                    <BookOpen className="h-5 w-5 text-orange-600" />
+                  </div>
+                  <div className="text-sm">
+                    <div className="font-medium">Smart Testing</div>
+                    <div className="text-muted-foreground">Adaptive difficulty</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Button 
+                  onClick={handleConfigureTest}
+                  disabled={isGeneratingQuestions || flashcards.length === 0 || (!usageData?.canConsumeQuestions && !usageData?.isProTier)}
+                  className="flex-1"
+                  size="lg"
+                >
+                  {isGeneratingQuestions ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Generating Questions...
+                    </>
+                  ) : (
+                    <>
+                      <Settings className="mr-2 h-4 w-4" />
+                      Configure Test
+                    </>
+                  )}
+                </Button>
+                <Button asChild variant="outline" size="lg">
+                  <Link href={`/home/decks/${deckId}/study`}>
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    Study First
+                  </Link>
+                </Button>
+              </div>
+
+              {/* Show limit warning for users who can't generate tests */}
+              {usageData && !usageData.canConsumeQuestions && !usageData.isProTier && (
+                <div className="text-center p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                  <p className="text-sm text-orange-800">
+                    You've reached your monthly question limit. 
+                    <Link href="/home/billing" className="font-medium underline ml-1">
+                      Upgrade to Pro
+                    </Link> for unlimited tokens.
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Modern Test Configurator Dialog */}
+        <ModernTestConfigurator
+          isOpen={showConfigDialog}
+          onOpenChange={setShowConfigDialog}
+          onConfirm={handleConfigConfirm}
+          maxQuestions={20}
+        />
       </div>
     );
   }
@@ -941,14 +1081,77 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
                             <p className="text-sm text-muted-foreground">{question.question_text}</p>
                           </div>
                           
-                          <div>
-                            <h5 className="font-medium mb-1">Your Answer:</h5>
-                            <p className="text-sm">{question.user_answer}</p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <h5 className="font-medium mb-1 text-red-600">Your Answer:</h5>
+                              <div className="text-sm p-3 rounded-lg bg-red-50 border border-red-200">
+                                {question.user_answer}
+                              </div>
+                            </div>
+                            
+                            {/* Show correct answer based on question type */}
+                            {(() => {
+                              const originalQuestion = questions.find(q => q.id === question.question_id);
+                              if (!originalQuestion) return null;
+                              
+                              let correctAnswer = '';
+                              let isUserCorrect = false;
+                              
+                              if (originalQuestion.type === 'multiple_choice') {
+                                const mcq = originalQuestion as MultipleChoiceQuestion;
+                                correctAnswer = `${String.fromCharCode(65 + mcq.correct_answer)}. ${mcq.options[mcq.correct_answer]}`;
+                                const userAnswerMatch = question.user_answer.match(/^[A-D]\./);
+                                if (userAnswerMatch) {
+                                  const userIndex = userAnswerMatch[0].charCodeAt(0) - 65;
+                                  isUserCorrect = userIndex === mcq.correct_answer;
+                                }
+                              } else if (originalQuestion.type === 'true_false') {
+                                const tf = originalQuestion as TrueFalseQuestion;
+                                correctAnswer = tf.correct_answer ? 'True' : 'False';
+                                isUserCorrect = question.user_answer.toLowerCase() === correctAnswer.toLowerCase();
+                              } else if (originalQuestion.type === 'open_ended') {
+                                const oe = originalQuestion as OpenEndedQuestion;
+                                if (oe.suggested_answer) {
+                                  correctAnswer = oe.suggested_answer;
+                                } else {
+                                  // Generate a sample answer based on the question
+                                  correctAnswer = "Sample answer: This would be a comprehensive response addressing the key concepts mentioned in the question.";
+                                }
+                                isUserCorrect = question.individual_score >= 70;
+                              }
+                              
+                              return (
+                                <div>
+                                  <h5 className="font-medium mb-1 text-green-600">
+                                    {originalQuestion.type === 'open_ended' ? 'Sample Answer:' : 'Correct Answer:'}
+                                  </h5>
+                                  <div className="text-sm p-3 rounded-lg bg-green-50 border border-green-200">
+                                    {correctAnswer}
+                                  </div>
+                                  {originalQuestion.type === 'multiple_choice' && (
+                                    <div className="mt-2">
+                                      <Badge variant={isUserCorrect ? 'default' : 'destructive'} className="text-xs">
+                                        {isUserCorrect ? '✓ Correct' : '✗ Incorrect'}
+                                      </Badge>
+                                    </div>
+                                  )}
+                                  {originalQuestion.type === 'true_false' && (
+                                    <div className="mt-2">
+                                      <Badge variant={isUserCorrect ? 'default' : 'destructive'} className="text-xs">
+                                        {isUserCorrect ? '✓ Correct' : '✗ Incorrect'}
+                                      </Badge>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })()}
                           </div>
                           
                           <div>
-                            <h5 className="font-medium mb-1">Feedback:</h5>
-                            <p className="text-sm">{question.detailed_feedback}</p>
+                            <h5 className="font-medium mb-1">AI Feedback:</h5>
+                            <div className="text-sm p-3 rounded-lg bg-blue-50 border border-blue-200">
+                              {question.detailed_feedback}
+                            </div>
                           </div>
                           
                           {question.improvement_tips.length > 0 && (

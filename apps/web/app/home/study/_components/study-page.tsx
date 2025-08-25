@@ -164,13 +164,12 @@ export function StudyPage({ userId }: StudyPageProps) {
                   
                   <Button 
                     onClick={() => handleTestDeck(deck.id)} 
-                    variant={subscriptionInfo?.tier === 'free' ? 'outline' : 'secondary'}
+                    variant="secondary"
                     className="w-full"
                     size="sm"
-                    disabled={subscriptionInfo?.tier === 'free'}
                   >
                     <TestTube className="h-4 w-4 mr-2" />
-                    {subscriptionInfo?.tier === 'free' ? 'Test Mode (Pro)' : 'Test Knowledge'}
+                    Test Knowledge
                   </Button>
                 </div>
               </CardContent>

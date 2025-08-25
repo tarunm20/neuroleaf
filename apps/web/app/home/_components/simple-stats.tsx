@@ -44,8 +44,8 @@ export function SimpleStats({
       icon: TestTube,
       color: testsCompleted > 0 ? "text-primary" : "text-muted-foreground",
       bgColor: testsCompleted > 0 ? "bg-gradient-to-br from-primary/10 to-primary/5" : "bg-muted/20",
-      subtitle: subscriptionInfo?.tier === 'free' ? "Pro feature" : "AI-powered tests",
-      isPro: subscriptionInfo?.tier === 'free',
+      subtitle: "AI-powered tests",
+      isPro: false,
     },
   ];
 
@@ -64,11 +64,6 @@ export function SimpleStats({
                   <Icon className={`h-4 w-4 ${stat.color}`} />
                   <span className="text-card-foreground">{stat.title}</span>
                 </div>
-                {stat.isPro && (
-                  <Badge variant="outline" className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700">
-                    Pro
-                  </Badge>
-                )}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">

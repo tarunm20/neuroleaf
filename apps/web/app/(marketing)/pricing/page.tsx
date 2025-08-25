@@ -290,7 +290,7 @@ function PricingPage() {
             },
             {
               question: "What's the difference between Free and Pro test modes?",
-              answer: "Both tiers have access to the same AI-powered test mode with intelligent question generation and grading. Free users get 5 AI test sessions per month, while Pro users get unlimited test sessions.",
+              answer: "Both tiers have access to the same AI-powered test mode with intelligent question generation and grading. Free users get 60 AI test sessions per month, while Pro users get unlimited test sessions.",
               icon: TestTube
             },
             {

@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Type, Upload, Loader2, Plus, CheckCircle } from 'lucide-react';
+import { Type, Upload, Loader2, Plus, CheckCircle, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUser } from '@kit/supabase/hooks/use-user';
 import { useSubscription } from '@kit/subscription/hooks';
@@ -56,15 +56,20 @@ export function CreateDeckDialog({
   const isPro = process.env.NODE_ENV === 'development' 
     ? true // Default to Pro in development for testing
     : subscriptionInfo?.tier === 'pro';
+    
+  // Get plan limits for file restrictions
+  const userTier = isPro ? 'pro' : 'free';
+  const maxFilesPerDeck = isPro ? 20 : 3;
   
+  const [inputMode, setInputMode] = useState<'text' | 'upload'>('text');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingState, setLoadingState] = useState<'idle' | 'creating' | 'analyzing' | 'generating' | 'complete'>('idle');
-  const [inputMode, setInputMode] = useState<'text' | 'upload'>('text');
   const [fileExtractedContent, setFileExtractedContent] = useState(''); // Hidden file content
   const [extractedFileInfo, setExtractedFileInfo] = useState<TextExtractionResult | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<Array<{
     text: string;
-    wordCount: number;
+    tokenCount: number;
+    wordCount?: number; // Keep for compatibility
     fileInfo: {
       name: string;
       size: number;
@@ -89,17 +94,33 @@ export function CreateDeckDialog({
   const isFormValid = useMemo(() => {
     const formName = form.watch('name')?.trim() || '';
     const textContent = getCurrentContent();
-    const hasValidText = textContent.length >= 10;
+    const hasValidText = textContent.length >= 5; // Temporarily lower for debugging
     const hasValidName = formName.length >= 1;
+    
+    console.log('Form validation check:', {
+      formName,
+      textContentLength: textContent.length,
+      hasValidText,
+      hasValidName,
+      isValid: hasValidName && hasValidText
+    });
     
     // Valid if we have a name AND valid text content
     return hasValidName && hasValidText;
   }, [form.watch('name'), fileExtractedContent, form.watch('content')]);
 
   const handleSubmit = async (data: FormData) => {
+    console.log('Create deck form submitted:', {
+      name: data.name,
+      hasFileContent: fileExtractedContent.length > 0,
+      fileContentLength: fileExtractedContent.length,
+      isFormValid
+    });
+    
     // Use the same validation logic as the button
     if (!isFormValid) {
-      toast.error('Please provide content by uploading a file/image or entering text (minimum 10 characters)');
+      console.log('Form validation failed');
+      toast.error('Please provide content by uploading a file/image or entering text (minimum 5 characters)');
       return;
     }
     
@@ -159,13 +180,15 @@ export function CreateDeckDialog({
   };
 
   const handleFileUpload = (result: TextExtractionResult) => {
+    console.log('File upload result:', result);
     if (result.success) {
       // Store file content separately - DON'T put it in the visible form content
       setFileExtractedContent(result.text);
       setExtractedFileInfo(result);
       setUploadedFiles([{
         text: result.text,
-        wordCount: result.wordCount,
+        tokenCount: result.tokenCount,
+        wordCount: result.wordCount, // Keep for compatibility
         fileInfo: result.fileInfo
       }]);
       // Clear any existing content in the form
@@ -173,8 +196,13 @@ export function CreateDeckDialog({
       if (!form.getValues('name')) {
         const fileName = result.fileInfo.name.replace(/\.[^/.]+$/, '');
         form.setValue('name', fileName);
+        console.log('Set deck name to:', fileName);
       }
-      toast.success(`Successfully extracted ${result.wordCount} words from ${result.fileInfo.name}`);
+      console.log('File extracted successfully, content length:', result.text.length);
+      toast.success(`Successfully extracted ${result.tokenCount.toLocaleString()} tokens from ${result.fileInfo.name}`);
+    } else {
+      console.log('File upload failed:', result.error);
+      toast.error(result.error || 'Failed to extract text from file');
     }
   };
 
@@ -187,7 +215,8 @@ export function CreateDeckDialog({
       setExtractedFileInfo({
         text: result.combinedText,
         success: true,
-        wordCount: result.totalWordCount,
+        tokenCount: result.totalTokenCount,
+        wordCount: result.totalWordCount, // Keep for compatibility
         fileInfo: {
           name: `${result.files.length} files`,
           size: result.totalSize,
@@ -200,7 +229,7 @@ export function CreateDeckDialog({
         const fileName = result.files[0]?.fileInfo.name.replace(/\.[^/.]+$/, '') || '';
         form.setValue('name', fileName);
       }
-      toast.success(`Successfully extracted ${result.totalWordCount} words from ${result.files.length} files`);
+      toast.success(`Successfully extracted ${result.totalTokenCount.toLocaleString()} tokens from ${result.files.length} files`);
     }
   };
 
@@ -344,9 +373,11 @@ export function CreateDeckDialog({
                 onError={handleFileUploadError}
                 extractTextAction={extractTextAction}
                 disabled={isLoading}
-                multiple={isPro}
+                multiple={true} // Allow multiple files for all users
                 isPro={isPro}
                 maxTotalCharacters={isPro ? 200000 : 50000} // 200K for Pro, 50K for Free
+                maxFilesPerDeck={maxFilesPerDeck}
+                currentFileCount={uploadedFiles.length}
               />
               
               {/* Show uploaded files list */}
@@ -358,11 +389,6 @@ export function CreateDeckDialog({
                       <span className="text-sm font-medium text-green-700">
                         {uploadedFiles.length === 1 ? 'File uploaded' : `${uploadedFiles.length} files uploaded`}
                       </span>
-                      {isPro && uploadedFiles.length > 1 && (
-                        <span className="text-xs bg-primary/20 text-primary-foreground px-2 py-1 rounded border-primary/30">
-                          Pro - Multi-file
-                        </span>
-                      )}
                     </div>
                     <Button
                       type="button"
@@ -397,7 +423,7 @@ export function CreateDeckDialog({
                               }
                             </span>
                             <span>
-                              {file.wordCount.toLocaleString()} words
+                              {file.tokenCount.toLocaleString()} tokens
                             </span>
                           </div>
                         </div>
@@ -406,8 +432,8 @@ export function CreateDeckDialog({
                   </div>
                 </div>
               )}
-              
-              {/* Only show manual text input if no file is uploaded */}
+
+              {/* Add content via text if no files uploaded */}
               {uploadedFiles.length === 0 && (
                 <div>
                   <Textarea

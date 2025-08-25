@@ -17,14 +17,17 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.0.1",
     "@kit/ai": "workspace:*",
     "@kit/subscription": "workspace:*",
     "@kit/supabase": "workspace:*",
     "@kit/ui": "workspace:*",
     "@supabase/supabase-js": "2.48.1",
     "@tanstack/react-query": "5.77.2",
+    "lucide-react": "^0.511.0",
     "next": "15.3.2",
     "react": "19.1.0",
+    "react-hook-form": "^7.56.4",
     "sonner": "^1.7.4",
     "zod": "^3.25.32"
   },

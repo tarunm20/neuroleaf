@@ -17,10 +17,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
-          operationName?: string
           extensions?: Json
-          variables?: Json
+          operationName?: string
           query?: string
+          variables?: Json
         }
         Returns: Json
       }
@@ -153,6 +153,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ai_test_usage: {
+        Row: {
+          created_at: string
+          id: string
+          month_year: string
+          tests_generated: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          month_year: string
+          tests_generated?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          month_year?: string
+          tests_generated?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_token_usage: {
+        Row: {
+          created_at: string | null
+          id: string
+          month_year: string
+          tokens_used: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          month_year: string
+          tokens_used?: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          month_year?: string
+          tokens_used?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       deck_collaborators: {
         Row: {
@@ -421,12 +475,16 @@ export type Database = {
           ai_feedback: string
           ai_model_used: string | null
           ai_score: number
+          correct_answer_data: Json | null
           created_at: string | null
           expected_answer: string | null
           flashcard_id: string | null
+          grading_method: string | null
           id: string
           is_correct: boolean | null
+          question_options: Json | null
           question_text: string
+          question_type: string | null
           response_time_seconds: number | null
           test_session_id: string
           user_response: string
@@ -435,12 +493,16 @@ export type Database = {
           ai_feedback: string
           ai_model_used?: string | null
           ai_score: number
+          correct_answer_data?: Json | null
           created_at?: string | null
           expected_answer?: string | null
           flashcard_id?: string | null
+          grading_method?: string | null
           id?: string
           is_correct?: boolean | null
+          question_options?: Json | null
           question_text: string
+          question_type?: string | null
           response_time_seconds?: number | null
           test_session_id: string
           user_response: string
@@ -449,12 +511,16 @@ export type Database = {
           ai_feedback?: string
           ai_model_used?: string | null
           ai_score?: number
+          correct_answer_data?: Json | null
           created_at?: string | null
           expected_answer?: string | null
           flashcard_id?: string | null
+          grading_method?: string | null
           id?: string
           is_correct?: boolean | null
+          question_options?: Json | null
           question_text?: string
+          question_type?: string | null
           response_time_seconds?: number | null
           test_session_id?: string
           user_response?: string
@@ -482,11 +548,15 @@ export type Database = {
           completed_at: string | null
           created_at: string | null
           deck_id: string
+          grading_metadata: Json | null
           id: string
+          overall_analysis: Json | null
           questions_completed: number | null
           started_at: string | null
           status: string | null
           test_mode: Database["public"]["Enums"]["test_mode"]
+          test_questions: Json | null
+          test_results: Json | null
           time_spent_seconds: number | null
           total_questions: number
           updated_at: string | null
@@ -497,11 +567,15 @@ export type Database = {
           completed_at?: string | null
           created_at?: string | null
           deck_id: string
+          grading_metadata?: Json | null
           id?: string
+          overall_analysis?: Json | null
           questions_completed?: number | null
           started_at?: string | null
           status?: string | null
           test_mode?: Database["public"]["Enums"]["test_mode"]
+          test_questions?: Json | null
+          test_results?: Json | null
           time_spent_seconds?: number | null
           total_questions?: number
           updated_at?: string | null
@@ -512,11 +586,15 @@ export type Database = {
           completed_at?: string | null
           created_at?: string | null
           deck_id?: string
+          grading_metadata?: Json | null
           id?: string
+          overall_analysis?: Json | null
           questions_completed?: number | null
           started_at?: string | null
           status?: string | null
           test_mode?: Database["public"]["Enums"]["test_mode"]
+          test_questions?: Json | null
+          test_results?: Json | null
           time_spent_seconds?: number | null
           total_questions?: number
           updated_at?: string | null
@@ -590,17 +668,45 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_current_month_test_usage: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
+      get_current_month_token_usage: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
       get_deck_performance_analytics: {
-        Args: { p_deck_id: string; p_user_id: string }
+        Args: { p_user_id: string; p_deck_id: string }
         Returns: {
+          average_score: number
           flashcard_id: string
           front_content: string
           mastery_level: number
           is_mastered: boolean
           total_attempts: number
-          average_score: number
           latest_score: number
           last_attempt_at: string
+        }[]
+      }
+      get_test_session_details: {
+        Args: { p_session_id: string; p_user_id: string }
+        Returns: {
+          overall_analysis: Json
+          grading_metadata: Json
+          responses: Json
+          questions_completed: number
+          total_questions: number
+          session_id: string
+          deck_id: string
+          deck_name: string
+          test_mode: Database["public"]["Enums"]["test_mode"]
+          average_score: number
+          time_spent_seconds: number
+          started_at: string
+          completed_at: string
+          test_questions: Json
+          test_results: Json
         }[]
       }
       get_user_performance_summary: {
@@ -613,6 +719,52 @@ export type Database = {
           needs_review_flashcards: number
           total_test_sessions: number
         }[]
+      }
+      get_user_test_history: {
+        Args: { p_user_id: string; p_limit?: number; p_offset?: number }
+        Returns: {
+          session_id: string
+          deck_id: string
+          deck_name: string
+          test_mode: Database["public"]["Enums"]["test_mode"]
+          total_questions: number
+          questions_completed: number
+          average_score: number
+          time_spent_seconds: number
+          started_at: string
+          completed_at: string
+          test_questions: Json
+          overall_analysis: Json
+          grading_metadata: Json
+          test_results: Json
+        }[]
+      }
+      increment_test_usage: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
+      increment_token_usage: {
+        Args: { p_user_id: string; p_tokens_used: number }
+        Returns: number
+      }
+      reset_monthly_test_usage: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      reset_old_token_usage: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      save_complete_test_session: {
+        Args: {
+          p_results?: Json
+          p_questions?: Json
+          p_analysis?: Json
+          p_metadata?: Json
+          p_session_id: string
+          p_user_id: string
+        }
+        Returns: boolean
       }
     }
     Enums: {
@@ -880,11 +1032,11 @@ export type Database = {
     }
     Functions: {
       add_prefixes: {
-        Args: { _bucket_id: string; _name: string }
+        Args: { _name: string; _bucket_id: string }
         Returns: undefined
       }
       can_insert_object: {
-        Args: { owner: string; name: string; metadata: Json; bucketid: string }
+        Args: { owner: string; metadata: Json; bucketid: string; name: string }
         Returns: undefined
       }
       delete_prefix: {
@@ -924,11 +1076,11 @@ export type Database = {
       }
       list_multipart_uploads_with_delimiter: {
         Args: {
-          delimiter_param: string
           next_key_token?: string
           max_keys?: number
-          bucket_id: string
+          delimiter_param: string
           prefix_param: string
+          bucket_id: string
           next_upload_token?: string
         }
         Returns: {
@@ -939,10 +1091,10 @@ export type Database = {
       }
       list_objects_with_delimiter: {
         Args: {
-          max_keys?: number
           bucket_id: string
           prefix_param: string
           delimiter_param: string
+          max_keys?: number
           start_after?: string
           next_token?: string
         }
@@ -959,79 +1111,79 @@ export type Database = {
       }
       search: {
         Args: {
+          sortorder?: string
+          sortcolumn?: string
+          search?: string
           offsets?: number
+          levels?: number
           limits?: number
           bucketname: string
-          search?: string
           prefix: string
-          levels?: number
-          sortcolumn?: string
-          sortorder?: string
         }
         Returns: {
-          name: string
           id: string
-          updated_at: string
+          name: string
           created_at: string
           last_accessed_at: string
           metadata: Json
+          updated_at: string
         }[]
       }
       search_legacy_v1: {
         Args: {
-          bucketname: string
-          search?: string
-          offsets?: number
-          sortcolumn?: string
           prefix: string
-          levels?: number
-          sortorder?: string
+          bucketname: string
           limits?: number
+          levels?: number
+          offsets?: number
+          search?: string
+          sortcolumn?: string
+          sortorder?: string
         }
         Returns: {
-          updated_at: string
+          name: string
           id: string
+          updated_at: string
           created_at: string
           last_accessed_at: string
           metadata: Json
-          name: string
         }[]
       }
       search_v1_optimised: {
         Args: {
-          offsets?: number
-          prefix: string
-          bucketname: string
-          limits?: number
-          levels?: number
-          search?: string
-          sortcolumn?: string
           sortorder?: string
+          sortcolumn?: string
+          search?: string
+          offsets?: number
+          levels?: number
+          prefix: string
+          limits?: number
+          bucketname: string
         }
         Returns: {
-          name: string
-          id: string
-          updated_at: string
-          created_at: string
-          last_accessed_at: string
           metadata: Json
+          last_accessed_at: string
+          created_at: string
+          updated_at: string
+          id: string
+          name: string
         }[]
       }
       search_v2: {
         Args: {
           prefix: string
-          start_after?: string
-          levels?: number
-          limits?: number
           bucket_name: string
+          limits?: number
+          levels?: number
+          start_after?: string
         }
         Returns: {
-          created_at: string
           updated_at: string
+          key: string
           name: string
           id: string
+          created_at: string
           metadata: Json
-          key: string
         }[]
       }
     }

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@kit/ui/card';
 import { Button } from '@kit/ui/button';
 import { Badge } from '@kit/ui/badge';
 import { Textarea } from '@kit/ui/textarea';
-import { Clock, MessageSquare } from 'lucide-react';
+import { Clock, MessageSquare, CheckCircle } from 'lucide-react';
 import { MathContent } from '@kit/ui/math-content';
 import type { OpenEndedQuestion } from '@kit/test-mode/schemas';
 
@@ -103,35 +103,75 @@ export function OpenEndedQuestionComponent({
             <h5 className="text-sm font-medium text-amber-800 mb-1">
               💡 Hint for a good answer:
             </h5>
-            <p className="text-xs text-amber-700">
+            <div className="text-xs text-amber-700">
               <MathContent>{question.suggested_answer}</MathContent>
-            </p>
+            </div>
           </div>
         )}
 
-        {/* AI Feedback (shown after submission) */}
-        {showFeedback && feedback && (
+        {/* Results Display (shown after submission) */}
+        {showFeedback && (
           <div className="space-y-4">
-            {/* AI Feedback */}
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h4 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" />
-                AI Feedback:
+            {/* Sample Answer (always show for educational value) */}
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <h4 className="font-medium text-green-800 mb-2 flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                Sample Answer:
               </h4>
-              <p className="text-sm text-blue-700 leading-relaxed">
-                <MathContent>{feedback}</MathContent>
-              </p>
+              <div className="text-sm text-green-700 leading-relaxed">
+                {expectedAnswer ? (
+                  <MathContent>{expectedAnswer}</MathContent>
+                ) : (
+                  question.suggested_answer ? (
+                    <MathContent>{question.suggested_answer}</MathContent>
+                  ) : (
+                    <div className="space-y-2">
+                      <p>A comprehensive answer should address the following key aspects:</p>
+                      <ul className="list-disc list-inside space-y-1 ml-2">
+                        <li>Define or explain the main concepts mentioned in the question</li>
+                        <li>Provide specific examples or evidence to support your points</li>
+                        <li>Analyze relationships between different ideas</li>
+                        <li>Draw clear conclusions based on your analysis</li>
+                      </ul>
+                      <p className="text-xs italic mt-2">
+                        Note: This is a general template. A good answer would provide specific details relevant to the question topic.
+                      </p>
+                    </div>
+                  )
+                )}
+              </div>
             </div>
 
-            {/* Expected Answer Reference (if available) */}
-            {expectedAnswer && (
-              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                <h4 className="font-medium text-green-800 mb-2">
-                  Reference Answer:
+            {/* AI Feedback */}
+            {feedback && (
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  AI Feedback on Your Answer:
                 </h4>
-                <p className="text-sm text-green-700 leading-relaxed">
-                  <MathContent>{expectedAnswer}</MathContent>
-                </p>
+                <div className="text-sm text-blue-700 leading-relaxed">
+                  <MathContent>{feedback}</MathContent>
+                </div>
+              </div>
+            )}
+
+            {/* Performance Summary */}
+            {score !== undefined && (
+              <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-gray-800">Your Performance:</h4>
+                  <Badge variant={score >= 80 ? 'default' : score >= 60 ? 'secondary' : 'destructive'}>
+                    {score}% ({score >= 90 ? 'A' : score >= 80 ? 'B' : score >= 70 ? 'C' : score >= 60 ? 'D' : 'F'})
+                  </Badge>
+                </div>
+                <div className="mt-2 text-xs text-gray-600">
+                  {score >= 80 
+                    ? "Excellent work! Your answer demonstrates strong understanding."
+                    : score >= 60 
+                    ? "Good effort. Review the sample answer to see how you can improve."
+                    : "Keep practicing. Compare your answer with the sample to identify areas for improvement."
+                  }
+                </div>
               </div>
             )}
           </div>

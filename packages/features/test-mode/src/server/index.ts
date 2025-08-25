@@ -9,5 +9,13 @@ export {
   getTestSessionAnalyticsAction,
   completeTestSessionAction,
   gradeAnswersAction,
+  gradeAnswersOptimizedAction,
+  gradeAnswersWithHistoryAction,
   gradeTestComprehensiveAction,
 } from './test-actions';
+
+// Export usage tracking actions
+export * from './usage-tracking';
+
+// Export test history actions
+export * from './test-history-actions';

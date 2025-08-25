@@ -10,7 +10,8 @@ export interface TextExtractionResult {
   text: string;
   success: boolean;
   error?: string;
-  wordCount: number;
+  tokenCount: number;
+  wordCount?: number; // Keep for backward compatibility during transition
   fileInfo: {
     name: string;
     size: number;
@@ -21,7 +22,8 @@ export interface TextExtractionResult {
 export interface MultiFileExtractionResult {
   files: Array<{
     text: string;
-    wordCount: number;
+    tokenCount: number;
+    wordCount?: number; // Keep for backward compatibility during transition
     fileInfo: {
       name: string;
       size: number;
@@ -29,7 +31,8 @@ export interface MultiFileExtractionResult {
     };
   }>;
   combinedText: string;
-  totalWordCount: number;
+  totalTokenCount: number;
+  totalWordCount?: number; // Keep for backward compatibility during transition
   totalSize: number;
   success: boolean;
   error?: string;
@@ -63,14 +66,16 @@ async function processImageFile(file: File): Promise<TextExtractionResult> {
       throw new Error(data.error || 'OCR processing failed');
     }
     
-    // Count words in extracted text (handle potential undefined)
+    // Count words and estimate tokens in extracted text
     const extractedText = data.text || '';
     const wordCount = extractedText.trim() ? extractedText.trim().split(/\s+/).length : 0;
+    const tokenCount = Math.ceil(extractedText.length / 4); // Estimate: 4 chars = 1 token
     
     return {
       text: extractedText,
       success: true,
-      wordCount,
+      tokenCount,
+      wordCount, // Keep for compatibility
       fileInfo: {
         name: file.name,
         size: file.size,
@@ -83,7 +88,8 @@ async function processImageFile(file: File): Promise<TextExtractionResult> {
       text: '',
       success: false,
       error: error instanceof Error ? error.message : 'Failed to extract text from image',
-      wordCount: 0,
+      tokenCount: 0,
+      wordCount: 0, // Keep for compatibility
       fileInfo: {
         name: file.name,
         size: file.size,
@@ -115,6 +121,8 @@ interface FileUploadButtonProps {
   multiple?: boolean;
   isPro?: boolean;
   maxTotalCharacters?: number; // character limit instead of size
+  maxFilesPerDeck?: number; // max files allowed per deck
+  currentFileCount?: number; // current number of files already uploaded
 }
 
 export function FileUploadButton({ 
@@ -125,7 +133,9 @@ export function FileUploadButton({
   disabled = false,
   multiple = false,
   isPro: _isPro = false,
-  maxTotalCharacters = 50000 // 50K characters for Free, 200K for Pro
+  maxTotalCharacters = 50000, // 50K characters for Free, 200K for Pro
+  maxFilesPerDeck = 3, // Default to Free tier limit
+  currentFileCount = 0 // Default to 0 files currently uploaded
 }: FileUploadButtonProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -136,6 +146,19 @@ export function FileUploadButton({
 
     // Reset input value so same file can be selected again
     event.target.value = '';
+
+    // File count validation
+    const totalFilesAfterUpload = currentFileCount + files.length;
+    if (totalFilesAfterUpload > maxFilesPerDeck) {
+      const remainingSlots = maxFilesPerDeck - currentFileCount;
+      if (remainingSlots <= 0) {
+        onError(`You've reached your file limit of ${maxFilesPerDeck} files per deck. Please remove some files before uploading more.`);
+        return;
+      } else {
+        onError(`You can only upload ${remainingSlots} more file${remainingSlots === 1 ? '' : 's'}. Your limit is ${maxFilesPerDeck} files per deck.`);
+        return;
+      }
+    }
 
     // Client-side file type validation
     const supportedTypes = [
@@ -192,7 +215,8 @@ export function FileUploadButton({
           combinedText += `\n\n--- From ${file.name} ---\n\n${result.text}`;
           processedFiles.push({
             text: result.text,
-            wordCount: result.wordCount,
+            tokenCount: result.tokenCount,
+            wordCount: result.wordCount, // Keep for compatibility
             fileInfo: result.fileInfo
           });
         } else {
@@ -215,7 +239,8 @@ export function FileUploadButton({
         const singleFileResult: TextExtractionResult = {
           text: processedFiles[0]?.text || '',
           success: true,
-          wordCount: processedFiles[0]?.wordCount || 0,
+          tokenCount: processedFiles[0]?.tokenCount || 0,
+          wordCount: processedFiles[0]?.wordCount || 0, // Keep for compatibility
           fileInfo: processedFiles[0]?.fileInfo || { name: 'Unknown', size: 0, type: 'unknown' }
         };
         
@@ -225,7 +250,8 @@ export function FileUploadButton({
         const multiFileResult: MultiFileExtractionResult = {
           files: processedFiles,
           combinedText: combinedText.trim(),
-          totalWordCount: processedFiles.reduce((sum, file) => sum + file.wordCount, 0),
+          totalTokenCount: processedFiles.reduce((sum, file) => sum + file.tokenCount, 0),
+          totalWordCount: processedFiles.reduce((sum, file) => sum + (file.wordCount || 0), 0), // Keep for compatibility
           totalSize: totalSize,
           success: true
         };

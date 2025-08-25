@@ -20,8 +20,12 @@ export interface PricingPlan {
     cardsPerDeck: number | 'unlimited';
     aiGenerations?: number | 'unlimited';
     aiTestsPerMonth?: number | 'unlimited';
+    aiQuestionsPerMonth?: number | 'unlimited';
     collaborators?: number | 'unlimited';
     fileUploads?: number | 'unlimited';
+    maxFilesPerDeck?: number | 'unlimited';
+    maxSizePerDeck?: number | 'unlimited';
+    totalStorageLimit?: number | 'unlimited';
   };
   popular?: boolean;
 }
@@ -39,16 +43,20 @@ export const pricingPlans: PricingPlan[] = [
     },
     features: [
       '3 flashcard decks',
-      '50 cards per deck',
-      '5 AI tests per month',
-      '1 file upload per deck',
+      '75 cards per deck',
+      '100 AI questions per month (~10 tests)',
+      'Multiple file uploads (3 per deck)',
       'Rich text editing',
       'AI-powered test mode',
       'Basic progress tracking',
     ],
     limits: {
       decks: 3,
-      cardsPerDeck: 50,
+      cardsPerDeck: 75,
+      aiQuestionsPerMonth: 100,
+      maxFilesPerDeck: 3,
+      maxSizePerDeck: 25 * 1024 * 1024, // 25MB
+      totalStorageLimit: 100 * 1024 * 1024, // 100MB
     },
   },
   {
@@ -63,9 +71,9 @@ export const pricingPlans: PricingPlan[] = [
     },
     features: [
       'Unlimited decks & cards',
-      'Unlimited AI tests',
+      'Unlimited AI questions',
       'Multiple file uploads per deck',
-      'Multi-file bulk creation',
+      'Multi-file bulk creation (up to 20 files)',
       'Advanced analytics & insights',
       'Rich text editing',
       'Priority support',
@@ -73,6 +81,10 @@ export const pricingPlans: PricingPlan[] = [
     limits: {
       decks: 'unlimited',
       cardsPerDeck: 'unlimited',
+      aiQuestionsPerMonth: 'unlimited',
+      maxFilesPerDeck: 20,
+      maxSizePerDeck: 200 * 1024 * 1024, // 200MB
+      totalStorageLimit: 'unlimited',
       fileUploads: 'unlimited',
     },
     popular: true,
@@ -90,14 +102,17 @@ export const billingConfig = {
   planLimits: {
     free: {
       decks: 3,
-      cardsPerDeck: 50,
+      cardsPerDeck: 75,
       hasFileUpload: true,
-      hasMultiFileUpload: false,
+      hasMultiFileUpload: true,
       hasRichTextEditor: true,
       hasAdvancedStudy: false,
       hasTestMode: true,
       hasAdvancedAnalytics: false,
-      aiTestsPerMonth: 5,
+      aiQuestionsPerMonth: 100,
+      maxFilesPerDeck: 3,
+      maxSizePerDeck: 25 * 1024 * 1024, // 25MB
+      totalStorageLimit: 100 * 1024 * 1024, // 100MB
     },
     pro: {
       decks: -1, // unlimited
@@ -108,7 +123,10 @@ export const billingConfig = {
       hasAdvancedStudy: true,
       hasTestMode: true,
       hasAdvancedAnalytics: true,
-      aiTestsPerMonth: -1, // unlimited
+      aiQuestionsPerMonth: -1, // unlimited
+      maxFilesPerDeck: 20,
+      maxSizePerDeck: 200 * 1024 * 1024, // 200MB
+      totalStorageLimit: -1, // unlimited
     },
   },
 

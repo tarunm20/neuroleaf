@@ -294,13 +294,11 @@ export function StudySessionPage({ deckId }: StudySessionPageProps) {
             </p>
             <Button 
               onClick={handleTestMode}
-              disabled={subscriptionInfo?.tier === 'free'}
               size="sm"
               className="w-full"
-              variant={subscriptionInfo?.tier === 'free' ? 'outline' : 'default'}
             >
               <TestTube className="h-4 w-4 mr-2" />
-              {subscriptionInfo?.tier === 'free' ? 'Upgrade to Pro' : 'Start Test'}
+              Start Test
             </Button>
           </CardContent>
         </Card>

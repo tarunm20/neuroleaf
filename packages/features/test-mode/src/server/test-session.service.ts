@@ -13,6 +13,8 @@ import type {
 } from '../schemas';
 import { AIGradingService, ComprehensiveGradingResponse } from '../services/ai-grading.service';
 import { AIQuestionsService } from '../services/ai-questions.service';
+import { ObjectiveGradingService } from '../services/objective-grading.service';
+import { TestHistoryService } from '../services/test-history.service';
 
 type Client = SupabaseClient<Database>;
 
@@ -21,6 +23,8 @@ export class TestSessionService {
     private readonly supabase: Client,
     private readonly aiGrading = new AIGradingService(),
     private readonly aiQuestions = new AIQuestionsService(),
+    private readonly objectiveGrading = new ObjectiveGradingService(),
+    private readonly testHistory = new TestHistoryService(supabase),
   ) {}
 
   /**
@@ -144,7 +148,7 @@ export class TestSessionService {
     // Update session progress
     await this.updateSessionProgress(data.test_session_id, userId);
 
-    return response as TestResponse;
+    return response as unknown as TestResponse;
   }
 
   /**
@@ -168,7 +172,7 @@ export class TestSessionService {
       throw new Error(`Failed to fetch test responses: ${error.message}`);
     }
 
-    return (responses || []) as TestResponse[];
+    return (responses || []) as unknown as TestResponse[];
   }
 
   /**
@@ -359,6 +363,65 @@ export class TestSessionService {
   }
 
   /**
+   * Optimized grading that uses objective grading for MCQ/T-F and AI grading for open-ended
+   * Provides significant cost savings and faster response times
+   */
+  async gradeAnswersOptimized(answers: Array<{
+    question: string;
+    user_answer: string;
+    expected_answer: string;
+    question_type?: 'multiple_choice' | 'true_false' | 'open_ended';
+    correct_answer?: number | boolean;
+    options?: string[];
+    explanation?: string;
+  }>) {
+    const results = await Promise.all(answers.map(async (answer) => {
+      // Use objective grading for MCQ and T/F questions when data is available
+      if (this.objectiveGrading.canGradeObjectively({
+        question_type: answer.question_type,
+        correct_answer: answer.correct_answer
+      })) {
+        return this.objectiveGrading.gradeObjectiveQuestion({
+          question: answer.question,
+          user_answer: answer.user_answer,
+          question_type: answer.question_type as 'multiple_choice' | 'true_false',
+          correct_answer: answer.correct_answer!,
+          options: answer.options,
+          explanation: answer.explanation
+        });
+      } else {
+        // Fallback to AI grading for open-ended questions or missing data
+        return this.aiGrading.gradeResponse({
+          question: answer.question,
+          expectedAnswer: answer.expected_answer,
+          userResponse: answer.user_answer,
+        });
+      }
+    }));
+    
+    // Generate overall feedback (same logic as existing method)
+    const avgScore = results.reduce((sum, result) => sum + result.score, 0) / results.length;
+    const overallFeedback = avgScore >= 80 
+      ? "Excellent work! You demonstrate strong understanding of the concepts."
+      : avgScore >= 70
+      ? "Good work! You show solid understanding with room for improvement."
+      : avgScore >= 60
+      ? "Fair performance. Review the material and focus on key concepts."
+      : "Keep studying! Focus on understanding the core concepts better.";
+    
+    return {
+      individual_grades: results,
+      overall_feedback: overallFeedback,
+      // Add metadata about grading method used
+      grading_metadata: {
+        objective_questions: results.filter(r => r.model_used === 'objective_grading_v1').length,
+        ai_graded_questions: results.filter(r => r.model_used !== 'objective_grading_v1').length,
+        total_questions: results.length
+      }
+    };
+  }
+
+  /**
    * Comprehensive test grading with detailed analysis using multi-step chain-of-thought reasoning
    */
   async gradeTestComprehensive(answers: Array<{
@@ -366,6 +429,10 @@ export class TestSessionService {
     question: string;
     user_answer: string;
     expected_answer: string;
+    question_type?: 'multiple_choice' | 'true_false' | 'open_ended';
+    correct_answer?: number | boolean;
+    options?: string[];
+    explanation?: string;
   }>): Promise<CompleteTestResults> {
     
     // Step 1: Grade individual questions with comprehensive analysis
@@ -399,17 +466,68 @@ export class TestSessionService {
     question: string;
     user_answer: string;
     expected_answer: string;
+    question_type?: 'multiple_choice' | 'true_false' | 'open_ended';
+    correct_answer?: number | boolean;
+    options?: string[];
+    explanation?: string;
   }>): Promise<QuestionAnalysis[]> {
     
     const gradingPromises = answers.map(async (answer) => {
-      const comprehensiveGrading = await this.aiGrading.gradeResponseComprehensive({
-        question: answer.question,
-        expectedAnswer: answer.expected_answer,
-        userResponse: answer.user_answer,
-      });
-
-      // Convert comprehensive grading to question analysis format
-      return this.convertToQuestionAnalysis(answer, comprehensiveGrading);
+      let gradingResult;
+      
+      // Use objective grading for MCQ and T/F questions when data is available
+      if (this.objectiveGrading.canGradeObjectively({
+        question_type: answer.question_type,
+        correct_answer: answer.correct_answer
+      })) {
+        gradingResult = this.objectiveGrading.gradeObjectiveQuestion({
+          question: answer.question,
+          user_answer: answer.user_answer,
+          question_type: answer.question_type as 'multiple_choice' | 'true_false',
+          correct_answer: answer.correct_answer!,
+          options: answer.options,
+          explanation: answer.explanation
+        });
+        
+        // Convert objective grading to comprehensive format for analysis
+        const comprehensiveGrading: ComprehensiveGradingResponse = {
+          score: gradingResult.score,
+          feedback: gradingResult.feedback,
+          is_correct: gradingResult.is_correct,
+          model_used: gradingResult.model_used,
+          topic_analysis: [{
+            topic: 'General Knowledge',
+            performance: gradingResult.is_correct ? 'excellent' : 'poor',
+            understanding_level: gradingResult.score,
+            specific_gaps: gradingResult.is_correct 
+              ? []
+              : ['Needs to review the correct answer and explanation'],
+            strengths: gradingResult.is_correct 
+              ? ['Demonstrated understanding of the concept']
+              : []
+          }],
+          improvement_suggestions: gradingResult.is_correct 
+            ? ['Continue practicing similar questions']
+            : ['Review the explanation and try similar questions'],
+          reasoning_chain: [
+            'Answer was evaluated using objective grading',
+            gradingResult.is_correct ? 'User selected the correct option' : 'User selected an incorrect option',
+            gradingResult.feedback
+          ],
+          confidence_level: gradingResult.is_correct ? 100 : 0,
+        };
+        
+        return this.convertToQuestionAnalysis(answer, comprehensiveGrading);
+      } else {
+        // Use AI grading for open-ended questions
+        const comprehensiveGrading = await this.aiGrading.gradeResponseComprehensive({
+          question: answer.question,
+          expectedAnswer: answer.expected_answer,
+          userResponse: answer.user_answer,
+        });
+        
+        return this.convertToQuestionAnalysis(answer, comprehensiveGrading);
+      }
     });
 
     return Promise.all(gradingPromises);
@@ -669,6 +787,66 @@ export class TestSessionService {
       ).length || 0,
       improvement_trend: averageScore >= 70 ? 'improving' : 'needs_improvement'
     };
+  }
+
+  /**
+   * Save test history after completion with optimized grading
+   */
+  async saveTestHistoryOptimized(
+    sessionId: string,
+    userId: string,
+    questions: Array<{
+      question: string;
+      question_type: 'multiple_choice' | 'true_false' | 'open_ended';
+      options?: string[];
+      correct_answer?: number | boolean | string;
+      explanation?: string;
+    }>,
+    results: {
+      individual_grades: Array<{
+        score: number;
+        feedback: string;
+        is_correct: boolean;
+        model_used: string;
+      }>;
+      overall_feedback: string;
+      grading_metadata: {
+        objective_questions: number;
+        ai_graded_questions: number;
+        total_questions: number;
+      };
+    },
+    analysis?: any
+  ): Promise<boolean> {
+    try {
+      const averageScore = results.individual_grades.reduce((sum, grade) => sum + grade.score, 0) / results.individual_grades.length;
+
+      const testHistoryData = {
+        session_id: sessionId,
+        questions,
+        results: {
+          individual_grades: results.individual_grades.map(grade => ({
+            score: grade.score,
+            feedback: grade.feedback,
+            is_correct: grade.is_correct,
+            grading_method: grade.model_used,
+          })),
+          overall_feedback: results.overall_feedback,
+          average_score: averageScore,
+        },
+        analysis,
+        metadata: {
+          ...results.grading_metadata,
+          grading_efficiency: results.grading_metadata.objective_questions / results.grading_metadata.total_questions,
+        },
+      };
+
+      return await this.testHistory.saveCompleteTestSession(userId, testHistoryData);
+    } catch (error) {
+      console.error('Error saving test history:', error);
+      // Don't throw error to avoid breaking the grading flow
+      return false;
+    }
   }
 
   /**

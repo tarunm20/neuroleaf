@@ -5,6 +5,8 @@ import { getSupabaseServerClient } from '@kit/supabase/server-client';
 import { requireUser } from '@kit/supabase/require-user';
 import { AIQuestionsService } from '../services/ai-questions.service';
 import { AIGradingService } from '../services/ai-grading.service';
+import { checkAndIncrementUsageAction } from './usage-tracking';
+import { QuestionDistributionSchema } from '../schemas';
 
 const GenerateQuestionsSchema = z.object({
   flashcards: z.array(z.object({
@@ -12,12 +14,13 @@ const GenerateQuestionsSchema = z.object({
     front_content: z.string(),
     back_content: z.string(),
   })),
-  question_count: z.number().min(1).max(20),
+  question_count: z.number().min(1).max(30),
   difficulty: z.enum(['easy', 'medium', 'hard']).default('medium'),
+  distribution: QuestionDistributionSchema.optional(),
 });
 
 /**
- * Generate AI questions from flashcards
+ * Generate AI questions from flashcards with usage tracking
  */
 export async function generateQuestionsAction(
   data: z.infer<typeof GenerateQuestionsSchema>,
@@ -31,11 +34,38 @@ export async function generateQuestionsAction(
 
   try {
     const validatedData = GenerateQuestionsSchema.parse(data);
-    const questionsService = new AIQuestionsService();
     
+    // Get user's subscription tier
+    const { data: account } = await supabase
+      .from('accounts')
+      .select('subscription_tier')
+      .eq('id', user.id)
+      .single();
+
+    const userTier = (account?.subscription_tier || 'free') as 'free' | 'pro';
+    
+    // Check question limits before generating
+    const usageCheck = await checkAndIncrementUsageAction(validatedData.question_count);
+    
+    if (!usageCheck.allowed) {
+      return { 
+        success: false, 
+        error: usageCheck.reason || 'Question limit exceeded',
+        usageLimitReached: true,
+        questionsRequested: validatedData.question_count,
+      };
+    }
+    
+    const questionsService = new AIQuestionsService();
     const questions = await questionsService.generateQuestions(validatedData);
     
-    return { success: true, data: questions };
+    // Usage is already tracked by checkAndIncrementUsageAction
+    
+    return { 
+      success: true, 
+      data: questions,
+      questionsUsed: usageCheck.questionsUsed || validatedData.question_count,
+    };
   } catch (error) {
     console.error('Generate questions error:', error);
     return {

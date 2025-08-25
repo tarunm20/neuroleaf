@@ -41,12 +41,6 @@ export function StudyStatusCard({
               <Target className="h-5 w-5 text-primary" />
               Study Status
             </CardTitle>
-            {isPremium && (
-              <Badge variant="secondary" className="bg-primary/20 text-primary-foreground border-primary/30">
-                <Crown className="h-3 w-3 mr-1" />
-                {subscriptionInfo?.tier === 'premium' ? 'Premium' : 'Pro'}
-              </Badge>
-            )}
           </div>
         </CardHeader>
         <CardContent className="space-y-4">

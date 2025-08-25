@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@edge-csrf/nextjs": "2.5.3-cloudflare-rc1",
+    "@google-cloud/vertexai": "^1.10.0",
     "@hookform/resolvers": "^5.0.1",
     "@kit/accounts": "workspace:*",
     "@kit/ai": "workspace:*",

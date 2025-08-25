@@ -27,6 +27,7 @@ import { useCreateFlashcard } from '@kit/flashcards/hooks';
 import { useUser } from '@kit/supabase/hooks/use-user';
 import { useSubscription } from '@kit/subscription/hooks';
 import { extractTextFromFileAction } from '~/lib/server-actions';
+import { getPlanLimits } from '~/config/billing.config';
 import { 
   Brain, 
   FileText, 
@@ -50,7 +51,8 @@ interface FileExtractionResult {
   text: string;
   success: boolean;
   error?: string;
-  wordCount: number;
+  tokenCount: number;
+  wordCount?: number; // Keep for compatibility
   fileInfo: {
     name: string;
     size: number;
@@ -63,7 +65,8 @@ interface FileExtractionResult {
 interface MultiFileExtractionResult {
   files: Array<{
     text: string;
-    wordCount: number;
+    tokenCount: number;
+    wordCount?: number; // Keep for compatibility
     fileInfo: {
       name: string;
       size: number;
@@ -71,7 +74,8 @@ interface MultiFileExtractionResult {
     };
   }>;
   combinedText: string;
-  totalWordCount: number;
+  totalTokenCount: number;
+  totalWordCount?: number; // Keep for compatibility
   totalSize: number;
   success: boolean;
   error?: string;
@@ -102,7 +106,8 @@ export function AIBulkCreationDialog({
   const [hasUploadedFile, setHasUploadedFile] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<Array<{
     text: string;
-    wordCount: number;
+    tokenCount: number;
+    wordCount?: number; // Keep for compatibility
     fileInfo: {
       name: string;
       size: number;
@@ -114,6 +119,11 @@ export function AIBulkCreationDialog({
   const isPro = process.env.NODE_ENV === 'development' 
     ? true // Default to Pro in development for testing
     : subscriptionInfo?.tier === 'pro';
+    
+  // Get plan limits for file restrictions
+  const userTier = isPro ? 'pro' : 'free';
+  const planLimits = getPlanLimits(userTier);
+  const maxFilesPerDeck = planLimits.maxFilesPerDeck || (isPro ? 20 : 3);
   
   const [generatedFlashcards, setGeneratedFlashcards] = useState<GeneratedFlashcard[]>([]);
   const [creationProgress, setCreationProgress] = useState(0);
@@ -135,12 +145,13 @@ export function AIBulkCreationDialog({
       setHasUploadedFile(true);
       setUploadedFiles([{
         text: result.text,
-        wordCount: result.wordCount,
+        tokenCount: result.tokenCount,
+        wordCount: result.wordCount, // Keep for compatibility
         fileInfo: result.fileInfo
       }]);
       // Clear any manual text input when file is uploaded
       setSourceText('');
-      toast.success(`Extracted ${result.wordCount} words from ${result.fileInfo.name}`);
+      toast.success(`Extracted ${result.tokenCount.toLocaleString()} tokens from ${result.fileInfo.name}`);
     } else {
       toast.error(result.error || 'Failed to extract text');
     }
@@ -155,6 +166,7 @@ export function AIBulkCreationDialog({
       setExtractedFileInfo({
         text: result.combinedText,
         success: true,
+        tokenCount: result.totalTokenCount,
         wordCount: result.totalWordCount,
         fileInfo: {
           name: `${result.files.length} files`,
@@ -165,7 +177,7 @@ export function AIBulkCreationDialog({
       setHasUploadedFile(true);
       // Clear any manual text input when files are uploaded
       setSourceText('');
-      toast.success(`Extracted ${result.totalWordCount} words from ${result.files.length} files`);
+      toast.success(`Extracted ${result.totalTokenCount.toLocaleString()} tokens from ${result.files.length} files`);
     } else {
       toast.error(result.error || 'Failed to extract text');
     }
@@ -352,9 +364,11 @@ export function AIBulkCreationDialog({
             onMultipleFilesExtracted={handleMultipleFilesExtracted}
             onError={handleFileError}
             extractTextAction={extractTextFromFileAction}
-            multiple={isPro}
+            multiple={true} // Allow multiple files for all users
             isPro={isPro}
             maxTotalCharacters={isPro ? 200000 : 50000} // 200K for Pro, 50K for Free
+            maxFilesPerDeck={maxFilesPerDeck}
+            currentFileCount={uploadedFiles.length}
           />
           {uploadedFiles.length > 0 && (
             <div className="mt-3 space-y-2">
@@ -364,11 +378,6 @@ export function AIBulkCreationDialog({
                   <span className="text-sm font-medium text-green-700">
                     {uploadedFiles.length === 1 ? 'File uploaded' : `${uploadedFiles.length} files uploaded`}
                   </span>
-                  {isPro && uploadedFiles.length > 1 && (
-                    <Badge variant="secondary" className="text-xs ml-2">
-                      Pro - Multi-file
-                    </Badge>
-                  )}
                 </div>
                 <Button
                   variant="ghost" 
@@ -403,7 +412,7 @@ export function AIBulkCreationDialog({
                           }
                         </span>
                         <span>
-                          {file.wordCount.toLocaleString()} words
+                          {file.tokenCount.toLocaleString()} tokens
                         </span>
                       </div>
                     </div>
@@ -429,7 +438,7 @@ export function AIBulkCreationDialog({
               className="min-h-[120px] resize-none"
             />
             <div className="mt-2 text-xs text-muted-foreground">
-              {sourceText.length > 0 && `${sourceText.trim().split(/\s+/).length} words`}
+              {sourceText.length > 0 && `${Math.ceil(sourceText.length / 4)} tokens`}
             </div>
           </CardContent>
         </Card>
@@ -449,7 +458,7 @@ export function AIBulkCreationDialog({
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
-                  {sourceText.trim().split(/\s+/).filter(word => word.length > 0).length.toLocaleString()} words
+                  {Math.ceil(sourceText.length / 4).toLocaleString()} tokens
                 </Badge>
                 <Button
                   variant="ghost" 

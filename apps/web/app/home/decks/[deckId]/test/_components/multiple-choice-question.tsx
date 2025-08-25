@@ -132,15 +132,31 @@ export function MultipleChoiceQuestionComponent({
           ))}
         </div>
 
-        {/* Explanation (shown after submission) */}
-        {showExplanation && question.explanation && (
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h4 className="font-medium text-blue-800 mb-2">
-              Explanation:
-            </h4>
-            <p className="text-sm text-blue-700 leading-relaxed">
-              <MathContent>{question.explanation}</MathContent>
-            </p>
+        {/* Correct Answer Display (shown after submission) */}
+        {showExplanation && (
+          <div className="mt-6 space-y-4">
+            {/* Correct Answer Box */}
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <h4 className="font-medium text-green-800 mb-2 flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                Correct Answer:
+              </h4>
+              <p className="text-sm text-green-700 leading-relaxed font-medium">
+                {String.fromCharCode(65 + question.correct_answer)}. {question.options[question.correct_answer]}
+              </p>
+            </div>
+
+            {/* Explanation */}
+            {question.explanation && (
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="font-medium text-blue-800 mb-2">
+                  Explanation:
+                </h4>
+                <p className="text-sm text-blue-700 leading-relaxed">
+                  <MathContent>{question.explanation}</MathContent>
+                </p>
+              </div>
+            )}
           </div>
         )}
 

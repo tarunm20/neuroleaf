@@ -1,4 +1,4 @@
-import { Home, User, BookOpen, BarChart3, CreditCard, TestTube } from 'lucide-react';
+import { Home, User, BookOpen, BarChart3, CreditCard, TestTube, History } from 'lucide-react';
 import { z } from 'zod';
 
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
@@ -26,6 +26,11 @@ const routes = [
         label: 'Analytics',
         path: '/home/analytics',
         Icon: <BarChart3 className={iconClasses} />,
+      },
+      {
+        label: 'Test History',
+        path: '/home/test-history',
+        Icon: <History className={iconClasses} />,
       },
     ],
   },

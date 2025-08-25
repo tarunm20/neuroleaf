@@ -68,12 +68,6 @@ export function CoreStatsGrid({
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   {stat.title}
                 </CardTitle>
-                {stat.isPremium && (
-                  <Badge variant="secondary" className="text-xs bg-emerald-100 text-emerald-700 border-emerald-200">
-                    <Crown className="h-2 w-2 mr-1" />
-                    Pro
-                  </Badge>
-                )}
               </div>
               <div className={`rounded-full p-2 ${stat.bgColor} ring-1 ring-emerald-200/50`}>
                 <Icon className={`h-4 w-4 ${stat.color}`} />

@@ -117,7 +117,7 @@ export function getPlanComparison(currentPlan: SubscriptionTier, targetPlan: Sub
     improvements: {
       decks: current.decks !== -1 && target.decks === -1,
       cardsPerDeck: current.cardsPerDeck !== -1 && target.cardsPerDeck === -1,
-      aiTests: target.aiTestsPerMonth > current.aiTestsPerMonth,
+      aiTests: (target.aiQuestionsPerMonth || 0) > (current.aiQuestionsPerMonth || 0),
       analytics: !current.hasAdvancedAnalytics && target.hasAdvancedAnalytics,
       testMode: !current.hasTestMode && target.hasTestMode,
     }

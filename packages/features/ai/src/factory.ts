@@ -1,10 +1,12 @@
 import { createGeminiClient } from './gemini';
 import { FlashcardGenerator } from './services/flashcard-generator';
 import { ContentEnhancer } from './services/content-enhancer';
+import { SampleAnswerGenerator } from './services/sample-answer-generator';
 
 export interface AIServices {
   flashcardGenerator: FlashcardGenerator;
   contentEnhancer: ContentEnhancer;
+  sampleAnswerGenerator: SampleAnswerGenerator;
 }
 
 /**
@@ -16,6 +18,7 @@ export function createAIServices(): AIServices {
   return {
     flashcardGenerator: new FlashcardGenerator(geminiClient),
     contentEnhancer: new ContentEnhancer(geminiClient),
+    sampleAnswerGenerator: new SampleAnswerGenerator(geminiClient),
   };
 }
 

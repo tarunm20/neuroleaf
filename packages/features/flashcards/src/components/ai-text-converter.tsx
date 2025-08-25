@@ -53,7 +53,7 @@ export function AITextConverter({
   const [isLoading, setIsLoading] = useState(false);
   const [generatedCards, setGeneratedCards] = useState<GeneratedFlashcard[]>([]);
   const [showPreview, setShowPreview] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState<{ name: string; wordCount: number; isImage?: boolean; imageData?: string } | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<{ name: string; tokenCount: number; wordCount?: number; isImage?: boolean; imageData?: string } | null>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(FormSchema) as any,
@@ -103,7 +103,8 @@ export function AITextConverter({
       form.setValue('content', result.text);
       setUploadedFile({ 
         name: result.fileInfo.name, 
-        wordCount: result.wordCount, 
+        tokenCount: result.tokenCount, 
+        wordCount: result.wordCount, // Keep for compatibility
         isImage: false 
       });
     }
@@ -198,7 +199,7 @@ export function AITextConverter({
                       </div>
                     ) : (
                       <p className="text-sm text-green-600 mt-1">
-                        {uploadedFile.wordCount} words extracted successfully
+                        {uploadedFile.tokenCount.toLocaleString()} tokens extracted successfully
                       </p>
                     )}
                   </div>

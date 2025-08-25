@@ -168,28 +168,44 @@ export function TrueFalseQuestionComponent({
           </div>
         )}
 
-        {/* Explanation (shown after submission) */}
-        {showExplanation && question.explanation && (
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h4 className="font-medium text-blue-800 mb-2">
-              Explanation:
-            </h4>
-            <p className="text-sm text-blue-700 leading-relaxed">
-              <MathContent>{question.explanation}</MathContent>
-            </p>
-            <div className="mt-3 pt-3 border-t border-blue-200">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-blue-800">
-                  Correct answer:
-                </span>
-                <Badge 
-                  variant={question.correct_answer ? "default" : "secondary"}
-                  className="text-xs"
-                >
-                  {question.correct_answer ? 'TRUE' : 'FALSE'}
-                </Badge>
+        {/* Results Display (shown after submission) */}
+        {showExplanation && (
+          <div className="mt-6 space-y-4">
+            {/* Correct Answer Box */}
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <h4 className="font-medium text-green-800 mb-3 flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                Correct Answer:
+              </h4>
+              <div className="flex items-center justify-center">
+                <div className={`p-3 rounded-lg border-2 flex items-center gap-3 ${
+                  question.correct_answer 
+                    ? 'border-green-500 bg-green-100' 
+                    : 'border-green-500 bg-green-100'
+                }`}>
+                  {question.correct_answer ? (
+                    <CheckCircle className="h-6 w-6 text-green-600" />
+                  ) : (
+                    <XCircle className="h-6 w-6 text-green-600" />
+                  )}
+                  <span className="font-semibold text-lg text-green-700">
+                    {question.correct_answer ? 'TRUE' : 'FALSE'}
+                  </span>
+                </div>
               </div>
             </div>
+
+            {/* Explanation */}
+            {question.explanation && (
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="font-medium text-blue-800 mb-2">
+                  Explanation:
+                </h4>
+                <p className="text-sm text-blue-700 leading-relaxed">
+                  <MathContent>{question.explanation}</MathContent>
+                </p>
+              </div>
+            )}
           </div>
         )}
 

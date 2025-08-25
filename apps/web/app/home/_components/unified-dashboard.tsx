@@ -20,9 +20,11 @@ import { PrimaryActionHero } from './primary-action-hero';
 import { StudyStatusCard } from './study-status-card';
 import { CoreStatsGrid } from './core-stats-grid';
 import { DeckDisplaySection } from './deck-display-section';
+import { TokenUsageCard } from './token-usage-card';
 import { LearningStatsService } from '~/lib/services/learning-stats.service';
 import { DevTierSwitcher } from '~/components/dev-tier-switcher';
 import { extractTextFromFileAction } from '../../../lib/server-actions/file-upload-actions';
+import { getCurrentUsageAction } from '@kit/test-mode/server';
 import { toast } from 'sonner';
 
 export function UnifiedDashboard() {
@@ -64,6 +66,15 @@ export function UnifiedDashboard() {
     staleTime: 1000 * 60 * 5, // 5 minutes (these stats are less time-sensitive)
     refetchOnWindowFocus: false,
     refetchOnMount: true,
+  });
+
+  // Fetch token usage data
+  const { data: tokenUsageData } = useQuery({
+    queryKey: ['token-usage', user?.data?.id],
+    queryFn: () => getCurrentUsageAction(),
+    enabled: !!user?.data?.id,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    refetchOnWindowFocus: true,
   });
 
 
@@ -277,7 +288,16 @@ export function UnifiedDashboard() {
         subscriptionInfo={subscriptionInfo || undefined}
       />
 
-      {/* 4. Deck Management Section - Clean, no create buttons */}
+      {/* 4. Token Usage Card - Show usage for all users */}
+      {tokenUsageData && (
+        <TokenUsageCard
+          currentUsage={tokenUsageData.currentUsage}
+          limit={tokenUsageData.limit}
+          isProTier={tokenUsageData.isProTier}
+        />
+      )}
+
+      {/* 5. Deck Management Section - Clean, no create buttons */}
       <div id="deck-management-section" className="space-y-6">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-foreground">My Flashcard Decks</h2>
