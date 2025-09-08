@@ -20,7 +20,8 @@ import {
   MoreHorizontal,
   Edit2,
   Check,
-  X
+  X,
+  Download
 } from 'lucide-react';
 
 import { Button } from '@kit/ui/button';
@@ -55,7 +56,7 @@ import { useDeck, useUpdateDeck } from '@kit/decks/hooks';
 import { useFlashcards, useDeleteFlashcard } from '@kit/flashcards/hooks';
 import { useUser } from '@kit/supabase/hooks/use-user';
 import { useCanAccessDeck } from '@kit/subscription/hooks';
-import { CreateFlashcardButton, EditFlashcardButton } from '@kit/flashcards/components';
+import { CreateFlashcardButton, EditFlashcardButton, FlashcardExportDialog } from '@kit/flashcards/components';
 import { AIBulkCreationDialog } from '../flashcards/_components/ai-bulk-creation-dialog';
 import { toast } from 'sonner';
 import { MathContent } from '@kit/ui/math-content';
@@ -108,6 +109,7 @@ export function DeckDetailPage({ deckId }: DeckDetailPageProps) {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editNameValue, setEditNameValue] = useState('');
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   
   const { data: deck, isLoading: deckLoading } = useDeck(deckId);
   const { data: flashcardsData, isLoading: flashcardsLoading } = useFlashcards(deckId, {
@@ -441,6 +443,15 @@ export function DeckDetailPage({ deckId }: DeckDetailPageProps) {
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">Flashcards</h2>
             <div className="flex gap-2">
+              {totalCards > 0 && (
+                <Button 
+                  variant="outline"
+                  onClick={() => setIsExportDialogOpen(true)}
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Export
+                </Button>
+              )}
               <CreateFlashcardButton deckId={deckId} />
               <Button 
                 variant="outline"
@@ -651,6 +662,16 @@ export function DeckDetailPage({ deckId }: DeckDetailPageProps) {
         open={showUploadDialog}
         onOpenChange={setShowUploadDialog}
       />
+
+      {/* Export Dialog */}
+      {deck && (
+        <FlashcardExportDialog
+          open={isExportDialogOpen}
+          onOpenChange={setIsExportDialogOpen}
+          deck={deck}
+          flashcards={flashcards}
+        />
+      )}
     </div>
   );
 }

@@ -86,7 +86,7 @@ export function UpgradePrompt({ type, current, limit, children }: UpgradePromptP
             </div>
             <div className="text-center p-4 border-2 border-primary rounded-lg bg-primary/5">
               <div className="text-2xl font-bold text-primary mb-1">Pro</div>
-              <div className="text-sm text-primary">$9.99/month</div>
+              <div className="text-sm text-primary">$5.99/month</div>
             </div>
           </div>
 

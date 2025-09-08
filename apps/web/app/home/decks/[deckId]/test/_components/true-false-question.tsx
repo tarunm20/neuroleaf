@@ -42,10 +42,10 @@ export function TrueFalseQuestionComponent({
     if (showExplanation) {
       // Show results state
       if (answer === question.correct_answer) {
-        return 'border-green-500 bg-green-50 text-green-900';
+        return 'border-green-500 bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-100 dark:border-green-400';
       }
       if (answer === selectedAnswer && answer !== question.correct_answer) {
-        return 'border-red-500 bg-red-50 text-red-900';
+        return 'border-red-500 bg-red-50 text-red-900 dark:bg-red-950 dark:text-red-100 dark:border-red-400';
       }
       return 'border-muted bg-muted/30 text-muted-foreground';
     }
@@ -64,16 +64,16 @@ export function TrueFalseQuestionComponent({
     if (showExplanation) {
       if (answer === question.correct_answer) {
         return answer ? (
-          <CheckCircle className="h-6 w-6 text-green-600" />
+          <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
         ) : (
-          <XCircle className="h-6 w-6 text-green-600" />
+          <XCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
         );
       }
       if (answer === selectedAnswer && answer !== question.correct_answer) {
         return answer ? (
-          <CheckCircle className="h-6 w-6 text-red-600" />
+          <CheckCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
         ) : (
-          <XCircle className="h-6 w-6 text-red-600" />
+          <XCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
         );
       }
       return <Circle className="h-6 w-6 text-muted-foreground" />;
@@ -172,23 +172,23 @@ export function TrueFalseQuestionComponent({
         {showExplanation && (
           <div className="mt-6 space-y-4">
             {/* Correct Answer Box */}
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-              <h4 className="font-medium text-green-800 mb-3 flex items-center gap-2">
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg dark:bg-green-950 dark:border-green-800">
+              <h4 className="font-medium text-green-800 dark:text-green-200 mb-3 flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" />
                 Correct Answer:
               </h4>
               <div className="flex items-center justify-center">
                 <div className={`p-3 rounded-lg border-2 flex items-center gap-3 ${
                   question.correct_answer 
-                    ? 'border-green-500 bg-green-100' 
-                    : 'border-green-500 bg-green-100'
+                    ? 'border-green-500 bg-green-100 dark:bg-green-900 dark:border-green-400' 
+                    : 'border-green-500 bg-green-100 dark:bg-green-900 dark:border-green-400'
                 }`}>
                   {question.correct_answer ? (
-                    <CheckCircle className="h-6 w-6 text-green-600" />
+                    <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
                   ) : (
-                    <XCircle className="h-6 w-6 text-green-600" />
+                    <XCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
                   )}
-                  <span className="font-semibold text-lg text-green-700">
+                  <span className="font-semibold text-lg text-green-700 dark:text-green-300">
                     {question.correct_answer ? 'TRUE' : 'FALSE'}
                   </span>
                 </div>
@@ -197,7 +197,7 @@ export function TrueFalseQuestionComponent({
 
             {/* Explanation */}
             {question.explanation && (
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg dark:bg-blue-950 dark:border-blue-800">
                 <h4 className="font-medium text-blue-800 mb-2">
                   Explanation:
                 </h4>

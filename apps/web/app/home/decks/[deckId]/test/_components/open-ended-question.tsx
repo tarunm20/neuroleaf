@@ -99,7 +99,7 @@ export function OpenEndedQuestionComponent({
 
         {/* Suggested Answer Hint (shown before submission if available) */}
         {!showFeedback && question.suggested_answer && (
-          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg dark:bg-amber-950 dark:border-amber-800">
             <h5 className="text-sm font-medium text-amber-800 mb-1">
               💡 Hint for a good answer:
             </h5>
@@ -113,12 +113,12 @@ export function OpenEndedQuestionComponent({
         {showFeedback && (
           <div className="space-y-4">
             {/* Sample Answer (always show for educational value) */}
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-              <h4 className="font-medium text-green-800 mb-2 flex items-center gap-2">
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg dark:bg-green-950 dark:border-green-800">
+              <h4 className="font-medium text-green-800 dark:text-green-200 mb-2 flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" />
                 Sample Answer:
               </h4>
-              <div className="text-sm text-green-700 leading-relaxed">
+              <div className="text-sm text-green-700 dark:text-green-300 leading-relaxed">
                 {expectedAnswer ? (
                   <MathContent>{expectedAnswer}</MathContent>
                 ) : (
@@ -144,7 +144,7 @@ export function OpenEndedQuestionComponent({
 
             {/* AI Feedback */}
             {feedback && (
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg dark:bg-blue-950 dark:border-blue-800">
                 <h4 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
                   <MessageSquare className="h-4 w-4" />
                   AI Feedback on Your Answer:
@@ -157,7 +157,7 @@ export function OpenEndedQuestionComponent({
 
             {/* Performance Summary */}
             {score !== undefined && (
-              <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+              <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-600">
                 <div className="flex items-center justify-between">
                   <h4 className="font-medium text-gray-800">Your Performance:</h4>
                   <Badge variant={score >= 80 ? 'default' : score >= 60 ? 'secondary' : 'destructive'}>

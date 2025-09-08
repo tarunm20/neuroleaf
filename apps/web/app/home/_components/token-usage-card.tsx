@@ -21,19 +21,19 @@ export function QuestionUsageCard({
   // Pro tier users have unlimited usage
   if (isProTier) {
     return (
-      <Card className={`border-yellow-200 bg-yellow-50 ${className}`}>
+      <Card className={`border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950 ${className}`}>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
-            <Crown className="h-4 w-4 text-yellow-600" />
+            <Crown className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
             Question Usage
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-2">
-            <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
+            <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900 dark:text-yellow-200 dark:border-yellow-700">
               Unlimited
             </Badge>
-            <span className="text-sm text-yellow-700">
+            <span className="text-sm text-yellow-700 dark:text-yellow-300">
               No limits this month
             </span>
           </div>
@@ -48,19 +48,19 @@ export function QuestionUsageCard({
   const hasReachedLimit = currentUsage >= limit;
 
   const getStatusColor = () => {
-    if (hasReachedLimit) return "text-red-600";
-    if (isNearLimit) return "text-orange-600";
-    return "text-green-600";
+    if (hasReachedLimit) return "text-red-600 dark:text-red-400";
+    if (isNearLimit) return "text-orange-600 dark:text-orange-400";
+    return "text-green-600 dark:text-green-400";
   };
 
   const getCardStyle = () => {
-    if (hasReachedLimit) return "border-red-200 bg-red-50";
-    if (isNearLimit) return "border-orange-200 bg-orange-50";
-    return "border-green-200 bg-green-50";
+    if (hasReachedLimit) return "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950";
+    if (isNearLimit) return "border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950";
+    return "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950";
   };
 
   const getIcon = () => {
-    if (hasReachedLimit) return <AlertCircle className="h-4 w-4 text-red-600" />;
+    if (hasReachedLimit) return <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />;
     return <Zap className="h-4 w-4 text-primary" />;
   };
 
@@ -109,7 +109,7 @@ export function QuestionUsageCard({
         </div>
 
         {hasReachedLimit && (
-          <div className="text-xs text-red-600 mt-2">
+          <div className="text-xs text-red-600 dark:text-red-400 mt-2">
             You've reached your monthly limit. Usage will reset next month.
           </div>
         )}

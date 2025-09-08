@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRightIcon, CheckIcon, Crown, Sparkles, Zap, TestTube, Brain } from 'lucide-react';
+import { ArrowRightIcon, CheckIcon, Crown, Sparkles, Zap, TestTube, Brain, BarChart3 } from 'lucide-react';
 
 import { Button } from '@kit/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@kit/ui/card';
@@ -202,70 +202,80 @@ function PricingPage() {
                 <span className="text-sm font-medium">Cards per Deck</span>
               </div>
               <div className="p-4 border-b border-r text-center">
-                <span className="text-sm text-muted-foreground">50 cards</span>
+                <span className="text-sm text-muted-foreground">75 cards</span>
               </div>
               <div className="p-4 border-b text-center">
                 <span className="text-sm text-primary font-medium">Unlimited</span>
               </div>
 
               <div className="p-4 border-b border-r">
-                <span className="text-sm font-medium">AI Test Sessions</span>
+                <span className="text-sm font-medium">AI Questions per Month</span>
               </div>
               <div className="p-4 border-b border-r text-center">
-                <span className="text-sm text-muted-foreground">5/month</span>
+                <span className="text-sm text-muted-foreground">100 questions</span>
               </div>
               <div className="p-4 border-b text-center">
                 <span className="text-sm text-primary font-medium">Unlimited</span>
+              </div>
+
+              <div className="p-4 border-b border-r">
+                <span className="text-sm font-medium">Test Question Types</span>
+              </div>
+              <div className="p-4 border-b border-r text-center">
+                <span className="text-sm text-muted-foreground">3 types (MCQ, T/F, Open)</span>
+              </div>
+              <div className="p-4 border-b text-center">
+                <span className="text-sm text-primary font-medium">3 types + Custom Config</span>
+              </div>
+
+              <div className="p-4 border-b border-r">
+                <span className="text-sm font-medium">Test Presets</span>
+              </div>
+              <div className="p-4 border-b border-r text-center">
+                <span className="text-sm text-muted-foreground">Quick Review, Focused</span>
+              </div>
+              <div className="p-4 border-b text-center">
+                <span className="text-sm text-primary font-medium">All + Deep Assessment</span>
               </div>
 
               <div className="p-4 border-b border-r">
                 <span className="text-sm font-medium">File Uploads</span>
               </div>
               <div className="p-4 border-b border-r text-center">
-                <span className="text-sm text-muted-foreground">1 per deck</span>
+                <span className="text-sm text-muted-foreground">3 per deck</span>
               </div>
               <div className="p-4 border-b text-center">
-                <span className="text-sm text-primary font-medium">Multiple per deck</span>
+                <span className="text-sm text-primary font-medium">20 per deck</span>
               </div>
 
               <div className="p-4 border-b border-r">
-                <span className="text-sm font-medium">File Types</span>
+                <span className="text-sm font-medium">Test History & Analytics</span>
               </div>
               <div className="p-4 border-b border-r text-center">
-                <span className="text-sm text-muted-foreground">PDF, DOCX, TXT</span>
+                <span className="text-sm text-muted-foreground">Basic tracking</span>
               </div>
               <div className="p-4 border-b text-center">
-                <span className="text-sm text-primary font-medium">PDF, DOCX, TXT</span>
+                <span className="text-sm text-primary font-medium">Comprehensive insights</span>
               </div>
 
               <div className="p-4 border-b border-r">
-                <span className="text-sm font-medium">Test Mode</span>
-              </div>
-              <div className="p-4 border-b border-r text-center">
-                <span className="text-sm text-muted-foreground">AI-Powered</span>
-              </div>
-              <div className="p-4 border-b text-center">
-                <span className="text-sm text-primary font-medium">AI-Powered</span>
-              </div>
-
-              <div className="p-4 border-b border-r">
-                <span className="text-sm font-medium">Rich Text Editor</span>
+                <span className="text-sm font-medium">Usage Dashboard</span>
               </div>
               <div className="p-4 border-b border-r text-center">
                 <span className="text-sm text-muted-foreground">✓</span>
               </div>
               <div className="p-4 border-b text-center">
-                <span className="text-sm text-primary font-medium">✓</span>
+                <span className="text-sm text-primary font-medium">✓ Advanced</span>
               </div>
 
               <div className="p-4 border-r">
-                <span className="text-sm font-medium">Analytics</span>
+                <span className="text-sm font-medium">Rich Text Editor</span>
               </div>
               <div className="p-4 border-r text-center">
-                <span className="text-sm text-muted-foreground">Basic</span>
+                <span className="text-sm text-muted-foreground">✓</span>
               </div>
               <div className="p-4 text-center">
-                <span className="text-sm text-primary font-medium">Advanced</span>
+                <span className="text-sm text-primary font-medium">✓</span>
               </div>
             </div>
           </div>
@@ -285,23 +295,23 @@ function PricingPage() {
           {[
             {
               question: "What file types can I upload for flashcard creation?",
-              answer: "Both Free and Pro users can upload PDF, DOCX, and TXT files to automatically extract content and create flashcards. Free users can upload 1 file per deck, while Pro users can upload multiple files per deck for comprehensive content creation.",
+              answer: "Both Free and Pro users can upload PDF, DOCX, and TXT files to automatically extract content and create flashcards. Free users can upload 3 files per deck, while Pro users can upload up to 20 files per deck for comprehensive content creation.",
               icon: Brain
             },
             {
-              question: "What's the difference between Free and Pro test modes?",
-              answer: "Both tiers have access to the same AI-powered test mode with intelligent question generation and grading. Free users get 60 AI test sessions per month, while Pro users get unlimited test sessions.",
+              question: "What's included in the AI test modes?",
+              answer: "All users get access to multiple choice, true/false, and open-ended questions with 3 test presets (Quick Review, Focused Study). Pro users also get the Deep Assessment preset, custom test configuration, and unlimited AI questions.",
               icon: TestTube
             },
             {
-              question: "What happens when I upgrade to Pro?",
-              answer: "You'll immediately get unlimited decks and cards, unlimited AI test sessions, multiple file uploads per deck, and advanced analytics. All your existing data remains safe and accessible.",
-              icon: Zap
+              question: "What analytics and tracking features are available?",
+              answer: "Free users get basic test analytics and usage tracking. Pro users get comprehensive test history, detailed performance insights, advanced usage dashboard, and interactive test configuration tools.",
+              icon: BarChart3
             },
             {
-              question: "What happens to my data if I downgrade?",
-              answer: "Your data is always safe with us. If you downgrade to free, you'll keep access to your first 3 decks with 50 cards each. Additional content remains saved but becomes read-only until you upgrade again.",
-              icon: Brain
+              question: "What happens when I upgrade to Pro?",
+              answer: "You'll immediately get unlimited decks and cards, unlimited AI questions, advanced test configurator, comprehensive analytics, detailed test history, and all premium test presets. All your existing data remains safe and accessible.",
+              icon: Zap
             }
           ].map((faq, index) => (
             <Card 

@@ -174,7 +174,7 @@ export function AdvancedAnalyticsPanel({
                 </Button>
 
                 <p className="text-xs text-muted-foreground">
-                  Starting at $9.99/month • Cancel anytime
+                  Starting at $5.99/month • Cancel anytime
                 </p>
               </div>
             )}

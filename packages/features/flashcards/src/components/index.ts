@@ -4,3 +4,4 @@ export * from './flashcard-editor';
 export * from './flashcard-preview';
 export * from './ai-text-converter';
 export * from './file-upload-button';
+export * from './flashcard-export-dialog';

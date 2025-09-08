@@ -725,7 +725,7 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
 
               {/* Show limit warning for users who can't generate tests */}
               {usageData && !usageData.canConsumeQuestions && !usageData.isProTier && (
-                <div className="text-center p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                <div className="text-center p-4 bg-orange-50 border border-orange-200 rounded-lg dark:bg-orange-950 dark:border-orange-800">
                   <p className="text-sm text-orange-800">
                     You've reached your monthly question limit. 
                     <Link href="/home/billing" className="font-medium underline ml-1">
@@ -872,7 +872,7 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
           </div>
           
           <div className="mb-4">
-            <h1 className="text-2xl font-bold text-emerald-900 mb-2">
+            <h1 className="text-2xl font-bold text-emerald-900 dark:text-emerald-100 mb-2">
               {hierarchy?.primary.celebration_message || 'Test Complete!'}
             </h1>
             <div className="text-3xl font-bold text-emerald-600 mb-2">
@@ -926,22 +926,22 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
                 </div>
                 
                 <div className="space-y-4">
-                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                    <h4 className="font-medium text-green-800 mb-2 flex items-center gap-2">
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200 dark:bg-green-950 dark:border-green-800">
+                    <h4 className="font-medium text-green-800 dark:text-green-200 mb-2 flex items-center gap-2">
                       <CheckCircle className="h-4 w-4" />
                       Key Strength
                     </h4>
-                    <p className="text-sm text-green-700">
+                    <p className="text-sm text-green-700 dark:text-green-300">
                       {hierarchy?.at_glance.primary_strength || (hasComprehensiveResults ? comprehensiveResults.overall_analysis.strengths_summary[0] : 'Completed the assessment successfully')}
                     </p>
                   </div>
                   
-                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <h4 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 dark:bg-blue-950 dark:border-blue-800">
+                    <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-2">
                       <Zap className="h-4 w-4" />
                       Focus Area
                     </h4>
-                    <p className="text-sm text-blue-700">
+                    <p className="text-sm text-blue-700 dark:text-blue-300">
                       {hierarchy?.at_glance.primary_improvement || (hasComprehensiveResults ? comprehensiveResults.overall_analysis.weaknesses_summary[0] : 'Continue practicing to improve')}
                     </p>
                   </div>
@@ -969,9 +969,9 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
                     <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className={`w-3 h-3 rounded-full ${
-                          topic.performance === 'excellent' ? 'bg-green-500' :
-                          topic.performance === 'good' ? 'bg-blue-500' :
-                          topic.performance === 'fair' ? 'bg-yellow-500' : 'bg-red-500'
+                          topic.performance === 'excellent' ? 'bg-green-500 dark:bg-green-600' :
+                          topic.performance === 'good' ? 'bg-blue-500 dark:bg-blue-600' :
+                          topic.performance === 'fair' ? 'bg-yellow-500 dark:bg-yellow-600' : 'bg-red-500 dark:bg-red-600'
                         }`} />
                         <span className="font-medium">{topic.topic}</span>
                       </div>
@@ -998,7 +998,7 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
               <CardContent className="space-y-6">
                 <div>
                   <h4 className="font-medium mb-3 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-red-500" />
+                    <div className="w-2 h-2 rounded-full bg-red-500 dark:bg-red-400" />
                     Priority Areas
                   </h4>
                   <div className="flex flex-wrap gap-2">
@@ -1010,7 +1010,7 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
                 
                 <div>
                   <h4 className="font-medium mb-3 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-blue-500" />
+                    <div className="w-2 h-2 rounded-full bg-blue-500 dark:bg-blue-400" />
                     Action Steps
                   </h4>
                   <ul className="space-y-2">
@@ -1027,13 +1027,13 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
 
                 <div>
                   <h4 className="font-medium mb-3 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-green-500" />
+                    <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400" />
                     Study Tips
                   </h4>
                   <ul className="space-y-2">
                     {(hierarchy?.growth_plan.study_tips || (hasComprehensiveResults ? comprehensiveResults.overall_analysis.study_plan_suggestions.slice(0, 3) : ['Practice regularly'])).map((tip, index) => (
                       <li key={index} className="text-sm flex items-start gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="h-4 w-4 text-green-500 dark:text-green-400 mt-0.5 flex-shrink-0" />
                         {tip}
                       </li>
                     ))}
@@ -1083,8 +1083,8 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                              <h5 className="font-medium mb-1 text-red-600">Your Answer:</h5>
-                              <div className="text-sm p-3 rounded-lg bg-red-50 border border-red-200">
+                              <h5 className="font-medium mb-1 text-red-600 dark:text-red-400">Your Answer:</h5>
+                              <div className="text-sm p-3 rounded-lg bg-red-50 border border-red-200 dark:bg-red-950 dark:border-red-800">
                                 {question.user_answer}
                               </div>
                             </div>
@@ -1122,10 +1122,10 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
                               
                               return (
                                 <div>
-                                  <h5 className="font-medium mb-1 text-green-600">
+                                  <h5 className="font-medium mb-1 text-green-600 dark:text-green-400">
                                     {originalQuestion.type === 'open_ended' ? 'Sample Answer:' : 'Correct Answer:'}
                                   </h5>
-                                  <div className="text-sm p-3 rounded-lg bg-green-50 border border-green-200">
+                                  <div className="text-sm p-3 rounded-lg bg-green-50 border border-green-200 dark:bg-green-950 dark:border-green-800">
                                     {correctAnswer}
                                   </div>
                                   {originalQuestion.type === 'multiple_choice' && (
@@ -1149,7 +1149,7 @@ export function TestModePage({ deckId, userId }: TestModePageProps) {
                           
                           <div>
                             <h5 className="font-medium mb-1">AI Feedback:</h5>
-                            <div className="text-sm p-3 rounded-lg bg-blue-50 border border-blue-200">
+                            <div className="text-sm p-3 rounded-lg bg-blue-50 border border-blue-200 dark:bg-blue-950 dark:border-blue-800">
                               {question.detailed_feedback}
                             </div>
                           </div>

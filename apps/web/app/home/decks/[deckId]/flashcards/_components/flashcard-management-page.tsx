@@ -14,7 +14,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@kit/ui/card';
 import { Badge } from '@kit/ui/badge';
 import { 
   CreateFlashcardButton,
-  EditFlashcardButton
+  EditFlashcardButton,
+  FlashcardExportDialog
 } from '@kit/flashcards/components';
 import { useFlashcards, useDeleteFlashcard } from '@kit/flashcards/hooks';
 import { useDeck } from '@kit/decks/hooks';
@@ -23,7 +24,8 @@ import {
   MoreHorizontal,
   BookOpen,
   Brain,
-  ArrowLeft
+  ArrowLeft,
+  Download
 } from 'lucide-react';
 import { 
   DropdownMenu,
@@ -72,6 +74,7 @@ export function FlashcardManagementPage({ deckId }: FlashcardManagementPageProps
   const [difficultyFilter, setDifficultyFilter] = useState<string>('all');
   const [tagFilter, setTagFilter] = useState<string>('all');
   const [isAIBulkDialogOpen, setIsAIBulkDialogOpen] = useState(false);
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
   // Fetch deck and flashcards
   const { data: deck, isLoading: deckLoading } = useDeck(deckId);
@@ -194,6 +197,15 @@ export function FlashcardManagementPage({ deckId }: FlashcardManagementPageProps
           </div>
         
           <div className="flex gap-2">
+            {flashcards.length > 0 && (
+              <Button 
+                variant="outline" 
+                onClick={() => setIsExportDialogOpen(true)}
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Export
+              </Button>
+            )}
             <Button 
               variant="outline" 
               onClick={() => setIsAIBulkDialogOpen(true)}
@@ -415,6 +427,16 @@ export function FlashcardManagementPage({ deckId }: FlashcardManagementPageProps
         open={isAIBulkDialogOpen}
         onOpenChange={setIsAIBulkDialogOpen}
       />
+
+      {/* Export Dialog */}
+      {deck && (
+        <FlashcardExportDialog
+          open={isExportDialogOpen}
+          onOpenChange={setIsExportDialogOpen}
+          deck={deck}
+          flashcards={flashcards}
+        />
+      )}
     </div>
   );
 }
