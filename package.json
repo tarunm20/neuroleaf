@@ -45,14 +45,12 @@
     "@types/katex": "^0.16.7",
     "cross-env": "^7.0.3",
     "date-fns": "^4.1.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.1",
     "katex": "^0.16.11",
     "prettier": "^3.5.3",
     "react-error-boundary": "^6.0.0",
     "turbo": "2.5.0",
     "typescript": "^5.7.3"
-  },
-  "dependencies": {
-    "html2canvas": "^1.4.1",
-    "jspdf": "^3.0.1"
   }
 }

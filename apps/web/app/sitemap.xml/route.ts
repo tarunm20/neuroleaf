@@ -1,6 +1,7 @@
 import { getServerSideSitemap } from 'next-sitemap';
 
 import appConfig from '~/config/app.config';
+import { getAllBlogPosts } from '~/lib/blog';
 
 /**
  * @description The maximum age of the sitemap in seconds.
@@ -22,8 +23,10 @@ export async function GET() {
 }
 
 function getPaths() {
-  const paths = [
+  const staticPaths = [
     '/',
+    '/blog',
+    '/pricing',
     '/faq',
     '/cookie-policy',
     '/terms-of-service',
@@ -31,10 +34,26 @@ function getPaths() {
     // add more paths here
   ];
 
-  return paths.map((path) => {
+  // Get all blog posts
+  const blogPosts = getAllBlogPosts();
+  const blogPaths = blogPosts.map(post => `/blog/${post.slug}`);
+
+  // Combine static paths and blog paths
+  const allPaths = [...staticPaths, ...blogPaths];
+
+  return allPaths.map((path) => {
+    // For blog posts, use their actual date; for others use current date
+    const isBlogPost = path.startsWith('/blog/') && path !== '/blog';
+    const lastmod = isBlogPost 
+      ? blogPosts.find(post => path === `/blog/${post.slug}`)?.date || new Date().toISOString().split('T')[0]
+      : new Date().toISOString();
+
     return {
       loc: new URL(path, appConfig.url).href,
-      lastmod: new Date().toISOString(),
+      lastmod: lastmod,
+      // Add changefreq and priority for better SEO
+      changefreq: isBlogPost ? 'weekly' : 'monthly',
+      priority: path === '/' ? 1.0 : (path === '/blog' ? 0.9 : (isBlogPost ? 0.8 : 0.7)),
     };
   });
 }
