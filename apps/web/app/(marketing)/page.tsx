@@ -112,29 +112,47 @@ export default withI18n(Home);
 
 function MainCallToActionButton() {
   return (
-    <div className={'flex flex-col sm:flex-row gap-4 items-center'}>
-      <CtaButton>
-        <Link href={'/auth/sign-up'}>
-          <span className={'flex items-center space-x-0.5'}>
-            <span>
-              Start Learning for Free
+    <div className={'flex flex-col gap-4 items-center'}>
+      <div className={'flex flex-col sm:flex-row gap-4 items-center'}>
+        <CtaButton>
+          <Link href={'/auth/sign-up'}>
+            <span className={'flex items-center space-x-0.5'}>
+              <span>
+                Start Learning for Free
+              </span>
+
+              <ArrowRightIcon
+                className={
+                  'animate-in fade-in slide-in-from-left-8 h-4' +
+                  ' zoom-in fill-mode-both delay-1000 duration-1000'
+                }
+              />
             </span>
+          </Link>
+        </CtaButton>
 
-            <ArrowRightIcon
-              className={
-                'animate-in fade-in slide-in-from-left-8 h-4' +
-                ' zoom-in fill-mode-both delay-1000 duration-1000'
-              }
-            />
-          </span>
-        </Link>
-      </CtaButton>
+        <CtaButton variant={'link'}>
+          <Link href={'/pricing'}>
+            View Pricing
+          </Link>
+        </CtaButton>
 
-      <CtaButton variant={'link'}>
-        <Link href={'/pricing'}>
-          View Pricing
-        </Link>
-      </CtaButton>
+        {/* Product Hunt Badge next to buttons */}
+        <a 
+          href="https://www.producthunt.com/products/neuroleaf?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-neuroleaf" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className={'hover:scale-105 transition-transform duration-200'}
+        >
+          <img 
+            src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1014712&theme=light&t=1757462306871" 
+            alt="Neuroleaf - Personalized education you can trust | Product Hunt" 
+            style={{width: '200px', height: '43px'}} 
+            width="200" 
+            height="43" 
+          />
+        </a>
+      </div>
     </div>
   );
 }

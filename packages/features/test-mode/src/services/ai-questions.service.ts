@@ -176,6 +176,13 @@ INSTRUCTIONS:
 - Vary question types: analysis, application, comparison, synthesis
 - Each question should be clear and specific
 
+HINT GUIDELINES (for suggested_answer field):
+- Provide subtle directional hints that guide thinking WITHOUT revealing the answer
+- Use prompts like "Consider how...", "Think about the relationship between...", "What factors might..."
+- Hints should help students approach the problem methodology, not solve it
+- Keep hints brief (1-2 sentences) and focus on thinking direction
+- DO NOT include specific facts, definitions, or direct answers in hints
+
 DIFFICULTY LEVEL: ${difficulty?.toUpperCase() || 'MEDIUM'}
 
 Please respond in the following JSON format:
@@ -183,7 +190,7 @@ Please respond in the following JSON format:
   "questions": [
     {
       "question": "Your question here",
-      "suggested_answer": "Brief guidance on what a good answer should include",
+      "suggested_answer": "Subtle thinking hint without revealing the answer",
       "difficulty": "${difficulty}"
     }
   ]

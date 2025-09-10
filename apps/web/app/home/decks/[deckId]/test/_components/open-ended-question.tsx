@@ -1,11 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@kit/ui/card';
 import { Button } from '@kit/ui/button';
 import { Badge } from '@kit/ui/badge';
 import { Textarea } from '@kit/ui/textarea';
-import { Clock, MessageSquare, CheckCircle } from 'lucide-react';
+import { Clock, MessageSquare, CheckCircle, ChevronDown, ChevronUp, Lightbulb } from 'lucide-react';
 import { MathContent } from '@kit/ui/math-content';
 import type { OpenEndedQuestion } from '@kit/test-mode/schemas';
 
@@ -36,6 +36,8 @@ export function OpenEndedQuestionComponent({
   disabled = false,
   expectedAnswer,
 }: OpenEndedQuestionProps) {
+  const [showHint, setShowHint] = useState(false);
+
   const getScoreBadgeVariant = (score: number) => {
     if (score >= 80) return 'default'; // Green
     if (score >= 60) return 'secondary'; // Blue
@@ -97,15 +99,35 @@ export function OpenEndedQuestionComponent({
           </div>
         </div>
 
-        {/* Suggested Answer Hint (shown before submission if available) */}
+        {/* Optional Hint (shown before submission if available) */}
         {!showFeedback && question.suggested_answer && (
-          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg dark:bg-amber-950 dark:border-amber-800">
-            <h5 className="text-sm font-medium text-amber-800 mb-1">
-              💡 Hint for a good answer:
-            </h5>
-            <div className="text-xs text-amber-700">
-              <MathContent>{question.suggested_answer}</MathContent>
-            </div>
+          <div className="space-y-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowHint(!showHint)}
+              className="w-auto px-3 py-1 h-8 text-muted-foreground hover:text-amber-700 border border-amber-200 hover:border-amber-300 hover:bg-amber-50 dark:border-amber-800 dark:hover:border-amber-700 dark:hover:bg-amber-950"
+            >
+              <Lightbulb className="h-3 w-3 mr-1" />
+              {showHint ? 'Hide Hint' : 'Show Hint'}
+              {showHint ? (
+                <ChevronUp className="h-3 w-3 ml-1" />
+              ) : (
+                <ChevronDown className="h-3 w-3 ml-1" />
+              )}
+            </Button>
+            
+            {showHint && (
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg dark:bg-amber-950 dark:border-amber-800">
+                <h5 className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-1 flex items-center gap-1">
+                  <Lightbulb className="h-3 w-3" />
+                  Thinking Direction:
+                </h5>
+                <div className="text-sm text-amber-700 dark:text-amber-300">
+                  <MathContent>{question.suggested_answer}</MathContent>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
